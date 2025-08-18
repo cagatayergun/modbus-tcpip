@@ -332,7 +332,7 @@ namespace TekstilScada.UI.Views
                 DateTime startTime = endTime.AddMinutes(-100);
 
                 var dataPoints = _logRepository.GetManualLogs(_machine.Id, startTime, endTime);
-
+              
                 if (!dataPoints.Any())
                 {
                     formsPlot1.Plot.Clear();
