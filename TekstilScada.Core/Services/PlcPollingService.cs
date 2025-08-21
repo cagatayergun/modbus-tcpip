@@ -14,7 +14,7 @@ namespace TekstilScada.Services
 {
     public class PlcPollingService
     {
-        public event Action<int, FullMachineStatus> OnMachineDataRefreshed;
+        public event Action<int, FullMachineStatus> OnMachineDataRefreshed ;
         private ConcurrentDictionary<int, IPlcManager> _plcManagers;
         public ConcurrentDictionary<int, FullMachineStatus> MachineDataCache { get; private set; }
         private readonly AlarmRepository _alarmRepository;
