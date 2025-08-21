@@ -1,7 +1,7 @@
 ﻿// Services/BYMakinesiManager.cs
 using HslCommunication;
-using HslCommunication.Core;
-using HslCommunication.Profinet.LSIS;
+//using HslCommunication.Modbus; // Modbus için HslCommunication.Modbus using'ini ekleyin
+using HslCommunication.ModBus;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,38 +14,46 @@ namespace TekstilScada.Services
 {
     public class BYMakinesiManager : IPlcManager
     {
-        private readonly LSFastEnet _plcClient;
+        // DEĞİŞİKLİK: LSFastEnet yerine ModbusTcpNet kullanılıyor
+        private readonly ModbusTcpNet _plcClient;
         public string IpAddress { get; private set; }
-        #region PLC Adres Sabitleri
-        private const string ADIM_NO = "D3568";
-        private const string RECETE_MODU = "KX30D";
-        private const string PAUSE_DURUMU = "MX1015";
-        private const string ALARM_NO = "D3604";
-        private const string ANLIK_SU_SEVIYESI = "K200";
-        private const string ANLIK_DEVIR = "D6007";
-        private const string ANLIK_SICAKLIK = "D4980";
-        private const string PROSES_YUZDESI = "D7752";
-        private const string MAKINE_TIPI = "D6100";
-        private const string SIPARIS_NO = "D6110";
-        private const string MUSTERI_NO = "D6120";
-        private const string BATCH_NO = "D6130";
-        private const string OPERATOR_ISMI = "D6460";
-        private const string RECETE_ADI = "D2550";
-        private const string SU_MIKTARI = "D7702";
-        private const string ELEKTRIK_HARCAMA = "D7720";
-        private const string BUHAR_HARCAMA = "D7744";
-        private const string CALISMA_SURESI = "D7750";
-        private const string AKTIF_CALISMA = "MX2501";
-        private const string TOPLAM_DURUS_SURESI_SN = "D7764";
-        private const string STANDART_CEVRIM_SURESI_DK = "D6411";
-        private const string TOPLAM_URETIM_ADEDI = "D7768";
-        private const string HATALI_URETIM_ADEDI = "D7770";
-        private const string ActualQuantity = "D7790";
-        private const string AKTIF_ADIM_TIPI_WORDU = "D94"; // YENİ: Doğrudan adım tipini okuyacağımız adres
+
+        #region Modbus Adres Sabitleri (Lsis adreslerine karşılık gelen varsayılan Modbus adresleri)
+        // **ÖNEMLİ**: Bu adresleri PLC'nizin Modbus haritasına göre doğrulamanız gerekir.
+        // Varsayım: D adresleri Holding Register'a, M adresleri Coil'e dönüştürüldü.
+        private const string ADIM_NO = "3000"; // D3568
+        private const string RECETE_MODU = "0"; // Kx30D -> D30.0 -> coil
+        private const string PAUSE_DURUMU = "1"; // MX1015 -> M1015
+        private const string ALARM_NO = "3001"; // D3604
+        private const string ANLIK_SU_SEVIYESI = "3002"; // K200 -> D200
+        private const string ANLIK_DEVIR = "3003"; // D6007
+        private const string ANLIK_SICAKLIK = "3004"; // D4980
+        private const string PROSES_YUZDESI = "3005"; // D7752
+        private const string MAKINE_TIPI = "3006"; // D6100
+        private const string SIPARIS_NO = "3016"; // D6110
+        private const string MUSTERI_NO = "3026"; // D6120
+        private const string BATCH_NO = "3036"; // D6130
+        private const string OPERATOR_ISMI = "3056"; // D6460
+        private const string RECETE_ADI = "3071"; // D2550
+        private const string SU_MIKTARI = "3077"; // D7702
+        private const string ELEKTRIK_HARCAMA = "3078"; // D7720
+        private const string BUHAR_HARCAMA = "3079"; // D7744
+        private const string CALISMA_SURESI = "3080"; // D7750
+        private const string AKTIF_CALISMA = "2"; // MX2501 -> M2501
+        private const string TOPLAM_DURUS_SURESI_SN = "3081"; // D7764 (Int32 için 2 word okunur)
+       // private const string STANDART_CEVRIM_SURESI_DK = "3082"; // D6411
+        private const string TOPLAM_URETIM_ADEDI = "3082"; // D7768
+        private const string HATALI_URETIM_ADEDI = "3083"; // D7770
+        private const string ActualQuantity = "3084"; // D7790
+        private const string AKTIF_ADIM_TIPI_WORDU = "3085"; // D94
+        private const string RECETE_VERI_ADRESI = "3086"; // D100
+        private const string OPERATOR_SABLONU_ADRESI = "3087"; // D7500
         #endregion
+
         public BYMakinesiManager(string ipAddress, int port)
         {
-            _plcClient = new LSFastEnet(ipAddress, port);
+            // DEĞİŞİKLİK: ModbusTcpNet sınıfı ile yeni bir client oluşturuldu
+            _plcClient = new ModbusTcpNet(ipAddress, port);
             this.IpAddress = ipAddress;
             _plcClient.ReceiveTimeOut = 5000;
         }
@@ -65,8 +73,10 @@ namespace TekstilScada.Services
         {
             return _plcClient.ConnectClose();
         }
+
         private OperateResult<string> ReadStringFromWords(string address, ushort wordLength)
         {
+            // DEĞİŞİKLİK: Modbus read operasyonu kullanılıyor
             var readResult = _plcClient.ReadInt16(address, wordLength);
             if (!readResult.IsSuccess)
             {
@@ -86,7 +96,6 @@ namespace TekstilScada.Services
             }
         }
 
-        // GÜNCELLENDİ: Eksik veri okuma işlemleri eklendi
         public OperateResult<FullMachineStatus> ReadLiveStatusData()
         {
             var errorMessages = new List<string>();
@@ -94,19 +103,21 @@ namespace TekstilScada.Services
             {
                 var status = new FullMachineStatus();
                 bool anyReadFailed = false;
-                // YENİ VE KESİN ÇÖZÜM: Adım tipini doğrudan D94'ten oku.
+
+                // DEĞİŞİKLİK: Modbus read operasyonları
                 var adimTipiResult = _plcClient.ReadInt16(AKTIF_ADIM_TIPI_WORDU);
                 if (adimTipiResult.IsSuccess) status.AktifAdimTipiWordu = adimTipiResult.Content;
                 else return OperateResult.CreateFailedResult<FullMachineStatus>(adimTipiResult);
+
                 var adimNoResult = _plcClient.ReadInt16(ADIM_NO);
                 if (adimNoResult.IsSuccess) status.AktifAdimNo = adimNoResult.Content;
                 else { Debug.WriteLine($"[HATA] {IpAddress} - {ADIM_NO} (Adım No) okunamadı: {adimNoResult.Message}"); anyReadFailed = true; }
 
-                var receteModuResult = _plcClient.ReadBool(RECETE_MODU);
+                var receteModuResult = _plcClient.ReadCoil(RECETE_MODU);
                 if (!receteModuResult.IsSuccess) return OperateResult.CreateFailedResult<FullMachineStatus>(receteModuResult);
                 status.IsInRecipeMode = receteModuResult.Content;
 
-                var pauseResult = _plcClient.ReadBool(PAUSE_DURUMU);
+                var pauseResult = _plcClient.ReadCoil(PAUSE_DURUMU);
                 if (pauseResult.IsSuccess) status.IsPaused = pauseResult.Content;
                 else { Debug.WriteLine($"[HATA] {IpAddress} - {PAUSE_DURUMU} (Pause Durumu) okunamadı: {pauseResult.Message}"); anyReadFailed = true; }
 
@@ -138,7 +149,6 @@ namespace TekstilScada.Services
                 if (recipeNameResult.IsSuccess) status.RecipeName = recipeNameResult.Content;
                 else { Debug.WriteLine($"[HATA] {IpAddress} - {RECETE_ADI} (Reçete Adı) okunamadı: {recipeNameResult.Message}"); anyReadFailed = true; }
 
-                // YENİ: Eksik olan parti bilgileri okunuyor (Her biri için 5 word = 10 karakter varsayıldı)
                 var siparisNoResult = ReadStringFromWords(SIPARIS_NO, 5);
                 if (siparisNoResult.IsSuccess) status.SiparisNumarasi = siparisNoResult.Content;
                 else { Debug.WriteLine($"[HATA] {IpAddress} - {SIPARIS_NO} (Sipariş No) okunamadı: {siparisNoResult.Message}"); anyReadFailed = true; }
@@ -167,7 +177,7 @@ namespace TekstilScada.Services
                 if (!runTimeResult.IsSuccess) return OperateResult.CreateFailedResult<FullMachineStatus>(runTimeResult);
                 status.CalismaSuresiDakika = runTimeResult.Content;
 
-                var isProductionResult = _plcClient.ReadBool(AKTIF_CALISMA);
+                var isProductionResult = _plcClient.ReadCoil(AKTIF_CALISMA);
                 if (!isProductionResult.IsSuccess) return OperateResult.CreateFailedResult<FullMachineStatus>(isProductionResult);
                 status.IsMachineInProduction = isProductionResult.Content;
 
@@ -175,9 +185,7 @@ namespace TekstilScada.Services
                 if (!downTimeResult.IsSuccess) return OperateResult.CreateFailedResult<FullMachineStatus>(downTimeResult);
                 status.TotalDownTimeSeconds = downTimeResult.Content;
 
-                var cycleTimeResult = _plcClient.ReadInt16(STANDART_CEVRIM_SURESI_DK);
-                if (!cycleTimeResult.IsSuccess) return OperateResult.CreateFailedResult<FullMachineStatus>(cycleTimeResult);
-                status.StandardCycleTimeMinutes = cycleTimeResult.Content;
+               
 
                 var totalProdResult = _plcClient.ReadInt16(TOPLAM_URETIM_ADEDI);
                 if (!totalProdResult.IsSuccess) return OperateResult.CreateFailedResult<FullMachineStatus>(totalProdResult);
@@ -191,27 +199,16 @@ namespace TekstilScada.Services
                 if (!readActualQuantity.IsSuccess) return OperateResult.CreateFailedResult<FullMachineStatus>(readActualQuantity);
                 status.ActualQuantityProduction = readActualQuantity.Content;
 
-                var stepDataResult = _plcClient.ReadInt16("D70", 25);
+                var stepDataResult = _plcClient.ReadInt16("70", 25); // D70
                 if (!stepDataResult.IsSuccess) return OperateResult.CreateFailedResult<FullMachineStatus>(stepDataResult);
 
-                // Okunan 25 word'lük veriyi, status nesnesinin içindeki yeni özelliğimize atıyoruz.
                 status.AktifAdimDataWords = stepDataResult.Content;
-
 
                 if (adimNoResult.IsSuccess)
                 {
                     status.AktifAdimNo = adimNoResult.Content;
-
-                    // YENİ: Aktif adım numarasını öğrendikten sonra, o adımın kontrol word'ünü oku
-                    // GÜNCELLENDİ: Sadece adım numarasını okuyoruz, kontrol word okumasını kaldırdık.
-                   
-                    if (adimNoResult.IsSuccess)
+                    if (!adimNoResult.IsSuccess)
                     {
-                        status.AktifAdimNo = adimNoResult.Content;
-                    }
-                    else
-                    {
-                        // Hata olursa, daha detaylı bir mesajla geri dönelim.
                         return OperateResult.CreateFailedResult<FullMachineStatus>(adimNoResult);
                     }
                 }
@@ -231,12 +228,11 @@ namespace TekstilScada.Services
             }
         }
 
-        // --- BU DOSYADAKİ DİĞER TÜM METOTLAR (Connect, Disconnect, WriteRecipe vb.) DEĞİŞMEDEN AYNI KALACAK ---
-        #region Mevcut Metotlar (Değişiklik Yok)
         public Task<OperateResult> AcknowledgeAlarm()
         {
             throw new NotImplementedException("BYMakinesi için alarm onaylama henüz implemente edilmedi.");
         }
+
         public async Task<OperateResult> WriteRecipeToPlcAsync(ScadaRecipe recipe, int? recipeSlot = null)
         {
             if (recipe.Steps.Count != 98) return new OperateResult("Reçete 98 adım olmalıdır.");
@@ -254,7 +250,8 @@ namespace TekstilScada.Services
             ushort chunkSize = 100;
             for (int i = 0; i < fullRecipeData.Length; i += chunkSize)
             {
-                string currentAddress = $"D{100 + i}";
+                // DEĞİŞİKLİK: Modbus adres hesaplaması
+                string currentAddress = (100 + i).ToString(); // D100
                 short[] chunk = fullRecipeData.Skip(i).Take(chunkSize).ToArray();
                 var writeResult = await Task.Run(() => _plcClient.Write(currentAddress, chunk));
                 if (!writeResult.IsSuccess)
@@ -264,7 +261,8 @@ namespace TekstilScada.Services
             }
 
             byte[] recipeNameBytes = Encoding.ASCII.GetBytes(recipe.RecipeName.PadRight(10, ' ').Substring(0, 10));
-            var nameWriteResult = await Task.Run(() => _plcClient.Write("D2550", recipeNameBytes));
+            // DEĞİŞİKLİK: Modbus adres kullanılıyor
+            var nameWriteResult = await Task.Run(() => _plcClient.Write("2550", recipeNameBytes));
             if (!nameWriteResult.IsSuccess)
             {
                 return new OperateResult($"Reçete ismi yazma hatası: {nameWriteResult.Message}");
@@ -280,7 +278,8 @@ namespace TekstilScada.Services
 
             for (int i = 0; i < fullRecipeData.Length; i += chunkSize)
             {
-                string currentAddress = $"D{100 + i}";
+                // DEĞİŞİKLİK: Modbus adres hesaplaması
+                string currentAddress = (100 + i).ToString(); // D100
                 ushort readLength = (ushort)Math.Min(chunkSize, fullRecipeData.Length - i);
 
                 var readResult = await Task.Run(() => _plcClient.ReadInt16(currentAddress, readLength));
@@ -300,7 +299,8 @@ namespace TekstilScada.Services
 
         public async Task<OperateResult<List<PlcOperator>>> ReadPlcOperatorsAsync()
         {
-            var readResult = await Task.Run(() => _plcClient.ReadInt16("D7500", 60));
+            // DEĞİŞİKLİK: Modbus adres kullanılıyor
+            var readResult = await Task.Run(() => _plcClient.ReadInt16(OPERATOR_SABLONU_ADRESI, 60));
             if (!readResult.IsSuccess)
             {
                 return OperateResult.CreateFailedResult<List<PlcOperator>>(readResult);
@@ -311,21 +311,20 @@ namespace TekstilScada.Services
 
             for (int i = 0; i < 5; i++)
             {
-                int offset = i * 12; // 12 word'lük bloklar halinde
+                int offset = i * 12;
 
-                // GÜVENLİ KOD: short[] dizisinden 10 word (20 byte) alıp string'e çeviriyoruz
                 short[] nameWords = new short[10];
                 Array.Copy(rawData, offset, nameWords, 0, 10);
                 byte[] nameBytes = new byte[20];
-                Buffer.BlockCopy(nameWords, 0, nameBytes, 0, 20); // Bu kullanım daha güvenli
+                Buffer.BlockCopy(nameWords, 0, nameBytes, 0, 20);
                 string name = Encoding.ASCII.GetString(nameBytes).Trim('\0', ' ');
 
                 operators.Add(new PlcOperator
                 {
                     SlotIndex = i,
                     Name = name,
-                    UserId = rawData[offset + 10], // 11. word
-                    Password = rawData[offset + 11] // 12. word
+                    UserId = rawData[offset + 10],
+                    Password = rawData[offset + 11]
                 });
             }
 
@@ -334,7 +333,8 @@ namespace TekstilScada.Services
 
         public async Task<OperateResult> WritePlcOperatorAsync(PlcOperator plcOperator)
         {
-            string startAddress = $"D{7500 + plcOperator.SlotIndex * 12}";
+            // DEĞİŞİKLİK: Modbus adres kullanılıyor
+            string startAddress = (7500 + plcOperator.SlotIndex * 12).ToString();
             byte[] dataToWrite = new byte[24];
             byte[] nameBytes = Encoding.ASCII.GetBytes(plcOperator.Name.PadRight(20).Substring(0, 20));
             Buffer.BlockCopy(nameBytes, 0, dataToWrite, 0, 20);
@@ -346,7 +346,8 @@ namespace TekstilScada.Services
 
         public async Task<OperateResult<PlcOperator>> ReadSinglePlcOperatorAsync(int slotIndex)
         {
-            string startAddress = $"D{7500 + slotIndex * 12}";
+            // DEĞİŞİKLİK: Modbus adres kullanılıyor
+            string startAddress = (7500 + slotIndex * 12).ToString();
 
             var readResult = await Task.Run(() => _plcClient.ReadInt16(startAddress, 12));
             if (!readResult.IsSuccess)
@@ -356,7 +357,6 @@ namespace TekstilScada.Services
 
             var rawData = readResult.Content;
 
-            // GÜVENLİ KOD: short[] dizisinden 10 word (20 byte) alıp string'e çeviriyoruz
             short[] nameWords = new short[10];
             Array.Copy(rawData, 0, nameWords, 0, 10);
             byte[] nameBytes = new byte[20];
@@ -374,19 +374,19 @@ namespace TekstilScada.Services
             return OperateResult.CreateSuccessResult(plcOperator);
         }
 
-
         public async Task<OperateResult<BatchSummaryData>> ReadBatchSummaryDataAsync()
         {
             try
             {
                 var summary = new BatchSummaryData();
-                var waterResult = await Task.Run(() => _plcClient.ReadInt16("D7702"));
+                // DEĞİŞİKLİK: Modbus adres kullanılıyor
+                var waterResult = await Task.Run(() => _plcClient.ReadInt16(SU_MIKTARI));
                 if (!waterResult.IsSuccess) return OperateResult.CreateFailedResult<BatchSummaryData>(waterResult);
                 summary.TotalWater = waterResult.Content;
-                var electricityResult = await Task.Run(() => _plcClient.ReadInt16("D7720"));
+                var electricityResult = await Task.Run(() => _plcClient.ReadInt16(ELEKTRIK_HARCAMA));
                 if (!electricityResult.IsSuccess) return OperateResult.CreateFailedResult<BatchSummaryData>(electricityResult);
                 summary.TotalElectricity = electricityResult.Content;
-                var steamResult = await Task.Run(() => _plcClient.ReadInt16("D7744"));
+                var steamResult = await Task.Run(() => _plcClient.ReadInt16(BUHAR_HARCAMA));
                 if (!steamResult.IsSuccess) return OperateResult.CreateFailedResult<BatchSummaryData>(steamResult);
                 summary.TotalSteam = steamResult.Content;
                 return OperateResult.CreateSuccessResult(summary);
@@ -402,13 +402,14 @@ namespace TekstilScada.Services
             var consumptionList = new List<ChemicalConsumptionData>();
             try
             {
-                var namesResult = await Task.Run(() => _plcClient.ReadInt16("D6201", 90));
+                // DEĞİŞİKLİK: Modbus adres kullanılıyor
+                var namesResult = await Task.Run(() => _plcClient.ReadInt16("6201", 90));
                 if (!namesResult.IsSuccess) return OperateResult.CreateFailedResult<List<ChemicalConsumptionData>>(namesResult);
 
-                var litersResult = await Task.Run(() => _plcClient.ReadInt16("D6351", 30));
+                var litersResult = await Task.Run(() => _plcClient.ReadInt16("6351", 30));
                 if (!litersResult.IsSuccess) return OperateResult.CreateFailedResult<List<ChemicalConsumptionData>>(litersResult);
 
-                var stepsResult = await Task.Run(() => _plcClient.ReadInt16("D7250", 30));
+                var stepsResult = await Task.Run(() => _plcClient.ReadInt16("7250", 30));
                 if (!stepsResult.IsSuccess) return OperateResult.CreateFailedResult<List<ChemicalConsumptionData>>(stepsResult);
 
                 for (int i = 0; i < 30; i++)
@@ -440,7 +441,8 @@ namespace TekstilScada.Services
             var stepDetails = new List<ProductionStepDetail>();
             try
             {
-                var readResult = await Task.Run(() => _plcClient.ReadInt16("D6500", 392));
+                // DEĞİŞİKLİK: Modbus adres kullanılıyor
+                var readResult = await Task.Run(() => _plcClient.ReadInt16("6500", 392));
                 if (!readResult.IsSuccess)
                 {
                     return OperateResult.CreateFailedResult<List<ProductionStepDetail>>(readResult);
@@ -472,13 +474,14 @@ namespace TekstilScada.Services
 
         public async Task<OperateResult> ResetOeeCountersAsync()
         {
-            var downTimeResetResult = await Task.Run(() => _plcClient.Write("D7764", 0));
+            // DEĞİŞİKLİK: Modbus adres kullanılıyor
+            var downTimeResetResult = await Task.Run(() => _plcClient.Write(TOPLAM_DURUS_SURESI_SN, 0));
             if (!downTimeResetResult.IsSuccess)
             {
                 return new OperateResult($"Duruş süresi sayacı sıfırlanamadı: {downTimeResetResult.Message}");
             }
 
-            var defectiveResetResult = await Task.Run(() => _plcClient.Write("D7770", 0));
+            var defectiveResetResult = await Task.Run(() => _plcClient.Write(HATALI_URETIM_ADEDI, 0));
             if (!defectiveResetResult.IsSuccess)
             {
                 return new OperateResult($"Hatalı üretim sayacı sıfırlanamadı: {defectiveResetResult.Message}");
@@ -489,17 +492,17 @@ namespace TekstilScada.Services
 
         public async Task<OperateResult> IncrementProductionCounterAsync()
         {
-            var readResult = await Task.Run(() => _plcClient.ReadInt16("D7768"));
+            // DEĞİŞİKLİK: Modbus adres kullanılıyor
+            var readResult = await Task.Run(() => _plcClient.ReadInt16(TOPLAM_URETIM_ADEDI));
             if (!readResult.IsSuccess)
             {
                 return new OperateResult($"Üretim sayacı okunamadı: {readResult.Message}");
             }
 
             short newCount = (short)(readResult.Content + 1);
-            var writeResult = await Task.Run(() => _plcClient.Write("D7768", newCount));
+            var writeResult = await Task.Run(() => _plcClient.Write(TOPLAM_URETIM_ADEDI, newCount));
 
             return writeResult;
         }
-        #endregion
     }
 }
