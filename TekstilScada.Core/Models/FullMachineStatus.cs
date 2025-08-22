@@ -21,6 +21,7 @@ namespace TekstilScada.Models
         public bool IsInRecipeMode { get; set; }
         public bool IsPaused { get; set; }
         public bool HasActiveAlarm { get; set; }
+        
         public int ActiveAlarmNumber { get; set; }
         public string ActiveAlarmText { get; set; }
 
@@ -32,6 +33,8 @@ namespace TekstilScada.Models
         public string OperatorIsmi { get; set; }
         // YENİ: Reçete Adı özelliği eklendi.
         public string RecipeName { get; set; }
+
+
 
         // Aktif Adım Bilgileri
         public short AktifAdimNo { get; set; }

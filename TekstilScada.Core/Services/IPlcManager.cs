@@ -32,7 +32,7 @@ namespace TekstilScada.Services
         // Üretim sonu rapor verilerini okuma
         Task<OperateResult<BatchSummaryData>> ReadBatchSummaryDataAsync();
         Task<OperateResult<List<ChemicalConsumptionData>>> ReadChemicalConsumptionDataAsync();
-        Task<OperateResult<List<ProductionStepDetail>>> ReadStepAnalysisDataAsync();
+      //  Task<OperateResult<List<ProductionStepDetail>>> ReadStepAnalysisDataAsync();
         Task<OperateResult> AcknowledgeAlarm();
         Task<OperateResult> ResetOeeCountersAsync();
         Task<OperateResult> IncrementProductionCounterAsync();

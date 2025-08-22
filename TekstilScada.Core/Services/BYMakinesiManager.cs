@@ -48,6 +48,7 @@ namespace TekstilScada.Services
         private const string AKTIF_ADIM_TIPI_WORDU = "3085"; // D94
         private const string RECETE_VERI_ADRESI = "3086"; // D100
         private const string OPERATOR_SABLONU_ADRESI = "3087"; // D7500
+       
         #endregion
 
         public BYMakinesiManager(string ipAddress, int port)
@@ -116,6 +117,8 @@ namespace TekstilScada.Services
                 var receteModuResult = _plcClient.ReadCoil(RECETE_MODU);
                 if (!receteModuResult.IsSuccess) return OperateResult.CreateFailedResult<FullMachineStatus>(receteModuResult);
                 status.IsInRecipeMode = receteModuResult.Content;
+
+                
 
                 var pauseResult = _plcClient.ReadCoil(PAUSE_DURUMU);
                 if (pauseResult.IsSuccess) status.IsPaused = pauseResult.Content;
@@ -201,8 +204,9 @@ namespace TekstilScada.Services
 
                 var stepDataResult = _plcClient.ReadInt16("70", 25); // D70
                 if (!stepDataResult.IsSuccess) return OperateResult.CreateFailedResult<FullMachineStatus>(stepDataResult);
-
                 status.AktifAdimDataWords = stepDataResult.Content;
+
+               
 
                 if (adimNoResult.IsSuccess)
                 {
@@ -235,6 +239,11 @@ namespace TekstilScada.Services
 
         public async Task<OperateResult> WriteRecipeToPlcAsync(ScadaRecipe recipe, int? recipeSlot = null)
         {
+          //  var recipe_write = 1;
+            var recipe_write = await Task.Run(() => _plcClient.Write("3209",1));
+            if (recipe_write.IsSuccess)
+            
+            
             if (recipe.Steps.Count != 98) return new OperateResult("Reçete 98 adım olmalıdır.");
 
             short[] fullRecipeData = new short[2450];
@@ -300,7 +309,7 @@ namespace TekstilScada.Services
         public async Task<OperateResult<List<PlcOperator>>> ReadPlcOperatorsAsync()
         {
             // DEĞİŞİKLİK: Modbus adres kullanılıyor
-            var readResult = await Task.Run(() => _plcClient.ReadInt16(OPERATOR_SABLONU_ADRESI, 60));
+            var readResult = await Task.Run(() => _plcClient.ReadInt16(OPERATOR_SABLONU_ADRESI, 120));
             if (!readResult.IsSuccess)
             {
                 return OperateResult.CreateFailedResult<List<PlcOperator>>(readResult);
@@ -333,8 +342,10 @@ namespace TekstilScada.Services
 
         public async Task<OperateResult> WritePlcOperatorAsync(PlcOperator plcOperator)
         {
-            // DEĞİŞİKLİK: Modbus adres kullanılıyor
-            string startAddress = (7500 + plcOperator.SlotIndex * 12).ToString();
+            var operator_write = await Task.Run(() => _plcClient.Write("3210", 1));
+            if (operator_write.IsSuccess) ;
+                // DEĞİŞİKLİK: Modbus adres kullanılıyor
+                string startAddress = (3087 + plcOperator.SlotIndex * 12).ToString();
             byte[] dataToWrite = new byte[24];
             byte[] nameBytes = Encoding.ASCII.GetBytes(plcOperator.Name.PadRight(20).Substring(0, 20));
             Buffer.BlockCopy(nameBytes, 0, dataToWrite, 0, 20);
@@ -346,8 +357,14 @@ namespace TekstilScada.Services
 
         public async Task<OperateResult<PlcOperator>> ReadSinglePlcOperatorAsync(int slotIndex)
         {
+            var single_operator_write = await Task.Run(() => _plcClient.Write("3211", 1));
+            if (single_operator_write.IsSuccess) ;
+
+            string op_no = slotIndex.ToString();
+
+            var single_operator_no = await Task.Run(() => _plcClient.Write(op_no, 1));
             // DEĞİŞİKLİK: Modbus adres kullanılıyor
-            string startAddress = (7500 + slotIndex * 12).ToString();
+            string startAddress = (3087 + slotIndex * 12).ToString();
 
             var readResult = await Task.Run(() => _plcClient.ReadInt16(startAddress, 12));
             if (!readResult.IsSuccess)
@@ -436,42 +453,7 @@ namespace TekstilScada.Services
             }
         }
 
-        public async Task<OperateResult<List<ProductionStepDetail>>> ReadStepAnalysisDataAsync()
-        {
-            var stepDetails = new List<ProductionStepDetail>();
-            try
-            {
-                // DEĞİŞİKLİK: Modbus adres kullanılıyor
-                var readResult = await Task.Run(() => _plcClient.ReadInt16("6500", 392));
-                if (!readResult.IsSuccess)
-                {
-                    return OperateResult.CreateFailedResult<List<ProductionStepDetail>>(readResult);
-                }
-
-                var rawData = readResult.Content;
-
-                for (int i = 0; i < 98; i++)
-                {
-                    int offset = i * 4;
-                    var step = new ProductionStepDetail
-                    {
-                        StepNumber = i + 1,
-                        TheoreticalTime = rawData[offset].ToString(),
-                        WorkingTime = rawData[offset + 1].ToString(),
-                        StopTime = rawData[offset + 2].ToString(),
-                        DeflectionTime = rawData[offset + 3].ToString()
-                    };
-                    stepDetails.Add(step);
-                }
-
-                return OperateResult.CreateSuccessResult(stepDetails);
-            }
-            catch (Exception ex)
-            {
-                return new OperateResult<List<ProductionStepDetail>>($"Adım analiz verileri okunurken hata: {ex.Message}");
-            }
-        }
-
+        
         public async Task<OperateResult> ResetOeeCountersAsync()
         {
             // DEĞİŞİKLİK: Modbus adres kullanılıyor
