@@ -414,44 +414,7 @@ namespace TekstilScada.Services
             }
         }
 
-        public async Task<OperateResult<List<ChemicalConsumptionData>>> ReadChemicalConsumptionDataAsync()
-        {
-            var consumptionList = new List<ChemicalConsumptionData>();
-            try
-            {
-                // DEĞİŞİKLİK: Modbus adres kullanılıyor
-                var namesResult = await Task.Run(() => _plcClient.ReadInt16("6201", 90));
-                if (!namesResult.IsSuccess) return OperateResult.CreateFailedResult<List<ChemicalConsumptionData>>(namesResult);
-
-                var litersResult = await Task.Run(() => _plcClient.ReadInt16("6351", 30));
-                if (!litersResult.IsSuccess) return OperateResult.CreateFailedResult<List<ChemicalConsumptionData>>(litersResult);
-
-                var stepsResult = await Task.Run(() => _plcClient.ReadInt16("7250", 30));
-                if (!stepsResult.IsSuccess) return OperateResult.CreateFailedResult<List<ChemicalConsumptionData>>(stepsResult);
-
-                for (int i = 0; i < 30; i++)
-                {
-                    if (stepsResult.Content[i] > 0)
-                    {
-                        byte[] nameBytes = new byte[6];
-                        Buffer.BlockCopy(namesResult.Content, i * 3 * 2, nameBytes, 0, 6);
-                        string chemicalName = System.Text.Encoding.ASCII.GetString(nameBytes).Trim('\0', ' ');
-
-                        consumptionList.Add(new ChemicalConsumptionData
-                        {
-                            StepNumber = stepsResult.Content[i],
-                            ChemicalName = chemicalName,
-                            AmountLiters = litersResult.Content[i]
-                        });
-                    }
-                }
-                return OperateResult.CreateSuccessResult(consumptionList);
-            }
-            catch (Exception ex)
-            {
-                return new OperateResult<List<ChemicalConsumptionData>>($"Kimyasal tüketim verileri okunurken hata: {ex.Message}");
-            }
-        }
+       
 
         
         public async Task<OperateResult> ResetOeeCountersAsync()

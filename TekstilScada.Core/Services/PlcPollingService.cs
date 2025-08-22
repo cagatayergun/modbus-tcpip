@@ -223,55 +223,36 @@ namespace TekstilScada.Services
         }
         private async void CheckAndLogBatchStartAndEnd(int machineId, FullMachineStatus currentStatus)
         {
-            // O anki makine için hangi batch'i takip ettiğimizi alıyoruz.
             _currentBatches.TryGetValue(machineId, out string lastTrackedBatchId);
-
-            // BATCH BAŞLANGICI TESPİTİ
-            // Koşul: Makine reçete modunda, PLC'den bir batch ID geliyor VE bu ID bizim son takip ettiğimizden farklı.
             if (currentStatus.IsInRecipeMode && !string.IsNullOrEmpty(currentStatus.BatchNumarasi) && currentStatus.BatchNumarasi != lastTrackedBatchId)
             {
-                // Takip ettiğimiz Batch ID'yi PLC'den gelen YENİ ID ile güncelliyoruz.
-                // Bu sayede bu blok sadece bir kez, yani batch ilk başladığında çalışır.
                 _currentBatches[machineId] = currentStatus.BatchNumarasi;
-
-                // Veritabanına, operatörün girdiği Batch ID ile yeni bir kayıt atıyoruz.
                 _productionRepository.StartNewBatch(currentStatus);
-
-                // Diğer sayaçları sıfırla
                 _liveAlarmCounters[machineId] = (0, 0);
+
                 var recipe = _recipeRepository.GetRecipeByName(currentStatus.RecipeName);
                 if (recipe != null)
                 {
                     var fullRecipe = _recipeRepository.GetRecipeById(recipe.Id);
-                    _liveAnalyzers[machineId] = new LiveStepAnalyzer(fullRecipe);
+                    // DÜZELTME: LiveStepAnalyzer artık productionRepository'i alıyor
+                    _liveAnalyzers[machineId] = new LiveStepAnalyzer(fullRecipe, _productionRepository);
                     double totalSeconds = RecipeAnalysis.CalculateTotalTheoreticalTimeSeconds(fullRecipe);
                     _batchTotalTheoreticalTimes[machineId] = totalSeconds;
                     _batchStartTimes[machineId] = DateTime.Now;
                     _batchNonProductiveSeconds[machineId] = 0;
                 }
             }
-            // BATCH BİTİŞİ TESPİTİ
-            // Koşul: Makine artık reçete modunda değil VE biz hala bir batch takip ediyorduk.
             else if (!currentStatus.IsInRecipeMode && lastTrackedBatchId != null)
             {
                 int actualProducedQuantity = currentStatus.ActualQuantityProduction;
                 _liveAlarmCounters.TryGetValue(machineId, out var finalCounters);
                 int totalDowntimeFromScada = finalCounters.machineAlarmSeconds + finalCounters.operatorPauseSeconds;
                 _batchTotalTheoreticalTimes.TryGetValue(machineId, out double theoreticalTime);
-
-
-                // YENİ KOD: Tüketim verilerini PLC'den oku ve kaydet
-               
-                // Batch'i kapatırken, bizim takip ettiğimiz son Batch ID'yi (`lastTrackedBatchId`) kullanıyoruz.
                 _productionRepository.EndBatch(
-              machineId, lastTrackedBatchId, currentStatus,
-              finalCounters.machineAlarmSeconds, finalCounters.operatorPauseSeconds,
-              actualProducedQuantity, totalDowntimeFromScada, theoreticalTime);
-
-                // Artık bu makine için bir batch takip etmiyoruz, bir sonraki yeni batch'e kadar temizliyoruz.
+                    machineId, lastTrackedBatchId, currentStatus,
+                    finalCounters.machineAlarmSeconds, finalCounters.operatorPauseSeconds,
+                    actualProducedQuantity, totalDowntimeFromScada, theoreticalTime);
                 _currentBatches[machineId] = null;
-
-                // Diğer verileri temizle
                 _liveAlarmCounters.TryRemove(machineId, out _);
                 _liveAnalyzers.TryRemove(machineId, out _);
                 _batchTotalTheoreticalTimes.TryRemove(machineId, out _);

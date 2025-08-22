@@ -3,12 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TekstilScada.Models;
+using TekstilScada.Repositories; // ProductionRepository için eklendi
 
 namespace TekstilScada.Core.Services
 {
     public class LiveStepAnalyzer
     {
         private readonly ScadaRecipe _recipe;
+        private readonly ProductionRepository _productionRepository; // YENİ: Bağımlılık eklendi
         private int _currentStepNumber = 0;
         private DateTime _currentStepStartTime;
         private DateTime? _currentPauseStartTime;
@@ -24,10 +26,12 @@ namespace TekstilScada.Core.Services
         public DateTime CurrentStepStartTime { get; private set; }
 
 
-        public LiveStepAnalyzer(ScadaRecipe recipe)
+        // GÜNCELLENDİ: Yeni constructor, ProductionRepository alacak şekilde.
+        public LiveStepAnalyzer(ScadaRecipe recipe, ProductionRepository productionRepository)
         {
             _recipe = recipe;
             this.Recipe = recipe;
+            _productionRepository = productionRepository;
             AnalyzedSteps = new List<ProductionStepDetail>();
             CurrentStepStartTime = DateTime.Now;
         }
@@ -73,7 +77,7 @@ namespace TekstilScada.Core.Services
                 // Mevcut adımı bitir (sürelerini hesapla ve kaydet).
                 if (_currentStepNumber > 0)
                 {
-                    FinalizeStep(_currentStepNumber);
+                    FinalizeStep(_currentStepNumber, status.BatchNumarasi, status.MachineId);
                 }
 
                 // Atlanan adımları işle
@@ -91,7 +95,7 @@ namespace TekstilScada.Core.Services
         }
 
         // ✅ BASİTLEŞTİRİLMİŞ METOT
-        private void StartNewStep(FullMachineStatus status)
+        public void StartNewStep(FullMachineStatus status)
         {
             CurrentStepStartTime = DateTime.Now;
             _currentPauseStartTime = null;
@@ -106,14 +110,41 @@ namespace TekstilScada.Core.Services
                 // Adım adı, 3 saniyelik gecikme sonrası okunan güncel PLC verisinden alınıyor.
                 StepName = GetStepTypeName(status.AktifAdimTipiWordu),
                 TheoreticalTime = CalculateTheoreticalTime(status.AktifAdimDataWords),
-               
+
                 WorkingTime = "İşleniyor...",
                 StopTime = "00:00:00",
                 DeflectionTime = ""
             });
+
+            // ✅ YENİ MANTIK: Kimyasal tüketimini kaydet
+            if ((status.AktifAdimTipiWordu & 8) != 0) // Eğer adım tipi "Dozaj" ise
+            {
+                try
+                {
+                    var dozajParams = new DozajParams(status.AktifAdimDataWords);
+                    if (!string.IsNullOrEmpty(dozajParams.Kimyasal) && dozajParams.DozajLitre > 0)
+                    {
+                        var consumptionData = new List<ChemicalConsumptionData>
+                        {
+                            new ChemicalConsumptionData
+                            {
+                                StepNumber = status.AktifAdimNo,
+                                ChemicalName = dozajParams.Kimyasal,
+                                AmountLiters = dozajParams.DozajLitre
+                            }
+                        };
+                        _productionRepository.LogChemicalConsumption(status.MachineId, status.BatchNumarasi, consumptionData);
+                        Console.WriteLine($"Makine {status.MachineId} için Dozaj adımı ({status.AktifAdimNo}) kaydedildi: {dozajParams.Kimyasal}, {dozajParams.DozajLitre} Litre");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Kimyasal tüketimi kaydedilirken hata oluştu: {ex.Message}");
+                }
+            }
         }
 
-        private void FinalizeStep(int stepNumber)
+        private void FinalizeStep(int stepNumber, string batchId, int machineId)
         {
             var stepToFinalize = AnalyzedSteps.LastOrDefault(s => s.StepNumber == stepNumber && s.WorkingTime == "İşleniyor...");
             if (stepToFinalize == null) return;
@@ -136,6 +167,9 @@ namespace TekstilScada.Core.Services
 
             string sign = deflection.TotalSeconds >= 0 ? "+" : "";
             stepToFinalize.DeflectionTime = $"{sign}{deflection:hh\\:mm\\:ss}";
+
+            // Adım tamamlandığında veritabanına logla
+            _productionRepository.LogSingleStepDetail(stepToFinalize, machineId, batchId);
         }
 
         // Bu metotları olduğu gibi bırakabilirsiniz
