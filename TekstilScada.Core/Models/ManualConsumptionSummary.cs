@@ -7,8 +7,8 @@
         public string ToplamManuelSure { get; set; }
         public double OrtalamaSicaklik { get; set; }
         public double OrtalamaDevir { get; set; }
-        public int ToplamSuTuketimi_Litre { get; set; }
-        public int ToplamElektrikTuketimi_kW { get; set; }
-        public int ToplamBuharTuketimi_kg { get; set; }
+        public decimal ToplamSuTuketimi_Litre { get; set; }
+        public decimal ToplamElektrikTuketimi_kW { get; set; }
+        public decimal ToplamBuharTuketimi_kg { get; set; }
     }
 }
