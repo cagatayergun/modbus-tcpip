@@ -23,6 +23,7 @@ namespace TekstilScada.Services
         // Varsayım: D adresleri Holding Register'a, M adresleri Coil'e dönüştürüldü.
         private const string ADIM_NO = "3000"; // D3568
         private const string RECETE_MODU = "0"; // Kx30D -> D30.0 -> coil
+        private const string MANUEL_MODU = "3"; // Kx30D -> D30.0 -> coil
         private const string PAUSE_DURUMU = "1"; // MX1015 -> M1015
         private const string ALARM_NO = "3001"; // D3604
         private const string ANLIK_SU_SEVIYESI = "3002"; // K200 -> D200
@@ -48,6 +49,7 @@ namespace TekstilScada.Services
         private const string AKTIF_ADIM_TIPI_WORDU = "3085"; // D94
         private const string RECETE_VERI_ADRESI = "3086"; // D100
         private const string OPERATOR_SABLONU_ADRESI = "3087"; // D7500
+
        
         #endregion
 
@@ -206,7 +208,10 @@ namespace TekstilScada.Services
                 if (!stepDataResult.IsSuccess) return OperateResult.CreateFailedResult<FullMachineStatus>(stepDataResult);
                 status.AktifAdimDataWords = stepDataResult.Content;
 
-               
+                var manuel_stat = _plcClient.ReadBool(MANUEL_MODU); // k30c
+                if (!manuel_stat.IsSuccess) return OperateResult.CreateFailedResult<FullMachineStatus>(manuel_stat);
+                status.manuel_status = manuel_stat.Content;
+
 
                 if (adimNoResult.IsSuccess)
                 {

@@ -20,6 +20,7 @@ namespace TekstilScada.Models
         // Durum Bayrakları
         public bool IsInRecipeMode { get; set; }
         public bool IsPaused { get; set; }
+        public bool manuel_status { get; set; }
         public bool HasActiveAlarm { get; set; }
         
         public int ActiveAlarmNumber { get; set; }
