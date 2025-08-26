@@ -75,19 +75,44 @@ namespace TekstilScada.UI.Views
 
                 if (dataPoints.Any())
                 {
-                    // Verileri makinelere göre grupla
                     var groupedData = dataPoints.GroupBy(d => d.MachineId);
+                    bool anyChecked = chkTemperature.Checked || chkWaterLevel.Checked || chkRpm.Checked;
+
+                    if (!anyChecked)
+                    {
+                        MessageBox.Show("Lütfen en az bir veri türü seçin (Sıcaklık, Su Seviyesi veya Devir).", "Uyarı");
+                        return;
+                    }
 
                     foreach (var group in groupedData)
                     {
                         var machineName = (clbMachines.DataSource as List<Machine>)?.FirstOrDefault(m => m.Id == group.Key)?.MachineName ?? $"Makine {group.Key}";
 
                         double[] timeData = group.Select(p => p.Timestamp.ToOADate()).ToArray();
-                        double[] tempData = group.Select(p => (double)p.Temperature).ToArray();
 
-                        var scatter = formsPlot1.Plot.Add.Scatter(timeData, tempData);
-                        scatter.LegendText = $"{machineName} - Sıcaklık";
-                        scatter.LineWidth = 2;
+                        if (chkTemperature.Checked)
+                        {
+                            double[] tempData = group.Select(p => (double)p.Temperature/10).ToArray();
+                            var scatter = formsPlot1.Plot.Add.Scatter(timeData, tempData);
+                            scatter.LegendText = $"{machineName} - Sıcaklık";
+                            scatter.LineWidth = 2;
+                        }
+
+                        if (chkWaterLevel.Checked)
+                        {
+                            double[] waterData = group.Select(p => (double)p.WaterLevel).ToArray();
+                            var scatter = formsPlot1.Plot.Add.Scatter(timeData, waterData);
+                            scatter.LegendText = $"{machineName} - Su Seviyesi";
+                            scatter.LineWidth = 2;
+                        }
+
+                        if (chkRpm.Checked)
+                        {
+                            double[] rpmData = group.Select(p => (double)p.Rpm).ToArray();
+                            var scatter = formsPlot1.Plot.Add.Scatter(timeData, rpmData);
+                            scatter.LegendText = $"{machineName} - Devir";
+                            scatter.LineWidth = 2;
+                        }
                     }
 
                     formsPlot1.Plot.Axes.DateTimeTicksBottom();

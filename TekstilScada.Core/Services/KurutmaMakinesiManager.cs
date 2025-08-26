@@ -143,7 +143,7 @@ namespace TekstilScada.Services
 
             try
             {
-                var isRunningResult = await Task.Run(() => _plcClient.ReadCoil("30C"));
+                var isRunningResult = await Task.Run(() => _plcClient.ReadCoil("30"));
                 if (!isRunningResult.IsSuccess) return isRunningResult;
                 if (isRunningResult.Content)
                 {

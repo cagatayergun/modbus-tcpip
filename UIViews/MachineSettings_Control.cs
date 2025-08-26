@@ -62,7 +62,7 @@ namespace TekstilScada.UI.Views
             // 1. Dilden bağımsız anahtarları ("Value") ve çevrilmiş metinleri ("Display") içeren listeyi oluştur.
             _machineTypeOptions = new List<object>
             {
-                new { Display = Resources.bymakinesi,       Value = "BY Makinesi" },
+                new { Display = Resources.bymakinesi,       Value = "BYMakinesi" },
                 new { Display = Resources.kurutmamakinesi,  Value = "Kurutma Makinesi" }
             };
 

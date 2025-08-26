@@ -25,7 +25,7 @@ namespace TekstilScada
         private readonly ProductionRepository _productionRepository;
         private readonly PlcPollingService _pollingService;
         private readonly DashboardRepository _dashboardRepository;
-
+        private readonly CostRepository _costRepository; // YENÝ: Alaný ekleyin
         // Arayüz Kontrolleri (Views)
         private readonly ProsesÝzleme_Control _prosesIzlemeView;
         private readonly ProsesKontrol_Control _prosesKontrolView;
@@ -50,7 +50,7 @@ namespace TekstilScada
             _productionRepository = new ProductionRepository();
             _pollingService = new PlcPollingService(_alarmRepository, _processLogRepository, _productionRepository, _recipeRepository);
             _dashboardRepository = new DashboardRepository(_recipeRepository);
-
+            _costRepository = new CostRepository(); // YENÝ: Nesneyi oluþturun
             _prosesIzlemeView = new ProsesÝzleme_Control();
             _prosesKontrolView = new ProsesKontrol_Control();
             _ayarlarView = new Ayarlar_Control();
@@ -104,8 +104,9 @@ namespace TekstilScada
             _prosesIzlemeView.InitializeView(machines, _pollingService);
             _prosesKontrolView.InitializeControl(_recipeRepository, _machineRepository, plcManagers, _pollingService);
             _ayarlarView.InitializeControl(_machineRepository, plcManagers);
-            _raporlarView.InitializeControl(_machineRepository, _alarmRepository, _productionRepository, _dashboardRepository, _processLogRepository, _recipeRepository);
-            _genelBakisView.InitializeControl(_pollingService, _machineRepository, _dashboardRepository, _alarmRepository, _processLogRepository);
+            // GÜNCELLENDÝ: CostRepository parametresini ekleyin
+            _raporlarView.InitializeControl(_machineRepository, _alarmRepository, _productionRepository, _dashboardRepository, _processLogRepository, _recipeRepository, _costRepository);
+            _genelBakisView.InitializeControl(_pollingService, _machineRepository, _dashboardRepository, _alarmRepository, _processLogRepository, _productionRepository);
 
             // HANGÝ SAYFANIN GÖSTERÝLECEÐÝNÝ KONTROL ET
             if (viewToShow != _genelBakisView)

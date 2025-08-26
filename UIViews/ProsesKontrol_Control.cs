@@ -478,7 +478,7 @@ namespace TekstilScada.UI.Views
                 }
 
                 // 3. Dosya adını otomatik olarak XPR0000.csv formatına çevir
-                string remoteFileName = string.Format("XPR{0:D4}.csv", recipeNumber);
+                string remoteFileName = string.Format("XPR{0:D5}.csv", recipeNumber);
 
                 btnSendToPlc.Enabled = false;
                 this.Cursor = Cursors.WaitCursor;
@@ -516,7 +516,7 @@ namespace TekstilScada.UI.Views
                 {
                     // Güncellenmiş ShowInputDialog metodunu kullanıyoruz (isNumeric = true)
                     string input = ShowInputDialog("Lütfen PLC'ye kaydedilecek reçete numarasını girin (1-20):", true);
-                    if (int.TryParse(input, out int slot) && slot >= 1 && slot <= 98)
+                    if (int.TryParse(input, out int slot) && slot >= 1 && slot <= 20)
                     {
                         recipeSlot = slot;
                     }

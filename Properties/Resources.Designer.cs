@@ -142,7 +142,7 @@ namespace TekstilScada.Properties {
         }
         
         /// <summary>
-        ///   Geçmil Alarmlar benzeri yerelleştirilmiş bir dize arar.
+        ///   Geçmiş Alarmlar benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
         public static string alarmrapor {
             get {

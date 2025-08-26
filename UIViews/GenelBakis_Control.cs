@@ -21,7 +21,8 @@ namespace TekstilScada.UI.Views
         private DashboardRepository _dashboardRepository;
         private AlarmRepository _alarmRepository;
         private ProcessLogRepository _logRepository;
-
+        private ProductionRepository _productionRepository;
+        private Dictionary<int, bool> _previousBatchStatuses;
         private readonly Dictionary<int, DashboardMachineCard_Control> _machineCards = new Dictionary<int, DashboardMachineCard_Control>();
         private System.Windows.Forms.Timer _uiUpdateTimer;
 
@@ -46,25 +47,28 @@ namespace TekstilScada.UI.Views
             ApplyLocalization();
         }
 
-        public void InitializeControl(PlcPollingService pollingService, MachineRepository machineRepo, DashboardRepository dashboardRepo, AlarmRepository alarmRepo, ProcessLogRepository logRepo)
+        public void InitializeControl(PlcPollingService pollingService, MachineRepository machineRepo, DashboardRepository dashboardRepo, AlarmRepository alarmRepo, ProcessLogRepository logRepo,ProductionRepository productionRepo)
         {
             _pollingService = pollingService;
             _machineRepository = machineRepo;
             _dashboardRepository = dashboardRepo;
             _alarmRepository = alarmRepo;
             _logRepository = logRepo;
+            _productionRepository = productionRepo; // YENİ: Atama işlemi
         }
         private void LanguageManager_LanguageChanged(object sender, EventArgs e)
         {
             ApplyLocalization();
         }
-
         private void GenelBakis_Control_Load(object sender, EventArgs e)
         {
             if (this.DesignMode) return;
 
             // YENİ: KPI Kartlarını bir kereliğine oluşturun ve panele ekleyin
             InitializeKpiCards();
+            // YENİ: Başlangıçta tüm makinelerin batch durumunu al.
+            _previousBatchStatuses = _pollingService.MachineDataCache
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.IsInRecipeMode);
 
             BuildMachineCards();
 
@@ -93,14 +97,41 @@ namespace TekstilScada.UI.Views
 
         private void BuildMachineCards()
         {
+            // YENİ: Güncelleme süresince düzeni askıya alarak göz kırpmasını engelle.
+            flpMachineGroups.SuspendLayout();
+
             var allMachines = _machineRepository.GetAllEnabledMachines();
             _machineCards.Clear();
             flpMachineGroups.Controls.Clear();
 
-            var groupedMachines = allMachines
-                .OrderBy(m => m.MachineSubType)
-                .ThenBy(m => m.Id)
-                .GroupBy(m => m.MachineSubType ?? $"{Resources.diger}");
+            var machineCache = _pollingService.MachineDataCache;
+
+            // YENİ SIRALAMA:
+            // 1. Üretim modunda olanlar en üstte.
+            // 2. Kendi içlerinde, en yeni başlayanlar en üstte.
+            // 3. Diğer makineler.
+            var sortedMachines = allMachines
+                .OrderByDescending(m =>
+                {
+                    if (machineCache.TryGetValue(m.Id, out var status))
+                    {
+                        return status.IsInRecipeMode;
+                    }
+                    return false;
+                })
+                .ThenByDescending(m =>
+                {
+                    if (machineCache.TryGetValue(m.Id, out var status) && status.IsInRecipeMode)
+                    {
+                        // ProductionRepository'den okunan batch başlangıç zamanını kullanın.
+                        var batchTimes = _productionRepository.GetBatchTimestamps(status.BatchNumarasi, m.Id);
+                        return batchTimes.StartTime ?? DateTime.MinValue;
+                    }
+                    return DateTime.MinValue;
+                });
+
+            var groupedMachines = sortedMachines
+                .GroupBy(m => m.MachineSubType ?? "Diğer");
 
             foreach (var group in groupedMachines)
             {
@@ -128,11 +159,26 @@ namespace TekstilScada.UI.Views
                 groupPanel.Controls.Add(innerPanel);
                 flpMachineGroups.Controls.Add(groupPanel);
             }
+
+            // YENİ: Düzeni devam ettir ve tüm değişiklikleri tek seferde çizdir.
+            flpMachineGroups.ResumeLayout();
         }
 
         private void RefreshDashboard()
         {
             if (this.IsDisposed) return;
+
+            // YENİ: Makine sıralamasını dinamik olarak kontrol et
+            var currentBatchStatuses = _pollingService.MachineDataCache
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.IsInRecipeMode);
+
+            if (!_previousBatchStatuses.SequenceEqual(currentBatchStatuses))
+            {
+                // Batch durumları değiştiyse, kartları yeniden oluştur ve sırala.
+                BuildMachineCards();
+                _previousBatchStatuses = currentBatchStatuses;
+            }
+
             UpdateKpiCards();
             UpdateSidebarCharts();
         }
@@ -167,21 +213,47 @@ namespace TekstilScada.UI.Views
         private void UpdateSidebarCharts()
         {
             // Saatlik Tüketim Grafiği
-            var hourlyData = _dashboardRepository.GetHourlyFactoryConsumption(DateTime.Today);
+            // Saatlik Elektrik Tüketimi
+            var hourlyElecData = _dashboardRepository.GetHourlyFactoryConsumption(DateTime.Today);
             formsPlotHourly.Plot.Clear();
-            if (hourlyData.Rows.Count > 0)
+            if (hourlyElecData.Rows.Count > 0)
             {
-                // HATA DÜZELTMESİ: Veritabanından gelen değerin DBNull olup olmadığını kontrol et.
-                // Eğer null ise 0.0 kullan, değilse değeri double'a çevir.
-                double[] hours = hourlyData.AsEnumerable().Select(row => row.IsNull("Saat") ? 0.0 : Convert.ToDouble(row["Saat"])).ToArray();
-                double[] consumption = hourlyData.AsEnumerable().Select(row => row.IsNull("ToplamElektrik") ? 0.0 : Convert.ToDouble(row["ToplamElektrik"])).ToArray();
-
+                double[] hours = hourlyElecData.AsEnumerable().Select(row => row.IsNull("Saat") ? 0.0 : Convert.ToDouble(row["Saat"])).ToArray();
+                double[] consumption = hourlyElecData.AsEnumerable().Select(row => row.IsNull("ToplamElektrik") ? 0.0 : Convert.ToDouble(row["ToplamElektrik"])).ToArray();
                 var barPlot = formsPlotHourly.Plot.Add.Bars(hours, consumption);
                 barPlot.Color = ScottPlot.Colors.SteelBlue;
             }
-            formsPlotHourly.Plot.Title(Resources.Saatlikelektrik);
+           // formsPlotHourly.Plot.Title(Resources.SaatlikElektrik);
             formsPlotHourly.Plot.Axes.AutoScale();
             formsPlotHourly.Refresh();
+
+            // Saatlik Su Tüketimi
+            var hourlyWaterData = _dashboardRepository.GetHourlyFactoryConsumption(DateTime.Today);
+            formsPlotHourlyWater.Plot.Clear();
+            if (hourlyWaterData.Rows.Count > 0)
+            {
+                double[] hours = hourlyWaterData.AsEnumerable().Select(row => row.IsNull("Saat") ? 0.0 : Convert.ToDouble(row["Saat"])).ToArray();
+                double[] consumption = hourlyWaterData.AsEnumerable().Select(row => row.IsNull("ToplamSu") ? 0.0 : Convert.ToDouble(row["ToplamSu"])).ToArray();
+                var barPlot = formsPlotHourlyWater.Plot.Add.Bars(hours, consumption);
+                barPlot.Color = ScottPlot.Colors.CornflowerBlue; // Farklı bir renk
+            }
+           // formsPlotHourlyWater.Plot.Title(Resources.SaatlikSu);
+            formsPlotHourlyWater.Plot.Axes.AutoScale();
+            formsPlotHourlyWater.Refresh();
+
+            // Saatlik Buhar Tüketimi
+            var hourlySteamData = _dashboardRepository.GetHourlyFactoryConsumption(DateTime.Today);
+            formsPlotHourlySteam.Plot.Clear();
+            if (hourlySteamData.Rows.Count > 0)
+            {
+                double[] hours = hourlySteamData.AsEnumerable().Select(row => row.IsNull("Saat") ? 0.0 : Convert.ToDouble(row["Saat"])).ToArray();
+                double[] consumption = hourlySteamData.AsEnumerable().Select(row => row.IsNull("ToplamBuhar") ? 0.0 : Convert.ToDouble(row["ToplamBuhar"])).ToArray();
+                var barPlot = formsPlotHourlySteam.Plot.Add.Bars(hours, consumption);
+                barPlot.Color = ScottPlot.Colors.DimGray; // Farklı bir renk
+            }
+           // formsPlotHourlySteam.Plot.Title(Resources.SaatlikBuhar);
+            formsPlotHourlySteam.Plot.Axes.AutoScale();
+            formsPlotHourlySteam.Refresh();
 
             // Popüler Alarmlar Grafiği
             var topAlarms = _alarmRepository.GetTopAlarmsByFrequency(DateTime.Now.AddDays(-1), DateTime.Now);
@@ -196,9 +268,28 @@ namespace TekstilScada.UI.Views
                 formsPlotTopAlarms.Plot.Axes.Bottom.TickGenerator = new ScottPlot.TickGenerators.NumericManual(ticks);
                 formsPlotTopAlarms.Plot.Axes.Bottom.TickLabelStyle.Rotation = 45;
             }
-            formsPlotTopAlarms.Plot.Title(Resources.ensikalarm);
+          //  formsPlotTopAlarms.Plot.Title(Resources.ensikalarm);
             formsPlotTopAlarms.Plot.Axes.AutoScale();
             formsPlotTopAlarms.Refresh();
+            var hourlyOeeData = _dashboardRepository.GetHourlyAverageOee(DateTime.Today);
+            formsPlotHourlyOee.Plot.Clear();
+            if (hourlyOeeData.Rows.Count > 0)
+            {
+                double[] hours = hourlyOeeData.AsEnumerable().Select(row => row.IsNull("Saat") ? 0.0 : Convert.ToDouble(row["Saat"])).ToArray();
+                double[] oeeValues = hourlyOeeData.AsEnumerable().Select(row => row.IsNull("AverageOEE") ? 0.0 : Convert.ToDouble(row["AverageOEE"])).ToArray();
+
+                var linePlot = formsPlotHourlyOee.Plot.Add.Scatter(hours, oeeValues);
+                linePlot.Color = ScottPlot.Colors.Orange;
+                linePlot.LineStyle.Width = 2;
+                linePlot.MarkerStyle.Shape = ScottPlot.MarkerShape.FilledCircle;
+                linePlot.MarkerStyle.Size = 5;
+
+                formsPlotHourlyOee.Plot.Axes.Bottom.Label.Text = "Saat";
+                formsPlotHourlyOee.Plot.Axes.Left.Label.Text = "Ortalama OEE (%)";
+            }
+           // formsPlotHourlyOee.Plot.Title("24 Saatlik OEE");
+            formsPlotHourlyOee.Plot.Axes.AutoScale();
+            formsPlotHourlyOee.Refresh();
         }
 
         protected override void OnHandleDestroyed(EventArgs e)
@@ -218,7 +309,7 @@ namespace TekstilScada.UI.Views
 
             gbTopAlarms.Text = Resources.son24topalarm;
 
-
+           // gbHourlyOee.Text = Resources.hourlyoee;
             //btnSave.Text = Resources.Save;
 
 

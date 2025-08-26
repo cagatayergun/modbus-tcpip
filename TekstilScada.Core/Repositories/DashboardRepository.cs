@@ -107,6 +107,40 @@ namespace TekstilScada.Repositories
             }
             return oeeList;
         }
+        public DataTable GetHourlyAverageOee(DateTime startDate)
+        {
+            var dt = new DataTable();
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                string query = @"
+                    SELECT 
+                        HOUR(b.EndTime) AS Saat,
+                        AVG(
+                            CASE WHEN b.TotalProductionCount > 0 AND b.TheoreticalCycleTimeSeconds > 0 AND TIME_TO_SEC(TIMEDIFF(b.EndTime, b.StartTime)) > 0 THEN
+                                (TIME_TO_SEC(TIMEDIFF(b.EndTime, b.StartTime)) - b.TotalDownTimeSeconds) / TIME_TO_SEC(TIMEDIFF(b.EndTime, b.StartTime)) *
+                                (b.TheoreticalCycleTimeSeconds / TIME_TO_SEC(TIMEDIFF(b.EndTime, b.StartTime)) - b.TotalDownTimeSeconds) *
+                                ( (b.TotalProductionCount - b.DefectiveProductionCount) / b.TotalProductionCount ) * 10000
+                            ELSE
+                                0
+                            END
+                        ) AS AverageOEE
+                    FROM production_batches AS b
+                    WHERE DATE(b.EndTime) = @SelectedDate AND b.EndTime IS NOT NULL
+                    GROUP BY Saat
+                    ORDER BY Saat;
+                ";
+                var cmd = new MySqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("@SelectedDate", startDate.ToString("yyyy-MM-dd"));
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    dt.Load(reader);
+                }
+            }
+            return dt;
+        }
         public DataTable GetHourlyFactoryConsumption(DateTime date)
         {
             var dt = new DataTable();

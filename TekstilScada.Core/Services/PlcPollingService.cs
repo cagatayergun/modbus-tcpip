@@ -95,20 +95,34 @@ namespace TekstilScada.Services
 
         public void Stop()
         {
-            _cancellationTokenSource?.Cancel();
-            try
+            // CancellationTokenSource'un null olup olmadığını kontrol et
+            if (_cancellationTokenSource != null)
             {
-                if (_pollingTasks.Any())
+                // İptal işlemini başlat
+                _cancellationTokenSource.Cancel();
+
+                // Tüm polling görevlerinin bitmesini bekle
+                try
                 {
-                    Task.WhenAll(_pollingTasks).Wait(2000);
+                    Task.WhenAll(_pollingTasks).Wait(3000); // 3 saniye bekle
+                }
+                catch (OperationCanceledException)
+                {
+                    // İptal isteği üzerine görevlerin sonlanması beklenir, bu bir hata değildir.
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Polling task'leri durdurulurken hata: {ex.Message}");
                 }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Polling task'leri durdurulurken hata: {ex.Message}");
-            }
+
+            // Kaynakları temizle
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = null; // Nesneyi null'a ayarla
             _loggingTimer?.Change(Timeout.Infinite, 0);
             _loggingTimer?.Dispose();
+            _loggingTimer = null; // Nesneyi null'a ayarla
+
             if (_plcManagers != null && !_plcManagers.IsEmpty)
             {
                 foreach (var manager in _plcManagers.Values)
@@ -121,7 +135,6 @@ namespace TekstilScada.Services
             _connectionStates?.Clear();
             _activeAlarmsTracker?.Clear();
             _currentBatches?.Clear();
-            _cancellationTokenSource?.Dispose();
             _pollingTasks?.Clear();
         }
 
