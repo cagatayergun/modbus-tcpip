@@ -63,12 +63,12 @@ namespace TekstilScada.Services
 
         public OperateResult Connect()
         {
-            Debug.WriteLine($"[{DateTime.Now:HH:mm:ss}] {IpAddress} (BY) -> Bağlantı deneniyor...");
+           // Debug.WriteLine($"[{DateTime.Now:HH:mm:ss}] {IpAddress} (BY) -> Bağlantı deneniyor...");
             var result = _plcClient.ConnectServer();
             if (result.IsSuccess)
-                Debug.WriteLine($"[{DateTime.Now:HH:mm:ss}] {IpAddress} (BY) -> Bağlantı BAŞARILI.");
+            { }//  Debug.WriteLine($"[{DateTime.Now:HH:mm:ss}] {IpAddress} (BY) -> Bağlantı BAŞARILI.");
             else
-                Debug.WriteLine($"[{DateTime.Now:HH:mm:ss}] {IpAddress} (BY) -> Bağlantı BAŞARISIZ: {result.Message}");
+            { }   //Debug.WriteLine($"[{DateTime.Now:HH:mm:ss}] {IpAddress} (BY) -> Bağlantı BAŞARISIZ: {result.Message}");
             return result;
         }
 
@@ -310,7 +310,39 @@ namespace TekstilScada.Services
 
             return OperateResult.CreateSuccessResult(fullRecipeData);
         }
+        public async Task<OperateResult<ScadaRecipe>> ReadFullRecipeDataAsync()
+        {
+            var readResult = await ReadRecipeFromPlcAsync(); // Kendi metodunuzu çağırın
+            if (!readResult.IsSuccess)
+            {
+                return OperateResult.CreateFailedResult<ScadaRecipe>(readResult);
+            }
 
+            var recipeData = readResult.Content;
+            var recipe = new ScadaRecipe
+            {
+                Steps = new List<ScadaRecipeStep>()
+            };
+
+            const int wordsPerStep = 25; // Her adım için 25 kelime (word) varsayımı
+            int totalSteps = recipeData.Length / wordsPerStep;
+
+            for (int i = 0; i < totalSteps; i++)
+            {
+                var stepWords = new short[wordsPerStep];
+                Array.Copy(recipeData, i * wordsPerStep, stepWords, 0, wordsPerStep);
+
+                // Adım numarası ve diğer verileri PLC verilerinden çekin
+                var step = new ScadaRecipeStep
+                {
+                    StepNumber = i + 1, // Adım numarası
+                    StepDataWords = stepWords
+                };
+                recipe.Steps.Add(step);
+            }
+
+            return OperateResult.CreateSuccessResult(recipe);
+        }
         public async Task<OperateResult<List<PlcOperator>>> ReadPlcOperatorsAsync()
         {
             // DEĞİŞİKLİK: Modbus adres kullanılıyor

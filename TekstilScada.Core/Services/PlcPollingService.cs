@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -144,6 +145,7 @@ namespace TekstilScada.Services
             {
                 try
                 {
+                    Debug.WriteLine($"[PollMachineLoop] Makine {machine.Id} için döngü çalışıyor. Bağlantı durumu: {MachineDataCache[machine.Id].ConnectionState}");
                     if (!MachineDataCache.TryGetValue(machine.Id, out var status)) return;
 
                     if (status.ConnectionState != ConnectionStatus.Connected)
@@ -161,6 +163,8 @@ namespace TekstilScada.Services
                             newStatus.ConnectionState = ConnectionStatus.Connected;
 
                             newStatus.AktifAdimAdi = GetStepTypeName(newStatus.AktifAdimTipiWordu);
+                            // Buraya ekleyin
+                            Debug.WriteLine($"[PollMachineLoop] Makine {machine.Id} için okuma başarılı. Adım No: {newStatus.AktifAdimNo}, Reçete Modu: {newStatus.IsInRecipeMode}");
 
                             var analyzer = _liveAnalyzers.TryGetValue(machine.Id, out var a) ? a : null;
                             if (newStatus.IsInRecipeMode && analyzer != null && _batchTotalTheoreticalTimes.TryGetValue(machine.Id, out double totalTheoreticalTime) && totalTheoreticalTime > 0)
@@ -237,26 +241,78 @@ namespace TekstilScada.Services
         private async void CheckAndLogBatchStartAndEnd(int machineId, FullMachineStatus currentStatus)
         {
             _currentBatches.TryGetValue(machineId, out string lastTrackedBatchId);
+
+            Debug.WriteLine($"[CheckAndLogBatchStartAndEnd] Makine {machineId} için kontrol. Mevcut Batch: '{currentStatus.BatchNumarasi}', Son Batch: '{lastTrackedBatchId}'");
+
+            // YENİ BİR BATCH BAŞLADIĞINDA
             if (currentStatus.IsInRecipeMode && !string.IsNullOrEmpty(currentStatus.BatchNumarasi) && currentStatus.BatchNumarasi != lastTrackedBatchId)
             {
+                // Önceki batch'in bitiş işlemlerini yapın (varsa).
+                if (lastTrackedBatchId != null)
+                {
+                    // YENİ: Batch'in son adımı için bitiş işlemini yapın.
+                    if (_liveAnalyzers.TryGetValue(machineId, out var analyzer))
+                    {
+                        // Son adımı manuel olarak sonlandır ve kaydet.
+                        var lastStep = analyzer.GetLastCompletedStep();
+                        if (lastStep != null && lastStep.WorkingTime == "İşleniyor...")
+                        {
+                            Debug.WriteLine($"[CheckAndLogBatchStartAndEnd] Batch sonlanırken son adım ({lastStep.StepNumber}) kaydediliyor.");
+                            analyzer.FinalizeStep(lastStep.StepNumber, lastTrackedBatchId, machineId);
+                        }
+                    }
+
+                    int actualProducedQuantity = currentStatus.ActualQuantityProduction;
+                    _liveAlarmCounters.TryGetValue(machineId, out var finalCounters);
+                    int totalDowntimeFromScada = finalCounters.machineAlarmSeconds + finalCounters.operatorPauseSeconds;
+                    _batchTotalTheoreticalTimes.TryGetValue(machineId, out double theoreticalTime);
+                    _productionRepository.EndBatch(
+                        machineId, lastTrackedBatchId, currentStatus,
+                        finalCounters.machineAlarmSeconds, finalCounters.operatorPauseSeconds,
+                        actualProducedQuantity, totalDowntimeFromScada, theoreticalTime);
+                }
+
+                // Yeni batch için bilgileri güncelleyin.
                 _currentBatches[machineId] = currentStatus.BatchNumarasi;
                 _productionRepository.StartNewBatch(currentStatus);
-                _liveAlarmCounters[machineId] = (0, 0);
 
-                var recipe = _recipeRepository.GetRecipeByName(currentStatus.RecipeName);
-                if (recipe != null)
+                if (_plcManagers.TryGetValue(machineId, out var plcManager))
                 {
-                    var fullRecipe = _recipeRepository.GetRecipeById(recipe.Id);
-                    // DÜZELTME: LiveStepAnalyzer artık productionRepository'i alıyor
-                    _liveAnalyzers[machineId] = new LiveStepAnalyzer(fullRecipe, _productionRepository);
-                    double totalSeconds = RecipeAnalysis.CalculateTotalTheoreticalTimeSeconds(fullRecipe);
-                    _batchTotalTheoreticalTimes[machineId] = totalSeconds;
-                    _batchStartTimes[machineId] = DateTime.Now;
-                    _batchNonProductiveSeconds[machineId] = 0;
+                    var recipeReadResult = await plcManager.ReadFullRecipeDataAsync();
+                    if (recipeReadResult.IsSuccess && recipeReadResult.Content != null)
+                    {
+                        var fullRecipe = recipeReadResult.Content;
+                        fullRecipe.RecipeName = currentStatus.RecipeName;
+                        _liveAnalyzers[machineId] = new LiveStepAnalyzer(fullRecipe, _productionRepository);
+                        double totalSeconds = RecipeAnalysis.CalculateTotalTheoreticalTimeSeconds(fullRecipe);
+                        _batchTotalTheoreticalTimes[machineId] = totalSeconds;
+                        _batchStartTimes[machineId] = DateTime.Now;
+                        _batchNonProductiveSeconds[machineId] = 0;
+                        Debug.WriteLine($"[CheckAndLogBatchStartAndEnd] YENİ BATCH BAŞLADI: Batch No: '{currentStatus.BatchNumarasi}'. LiveStepAnalyzer PLC'den okunan reçete ile oluşturuldu.");
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"[CheckAndLogBatchStartAndEnd] HATA: Reçete PLC'den okunamadı. LiveStepAnalyzer oluşturulamadı. Hata: {recipeReadResult.Message}");
+                    }
                 }
             }
+            // BATCH BİTİŞ DURUMU
             else if (!currentStatus.IsInRecipeMode && lastTrackedBatchId != null)
             {
+                // Batch bittiğinde son adımı kaydet
+                if (_liveAnalyzers.TryGetValue(machineId, out var analyzer))
+                {
+                    // Son adımı manuel olarak sonlandır ve kaydet.
+                    var lastStep = analyzer.GetLastCompletedStep();
+                    if (lastStep != null && lastStep.WorkingTime == "İşleniyor...")
+                    {
+                        Debug.WriteLine($"[CheckAndLogBatchStartAndEnd] Batch bitişi algılandı. Son adım ({lastStep.StepNumber}) kaydediliyor.");
+                        analyzer.FinalizeStep(lastStep.StepNumber, lastTrackedBatchId, machineId);
+                    }
+
+                }
+
+                // Batch bitişi için diğer işlemleri yap
                 int actualProducedQuantity = currentStatus.ActualQuantityProduction;
                 _liveAlarmCounters.TryGetValue(machineId, out var finalCounters);
                 int totalDowntimeFromScada = finalCounters.machineAlarmSeconds + finalCounters.operatorPauseSeconds;
@@ -265,24 +321,26 @@ namespace TekstilScada.Services
                     machineId, lastTrackedBatchId, currentStatus,
                     finalCounters.machineAlarmSeconds, finalCounters.operatorPauseSeconds,
                     actualProducedQuantity, totalDowntimeFromScada, theoreticalTime);
+
                 _currentBatches[machineId] = null;
                 _liveAlarmCounters.TryRemove(machineId, out _);
                 _liveAnalyzers.TryRemove(machineId, out _);
                 _batchTotalTheoreticalTimes.TryRemove(machineId, out _);
                 _batchStartTimes.TryRemove(machineId, out _);
                 _batchNonProductiveSeconds.TryRemove(machineId, out _);
+
                 if (_plcManagers.TryGetValue(machineId, out var plcManager))
                 {
-                    var summaryResult = await plcManager.ReadBatchSummaryDataAsync();
-                    if (summaryResult.IsSuccess)
-                    {
-                        _productionRepository.UpdateBatchSummary(machineId, lastTrackedBatchId, summaryResult.Content);
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Batch {lastTrackedBatchId} için özet verileri okunamadı: {summaryResult.Message}");
-                    }
                     Task.Run(async () => {
+                        var summaryResult = await plcManager.ReadBatchSummaryDataAsync();
+                        if (summaryResult.IsSuccess)
+                        {
+                            _productionRepository.UpdateBatchSummary(machineId, lastTrackedBatchId, summaryResult.Content);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Batch {lastTrackedBatchId} için özet verileri okunamadı: {summaryResult.Message}");
+                        }
                         await plcManager.IncrementProductionCounterAsync();
                         await plcManager.ResetOeeCountersAsync();
                     });
@@ -301,6 +359,9 @@ namespace TekstilScada.Services
         }
         private void ProcessLiveStepAnalysis(int machineId, FullMachineStatus currentStatus)
         {
+            // Buraya ekleyin
+            Debug.WriteLine($"[ProcessLiveStepAnalysis] Metot çağrıldı. Makine: {machineId}, Reçete Modu: {currentStatus.IsInRecipeMode}");
+
             if (!currentStatus.IsInRecipeMode || string.IsNullOrEmpty(currentStatus.BatchNumarasi)) return;
             if (_liveAnalyzers.TryGetValue(machineId, out var analyzer))
             {

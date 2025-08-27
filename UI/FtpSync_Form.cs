@@ -85,6 +85,8 @@ namespace TekstilScada.UI
             lstLocalRecipes.ValueMember = "Id";
         }
 
+        // FtpSync_Form.cs
+        // FtpSync_Form.cs
         private async void LoadHmiRecipes()
         {
             var selectedMachine = clbMachines.CheckedItems.Count == 1
@@ -122,30 +124,10 @@ namespace TekstilScada.UI
                     .OrderBy(f => f)
                     .ToList();
 
-                // YENİ KOD: Dosyaları oku ve reçete adlarını al
-                var displayList = new List<object>();
-                foreach (var file in recipeFiles)
-                {
-                    try
-                    {
-                        string csvContent = await ftpService.DownloadFileAsync($"/{file}");
-                        var tempRecipe = RecipeCsvConverter.ToRecipe(csvContent, file);
-                        displayList.Add(new { FileName = file, DisplayName = $"{file} - {tempRecipe.RecipeName}" });
-                    }
-                    catch
-                    {
-                        // Bir dosya okunamasa bile diğerlerini listeye ekle
-                        displayList.Add(new { FileName = file, DisplayName = $"{file} - (Hata)" });
-                    }
-                }
+                lstHmiRecipes.DataSource = recipeFiles;
 
-                if (displayList.Any())
-                {
-                    lstHmiRecipes.DisplayMember = "DisplayName";
-                    lstHmiRecipes.ValueMember = "FileName";
-                    lstHmiRecipes.DataSource = displayList;
-                }
-                else if (files.Any())
+                // Eğer hiç .csv dosyası bulunamazsa bilgilendirme mesajı göster
+                if (!recipeFiles.Any() && files.Any())
                 {
                     lstHmiRecipes.DataSource = new List<string> { "FTP'de .csv uzantılı reçete bulunamadı." };
                 }
@@ -278,15 +260,12 @@ namespace TekstilScada.UI
                 return;
             }
 
-            var selectedItem = lstHmiRecipes.SelectedItem as dynamic;
-            if (selectedItem == null)
+            var selectedFile = lstHmiRecipes.SelectedItem as string;
+            if (string.IsNullOrEmpty(selectedFile) || !selectedFile.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
             {
                 ClearPreview();
                 return;
             }
-            string selectedFile = selectedItem.FileName;
-
-
             var selectedMachine = clbMachines.CheckedItems.Cast<Machine>().FirstOrDefault();
 
             if (selectedFile == null || selectedMachine == null)
@@ -306,6 +285,8 @@ namespace TekstilScada.UI
                 string csvContent = await ftpService.DownloadFileAsync($"/{selectedFile}");
 
                 _previewRecipe = RecipeCsvConverter.ToRecipe(csvContent, "temp_preview");
+
+                // Reçete adını 99. adımdaki verilerden oluştur
                 string previewName = GeneratePreviewRecipeName(selectedMachine, selectedFile, _previewRecipe);
 
                 lblPreviewStatus.Visible = false;
@@ -372,6 +353,8 @@ namespace TekstilScada.UI
             _byMakinesiEditor = new SplitContainer();
             dgvRecipeSteps = new DataGridView();
             pnlStepDetails = new Panel();
+
+            // Üst başlık çubuğunu oluşturun ve reçete adını atayın
             var pnlTopBar = new Panel { Dock = DockStyle.Top, Height = 30, BackColor = Color.LightSteelBlue };
             var lblRecipeName = new Label { Dock = DockStyle.Fill, Text = recipeName, Font = new Font("Segoe UI", 10F, FontStyle.Bold), TextAlign = ContentAlignment.MiddleCenter };
             pnlTopBar.Controls.Add(lblRecipeName);
@@ -379,8 +362,12 @@ namespace TekstilScada.UI
             _byMakinesiEditor.Dock = DockStyle.Fill;
             _byMakinesiEditor.SplitterDistance = 450;
             _byMakinesiEditor.Panel1.Controls.Add(dgvRecipeSteps);
-            _byMakinesiEditor.Panel2.Controls.Add(pnlStepDetails);
+
+            // Panel2'ye ilk olarak başlık panelini ekle
             _byMakinesiEditor.Panel2.Controls.Add(pnlTopBar);
+
+            // Ardından, adım detayları panelini (Fill) olarak ekle
+            _byMakinesiEditor.Panel2.Controls.Add(pnlStepDetails);
 
             dgvRecipeSteps.Dock = DockStyle.Fill;
             dgvRecipeSteps.AllowUserToAddRows = false;
@@ -396,6 +383,7 @@ namespace TekstilScada.UI
 
             SetupStepsGridView();
         }
+
 
         private void SetupStepsGridView()
         {

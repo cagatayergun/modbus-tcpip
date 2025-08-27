@@ -13,7 +13,7 @@ namespace TekstilScada.Services
     public interface IPlcManager
     {
         string IpAddress { get; }
-
+        Task<OperateResult<ScadaRecipe>> ReadFullRecipeDataAsync(); // Bu satırı ekleyin
         OperateResult Connect();
         OperateResult Disconnect();
 
