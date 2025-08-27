@@ -14,9 +14,10 @@ namespace TekstilScada.Services
     {
         string IpAddress { get; }
         Task<OperateResult<ScadaRecipe>> ReadFullRecipeDataAsync(); // Bu satırı ekleyin
+        Task<OperateResult<Dictionary<int, string>>> ReadRecipeNamesFromPlcAsync(); // YENİ EKLENEN SATIR
         OperateResult Connect();
         OperateResult Disconnect();
-
+        Task<OperateResult> WriteRecipeNameAsync(int recipeNumber, string recipeName);
         // Canlı veri okuma
         OperateResult<FullMachineStatus> ReadLiveStatusData();
 

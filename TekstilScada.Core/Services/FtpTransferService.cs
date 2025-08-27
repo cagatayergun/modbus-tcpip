@@ -1,10 +1,16 @@
-﻿using System;
+﻿// ======================================================
+// FILE: TekstilScada.Core/Services/FtpTransferService.cs
+// TransferJob sınıfına yeni özellik eklendi ve kuyruk işleme mantığı güncellendi.
+// ======================================================
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using TekstilScada.Core;
 using TekstilScada.Models;
@@ -15,15 +21,15 @@ namespace TekstilScada.Services
     public enum TransferType { Gonder, Al }
     public enum TransferStatus { Beklemede, Aktarılıyor, Başarılı, Hatalı }
 
-    public class TransferJob : INotifyPropertyChanged // INotifyPropertyChanged arayüzünü ekliyoruz
+    public class TransferJob : INotifyPropertyChanged
     {
-        // INotifyPropertyChanged için gerekli event
         public event PropertyChangedEventHandler PropertyChanged;
-        //public static event EventHandler RecipeListChanged;
-        // ... diğer özellikler ...
-        public string HedefDosyaAdi { get; set; } // YENİ
 
-        // ReceteAdi özelliğini güncelleyelim
+        public string HedefDosyaAdi { get; set; }
+
+        // YENİ EKLENEN ÖZELLİK
+        public int RecipeNumber { get; set; }
+
         public string ReceteAdi => IslemTipi == TransferType.Gonder
                                    ? (!string.IsNullOrEmpty(HedefDosyaAdi) ? $"{YerelRecete?.RecipeName} -> {HedefDosyaAdi}" : YerelRecete?.RecipeName)
                                    : UzakDosyaAdi;
@@ -50,7 +56,7 @@ namespace TekstilScada.Services
                 if (_durum != value)
                 {
                     _durum = value;
-                    OnPropertyChanged(nameof(Durum)); // Değişikliği bildir
+                    OnPropertyChanged(nameof(Durum));
                 }
             }
         }
@@ -62,7 +68,7 @@ namespace TekstilScada.Services
                 if (_ilerleme != value)
                 {
                     _ilerleme = value;
-                    OnPropertyChanged(nameof(Ilerleme)); // Değişikliği bildir
+                    OnPropertyChanged(nameof(Ilerleme));
                 }
             }
         }
@@ -74,29 +80,42 @@ namespace TekstilScada.Services
                 if (_hataMesaji != value)
                 {
                     _hataMesaji = value;
-                    OnPropertyChanged(nameof(HataMesaji)); // Değişikliği bildir
+                    OnPropertyChanged(nameof(HataMesaji));
                 }
             }
         }
 
-        // DataGridView'de göstermek için property'ler
         public string MakineAdi => Makine.MachineName;
-       // public string ReceteAdi => IslemTipi == TransferType.Gonder ? YerelRecete?.RecipeName : UzakDosyaAdi;
     }
 
     public class FtpTransferService
     {
-        private static readonly Lazy<FtpTransferService> _instance = new Lazy<FtpTransferService>(() => new FtpTransferService());
-        public static FtpTransferService Instance => _instance.Value;
-          public event EventHandler RecipeListChanged;
+        // YENİ: Sadece bir `private static` örnek alanı bırakıldı.
+        private static readonly FtpTransferService _instance = new FtpTransferService();
+        public static FtpTransferService Instance => _instance;
+        public event EventHandler RecipeListChanged;
         public BindingList<TransferJob> Jobs { get; } = new BindingList<TransferJob>();
         private bool _isProcessing = false;
         private SynchronizationContext _syncContext;
-        private FtpTransferService() { }
+        private PlcPollingService _plcPollingService;
+
+        // YENİ: Yapıcı metot, PlcPollingService'i parametre olarak alıyor.
+        public FtpTransferService(PlcPollingService plcPollingService)
+        {
+            _plcPollingService = plcPollingService;
+        }
+
+        // YENİ: Parametresiz yapıcı, sadece singleton başlatma için.
+        private FtpTransferService()
+        {
+            // Diğer bağımlılıklar burada yoksa, boş bırakın
+        }
+
         public void SetSyncContext(SynchronizationContext context)
         {
             _syncContext = context;
         }
+
         public void QueueSendJobs(List<ScadaRecipe> receteler, Machine makine)
         {
             foreach (var recete in receteler)
@@ -114,7 +133,6 @@ namespace TekstilScada.Services
             {
                 foreach (var recete in receteler)
                 {
-                    // Her makine-reçete kombinasyonu için bir iş oluştur
                     if (!Jobs.Any(j => j.Makine.Id == makine.Id && j.YerelRecete?.Id == recete.Id && j.IslemTipi == TransferType.Gonder))
                     {
                         Jobs.Add(new TransferJob { Makine = makine, YerelRecete = recete, IslemTipi = TransferType.Gonder });
@@ -127,8 +145,6 @@ namespace TekstilScada.Services
         {
             foreach (var dosya in dosyaAdlari)
             {
-                // NİHAİ ÇÖZÜM: Tekrar çekmeyi engelleme kontrolü kaldırıldı.
-                // Artık aynı dosya için tekrar tekrar "Al" işlemi başlatılabilir.
                 Jobs.Add(new TransferJob { Makine = makine, UzakDosyaAdi = dosya, IslemTipi = TransferType.Al });
             }
             StartProcessingIfNotRunning();
@@ -138,58 +154,41 @@ namespace TekstilScada.Services
         {
             if (!_isProcessing)
             {
-                Task.Run(() => ProcessQueue(new RecipeRepository())); // Repository'i anlık oluşturuyoruz
+                Task.Run(() => ProcessQueue(new RecipeRepository()));
             }
         }
         private string GenerateNewRecipeName(TransferJob job, ScadaRecipe recipe, RecipeRepository recipeRepo)
         {
-            // 1. Kısım: Makine Adı
             string machineName = job.Makine.MachineName;
-
-            // 2. Kısım: Reçete Numarası (Dosya Adından) - GÜNCELLENDİ
-            string recipeNumberPart = "0"; // Varsayılan değer
+            string recipeNumberPart = "0";
             try
             {
-                string fileName = Path.GetFileNameWithoutExtension(job.UzakDosyaAdi); // Örn: "XPR00095"
-
-                // Dosya adının sonundaki rakamları bulmak için Regex kullan.
+                string fileName = Path.GetFileNameWithoutExtension(job.UzakDosyaAdi);
                 Match match = Regex.Match(fileName, @"\d+$");
                 if (match.Success)
                 {
-                    // Başındaki sıfırları kaldırmak için integer'a çevirip geri string yap.
-                    recipeNumberPart = int.Parse(match.Value).ToString(); // "95"
+                    recipeNumberPart = int.Parse(match.Value).ToString();
                 }
             }
             catch
             {
-                recipeNumberPart = "NO_HATA"; // Hata durumunda
+                recipeNumberPart = "NO_HATA";
             }
             string asciiPart = "BILGI_YOK";
             try
             {
-                // Yeni kural: Reçete adımlarından 99 numaralı adımı bul.
                 var step99 = recipe.Steps.FirstOrDefault(s => s.StepNumber == 99);
-
-                // 99. adımın var olup olmadığını ve ilk 5 word'ü içerecek kadar verisi olup olmadığını kontrol et.
                 if (step99 != null && step99.StepDataWords.Length >= 5)
                 {
-                    // 5 word = 10 byte
                     byte[] asciiBytes = new byte[10];
                     for (int i = 0; i < 5; i++)
                     {
-                        // 99. adımın ilk 5 word'ünü sırayla al (indeks 0'dan 4'e kadar).
                         short word = step99.StepDataWords[i];
                         byte[] wordBytes = BitConverter.GetBytes(word);
-
-                        // Byte sırasının (endianness) doğru olduğundan emin olmalıyız.
-                        // PLC'ler genellikle Big Endian, PC'ler Little Endian kullanır.
-                        // Gerekirse Array.Reverse(wordBytes) kullanılabilir.
-                        // Little Endian varsayımıyla devam ediyoruz.
                         asciiBytes[i * 2] = wordBytes[0];
                         asciiBytes[i * 2 + 1] = wordBytes[1];
                     }
 
-                    // Byte dizisini ASCII metne çevir ve temizle (boş karakterleri sil).
                     asciiPart = Encoding.ASCII.GetString(asciiBytes).Replace("\0", "").Trim();
                     if (string.IsNullOrEmpty(asciiPart))
                     {
@@ -198,24 +197,17 @@ namespace TekstilScada.Services
                 }
                 else
                 {
-                    // Reçetede 99. adım bulunamazsa veya yeterli veri yoksa bu ismi ver.
                     asciiPart = "ADIM99_YOK";
                 }
             }
             catch
             {
-                // Beklenmedik bir hata olursa bu ismi ver.
                 asciiPart = "HATA";
             }
 
-            // Temel ismi oluştur
             string baseName = $"{machineName}-{recipeNumberPart}-{asciiPart}";
-
-            // 4. Kısım: İsim çakışması varsa numaralandır
             string finalName = baseName;
             int copyCounter = 1;
-            // Not: Bu sorgu çok sayıda reçete varsa yavaş olabilir. 
-            // RecipeRepository'de RecipeNameExists(name) gibi daha verimli bir metot olması idealdir.
             var existingNames = new HashSet<string>(recipeRepo.GetAllRecipes().Select(r => r.RecipeName));
 
             while (existingNames.Contains(finalName))
@@ -226,6 +218,7 @@ namespace TekstilScada.Services
 
             return finalName;
         }
+
         private async Task ProcessQueue(RecipeRepository recipeRepo)
         {
             _isProcessing = true;
@@ -248,50 +241,55 @@ namespace TekstilScada.Services
                             throw new Exception("Reçete veritabanında bulunamadı veya adımları boş.");
                         }
 
-                        // ***************************************************************
-                        // *** NİHAİ ÇÖZÜM: LOKAL İSMİ 99. ADIMA YAZMA ***
-                        // ***************************************************************
+                        // Reçete adını PLC'ye yaz
+                        if (_plcPollingService.GetPlcManagers().TryGetValue(job.Makine.Id, out var plcManager))
+                        {
+                            // Hedef dosya adından reçete numarasını çıkar
+                            var recipeNumberMatch = Regex.Match(job.HedefDosyaAdi, @"XPR(\d+)\.csv");
+                            if (!recipeNumberMatch.Success || !int.TryParse(recipeNumberMatch.Groups[1].Value, out int recipeNumber))
+                            {
+                                throw new Exception("Geçersiz hedef dosya adı formatı. Reçete numarası çıkarılamadı.");
+                            }
 
-                        // 1. LOKALDEKİ reçete adını al (örn: "BY-1-REAKTİF-SİYAH-1").
+                            // PLC'ye yazma işlemi için metodu çağır
+                            var writeResult = await plcManager.WriteRecipeNameAsync(recipeNumber, fullRecipe.RecipeName);
+                            if (!writeResult.IsSuccess)
+                            {
+                                throw new Exception($"Reçete adı PLC'ye yazılamadı: {writeResult.Message}");
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception("PLC bağlantısı aktif değil, reçete adı PLC'ye yazılamadı.");
+                        }
+
+                        // Reçete adını PLC'ye gömmek için 99. adımı güncelle
                         string nameToEmbed = job.YerelRecete.RecipeName;
-
-                        // En fazla 10 karakter olabilir (5 word = 10 byte).
                         if (nameToEmbed.Length > 10)
                         {
                             nameToEmbed = nameToEmbed.Substring(0, 10);
                         }
-
-                        // 2. İsmi ASCII byte dizisine çevir. Kalan yerleri boşluk (0) ile doldur.
                         byte[] asciiBytes = new byte[10];
                         Encoding.ASCII.GetBytes(nameToEmbed, 0, nameToEmbed.Length, asciiBytes, 0);
-
-                        // 3. Reçetedeki 99. adımı bul veya oluştur.
                         var step99 = fullRecipe.Steps.FirstOrDefault(s => s.StepNumber == 99);
                         if (step99 == null)
                         {
                             step99 = new ScadaRecipeStep { StepNumber = 99 };
-                            // Adım listesini sıralı tutmak için sona eklemek yerine araya ekleyebiliriz (opsiyonel)
                             fullRecipe.Steps.Add(step99);
                             fullRecipe.Steps = fullRecipe.Steps.OrderBy(s => s.StepNumber).ToList();
                         }
 
-                        // 4. Byte'ları 5 adet word'e çevir ve 99. adımın ilk 5 verisine yaz.
                         for (int i = 0; i < 5; i++)
                         {
                             step99.StepDataWords[i] = BitConverter.ToInt16(asciiBytes, i * 2);
                         }
 
-                        // ***************************************************************
-
                         job.Ilerleme = 50;
 
-                        // Artık içinde lokal ismi de barındıran reçeteyi CSV'ye çevir.
                         string csvContent = RecipeCsvConverter.ToCsv(fullRecipe);
-
-                        // HMI'a sıralı dosya adıyla ("XPR0098.csv") gönder.
                         await ftpService.UploadFileAsync(job.HedefDosyaAdi, csvContent);
                     }
-                    else // Alma işlemi (Bu kısım aynı kalacak)
+                    else
                     {
                         var csvContent = await ftpService.DownloadFileAsync(job.UzakDosyaAdi);
                         job.Ilerleme = 50;
@@ -318,17 +316,15 @@ namespace TekstilScada.Services
             }
             _isProcessing = false;
         }
+
         public void QueueSequentiallyNamedSendJobs(List<ScadaRecipe> receteler, List<Machine> makineler, int startNumber)
         {
             int currentRecipeNumber = startNumber;
             foreach (var recete in receteler)
             {
-                // Hedef dosya adını formatla (örn: XPR0070.csv)
                 string hedefDosyaAdi = $"XPR{currentRecipeNumber:D5}.csv";
-
                 foreach (var makine in makineler)
                 {
-                    // Aynı işin kuyrukta olup olmadığını kontrol et (opsiyonel ama iyi bir pratik)
                     if (!Jobs.Any(j => j.Makine.Id == makine.Id && j.YerelRecete?.Id == recete.Id && j.HedefDosyaAdi == hedefDosyaAdi))
                     {
                         Jobs.Add(new TransferJob
@@ -336,14 +332,14 @@ namespace TekstilScada.Services
                             Makine = makine,
                             YerelRecete = recete,
                             IslemTipi = TransferType.Gonder,
-                            HedefDosyaAdi = hedefDosyaAdi // YENİ
+                            HedefDosyaAdi = hedefDosyaAdi,
+                            RecipeNumber = currentRecipeNumber
                         });
                     }
                 }
-                currentRecipeNumber++; // Bir sonraki reçete için numarayı artır
+                currentRecipeNumber++;
             }
             StartProcessingIfNotRunning();
         }
-
     }
 }

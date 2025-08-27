@@ -343,6 +343,116 @@ namespace TekstilScada.Services
 
             return OperateResult.CreateSuccessResult(recipe);
         }
+        public async Task<OperateResult<Dictionary<int, string>>> ReadRecipeNamesFromPlcAsync()
+
+        {
+
+            var recipeNames = new Dictionary<int, string>();
+
+            try
+
+            {
+
+                // Reçete isimleri D3212-D3812 arasında, her bir isim 6 word (12 byte)
+
+                const int startAddress = 3212;
+
+                const int wordsPerName = 6;
+
+                const int numRecipes = 99;
+
+                const int totalWords = numRecipes * wordsPerName;
+
+
+
+
+
+
+
+                var readResult = await Task.Run(() => _plcClient.ReadInt16(startAddress.ToString(), (ushort)totalWords));
+
+                await Task.Delay(1000);
+
+                if (!readResult.IsSuccess)
+
+                {
+
+                    return OperateResult.CreateFailedResult<Dictionary<int, string>>(readResult);
+
+                }
+
+
+
+                byte[] nameBytes = new byte[wordsPerName * 2];
+
+                var data = readResult.Content;
+
+
+
+                for (int i = 0; i < numRecipes; i++)
+
+                {
+
+                    short[] nameWords = new short[wordsPerName];
+
+                    Array.Copy(data, i * wordsPerName, nameWords, 0, wordsPerName);
+
+                    Buffer.BlockCopy(nameWords, 0, nameBytes, 0, nameBytes.Length);
+
+                    string name = Encoding.ASCII.GetString(nameBytes).Trim('�', ' ');
+
+
+
+                    if (!string.IsNullOrEmpty(name))
+
+                    {
+
+                        recipeNames.Add(i + 1, name);
+
+                    }
+
+                }
+
+                return OperateResult.CreateSuccessResult(recipeNames);
+
+            }
+
+            catch (Exception ex)
+
+            {
+
+                return new OperateResult<Dictionary<int, string>>($"Reçete isimleri okunurken hata: {ex.Message}");
+
+            }
+
+        }
+        public async Task<OperateResult> WriteRecipeNameAsync(int recipeNumber, string recipeName)
+        {
+            try
+            {
+                // Reçete isimleri D3212'den başlar, her isim 6 word (12 byte)
+                const int startAddress = 3212;
+                const int wordsPerName = 6;
+
+                // PLC adresini hesapla (1'den başlayan reçete numarası için)
+                int currentAddress = startAddress + (recipeNumber - 1) * wordsPerName;
+
+                // Reçete ismini 12 byte (6 word) uzunluğunda bir byte dizisine dönüştür.
+                // Fazla uzunsa kes, kısaysa null karakterlerle tamamla.
+                byte[] dataToWrite = new byte[wordsPerName * 2];
+                byte[] nameBytes = Encoding.ASCII.GetBytes(recipeName);
+                Buffer.BlockCopy(nameBytes, 0, dataToWrite, 0, Math.Min(nameBytes.Length, dataToWrite.Length));
+
+                // PLC'ye yazma işlemini başlat.
+                var writeResult = await Task.Run(() => _plcClient.Write(currentAddress.ToString(), dataToWrite));
+
+                return writeResult;
+            }
+            catch (Exception ex)
+            {
+                return new OperateResult($"Reçete adı yazılırken hata oluştu: {ex.Message}");
+            }
+        }
         public async Task<OperateResult<List<PlcOperator>>> ReadPlcOperatorsAsync()
         {
             // DEĞİŞİKLİK: Modbus adres kullanılıyor

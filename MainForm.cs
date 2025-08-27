@@ -34,7 +34,7 @@ namespace TekstilScada
         private readonly Raporlar_Control _raporlarView;
         private readonly LiveEventPopup_Form _liveEventPopup;
         private readonly GenelBakis_Control _genelBakisView;
-
+        private readonly FtpTransferService _ftpTransferService; // YENÝ: FTP transfer servisi eklendi
         private VncViewer_Form _activeVncViewerForm = null;
 
         public MainForm()
@@ -52,13 +52,14 @@ namespace TekstilScada
             _dashboardRepository = new DashboardRepository(_recipeRepository);
             _costRepository = new CostRepository(); // YENÝ: Nesneyi oluþturun
             _prosesIzlemeView = new ProsesÝzleme_Control();
-            _prosesKontrolView = new ProsesKontrol_Control();
+           _prosesKontrolView = new ProsesKontrol_Control();
             _ayarlarView = new Ayarlar_Control();
             _makineDetayView = new MakineDetay_Control();
             _raporlarView = new Raporlar_Control();
             _liveEventPopup = new LiveEventPopup_Form();
             _genelBakisView = new GenelBakis_Control();
-
+            _ftpTransferService = new FtpTransferService(_pollingService);
+            //_prosesKontrolView = new ProsesKontrol_Control(_ftpTransferService);
             // Olay abonelikleri (Events)
             LanguageManager.LanguageChanged += LanguageManager_LanguageChanged;
             _ayarlarView.MachineListChanged += OnMachineListChanged;
@@ -103,6 +104,7 @@ namespace TekstilScada
             // Kontrolleri en güncel verilerle baþlat
             _prosesIzlemeView.InitializeView(machines, _pollingService);
             _prosesKontrolView.InitializeControl(_recipeRepository, _machineRepository, plcManagers, _pollingService);
+
             _ayarlarView.InitializeControl(_machineRepository, plcManagers);
             // GÜNCELLENDÝ: CostRepository parametresini ekleyin
             _raporlarView.InitializeControl(_machineRepository, _alarmRepository, _productionRepository, _dashboardRepository, _processLogRepository, _recipeRepository, _costRepository);

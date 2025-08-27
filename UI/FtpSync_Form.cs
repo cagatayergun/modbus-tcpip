@@ -97,57 +97,51 @@ namespace TekstilScada.UI
             {
                 lstHmiRecipes.DataSource = null;
                 btnReceive.Enabled = false;
-                ClearPreview(); // Ön izlemeyi temizle
+                ClearPreview();
                 return;
             }
 
             btnReceive.Enabled = true;
 
-            if (string.IsNullOrEmpty(selectedMachine.VncAddress) || string.IsNullOrEmpty(selectedMachine.FtpUsername))
-            {
-                MessageBox.Show("Seçilen makine için FTP adresi veya kullanıcı adı tanımlanmamış.", "Eksik Bilgi");
-                lstHmiRecipes.DataSource = null;
-                return;
-            }
-
             btnRefreshHmi.Enabled = false;
-            lstHmiRecipes.DataSource = new List<string> { "Yükleniyor..." };
+            lstHmiRecipes.DataSource = new List<string> { "Reçete isimleri PLC'den okunuyor..." };
             ClearPreview();
 
             try
             {
-                var ftpService = new FtpService(selectedMachine.VncAddress, selectedMachine.FtpUsername, selectedMachine.FtpPassword);
-                var files = await ftpService.ListDirectoryAsync("/");
-
-                var recipeFiles = files
-                    .Where(f => f.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
-                    .OrderBy(f => f)
-                    .ToList();
-
-                lstHmiRecipes.DataSource = recipeFiles;
-
-                // Eğer hiç .csv dosyası bulunamazsa bilgilendirme mesajı göster
-                if (!recipeFiles.Any() && files.Any())
+                if (!_plcPollingService.GetPlcManagers().TryGetValue(selectedMachine.Id, out var plcManager))
                 {
-                    lstHmiRecipes.DataSource = new List<string> { "FTP'de .csv uzantılı reçete bulunamadı." };
+                    throw new Exception("Makine için PLC yöneticisi bulunamadı.");
                 }
-            }
-            // GÜNCELLENDİ: Daha spesifik hata yakalama
-            catch (WinSCP.SessionRemoteException scpEx)
-            {
-                // FTP bağlantı hatalarını (zaman aşımı, kimlik doğrulama vb.) özel olarak yakala.
-                string errorMessage = $"'{selectedMachine.MachineName}' makinesine bağlanılamadı.\n\n" +
-                                      "Lütfen makinenin açık, ağa bağlı ve FTP ayarlarının doğru olduğundan emin olun.\n\n" +
-                                      $"Teknik Detay: {scpEx.Message}";
-                MessageBox.Show(errorMessage, "FTP Bağlantı Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                lstHmiRecipes.DataSource = null; // Hata durumunda listeyi temizle
+
+                var readResult = await plcManager.ReadRecipeNamesFromPlcAsync();
+                if (readResult.IsSuccess)
+                {
+                    var recipeNames = readResult.Content;
+                    var displayList = new List<string>();
+                    foreach (var kvp in recipeNames)
+                    {
+                        displayList.Add($"{kvp.Key} - {kvp.Value}");
+                    }
+
+                    if (!displayList.Any())
+                    {
+                        displayList.Add("PLC'de kayıtlı reçete ismi bulunamadı.");
+                    }
+
+                    lstHmiRecipes.DataSource = displayList;
+                    lstHmiRecipes.ClearSelected(); // Clear selection after loading new data
+                }
+                else
+                {
+                    throw new Exception(readResult.Message);
+                }
             }
             catch (Exception ex)
             {
-                // Diğer tüm beklenmedik hataları yakala.
                 string errorMessage = $"Beklenmedik bir hata oluştu: {ex.Message}";
                 MessageBox.Show(errorMessage, "Genel Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                lstHmiRecipes.DataSource = null; // Hata durumunda listeyi temizle
+                lstHmiRecipes.DataSource = null;
             }
             finally
             {
@@ -260,34 +254,46 @@ namespace TekstilScada.UI
                 return;
             }
 
-            var selectedFile = lstHmiRecipes.SelectedItem as string;
-            if (string.IsNullOrEmpty(selectedFile) || !selectedFile.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
+            var selectedItem = lstHmiRecipes.SelectedItem as string;
+            if (string.IsNullOrEmpty(selectedItem))
             {
                 ClearPreview();
                 return;
             }
-            var selectedMachine = clbMachines.CheckedItems.Cast<Machine>().FirstOrDefault();
 
-            if (selectedFile == null || selectedMachine == null)
+            var selectedMachine = clbMachines.CheckedItems.Cast<Machine>().FirstOrDefault();
+            if (selectedMachine == null)
             {
                 ClearPreview();
                 return;
             }
+
+            // Extract the recipe number from the selected item string (e.g., "5 - kot siyah" -> 5)
+            var recipeNumberMatch = Regex.Match(selectedItem, @"^(\d+)\s*-");
+            if (!recipeNumberMatch.Success)
+            {
+                ClearPreview();
+                return;
+            }
+            int recipeNumber = int.Parse(recipeNumberMatch.Groups[1].Value);
+
+            // Construct the FTP filename based on the recipe number
+            string remoteFileName = $"XPR{recipeNumber:D5}.csv";
 
             tabControlMain.SelectedTab = tabPagePreview;
             pnlPreviewArea.Controls.Clear();
             lblPreviewStatus.Visible = true;
-            lblPreviewStatus.Text = $"'{selectedFile}' yükleniyor...";
+            lblPreviewStatus.Text = $"'{remoteFileName}' yükleniyor...";
 
             try
             {
                 var ftpService = new FtpService(selectedMachine.VncAddress, selectedMachine.FtpUsername, selectedMachine.FtpPassword);
-                string csvContent = await ftpService.DownloadFileAsync($"/{selectedFile}");
+                string csvContent = await ftpService.DownloadFileAsync($"/{remoteFileName}");
 
                 _previewRecipe = RecipeCsvConverter.ToRecipe(csvContent, "temp_preview");
 
-                // Reçete adını 99. adımdaki verilerden oluştur
-                string previewName = GeneratePreviewRecipeName(selectedMachine, selectedFile, _previewRecipe);
+                // Use the recipe name directly from the selected item for the preview title
+                string previewName = selectedItem;
 
                 lblPreviewStatus.Visible = false;
                 InitializeBYMakinesiEditor(previewName);

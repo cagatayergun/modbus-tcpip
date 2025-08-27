@@ -145,7 +145,7 @@ namespace TekstilScada.Services
             {
                 try
                 {
-                    Debug.WriteLine($"[PollMachineLoop] Makine {machine.Id} için döngü çalışıyor. Bağlantı durumu: {MachineDataCache[machine.Id].ConnectionState}");
+               //     Debug.WriteLine($"[PollMachineLoop] Makine {machine.Id} için döngü çalışıyor. Bağlantı durumu: {MachineDataCache[machine.Id].ConnectionState}");
                     if (!MachineDataCache.TryGetValue(machine.Id, out var status)) return;
 
                     if (status.ConnectionState != ConnectionStatus.Connected)
@@ -164,7 +164,7 @@ namespace TekstilScada.Services
 
                             newStatus.AktifAdimAdi = GetStepTypeName(newStatus.AktifAdimTipiWordu);
                             // Buraya ekleyin
-                            Debug.WriteLine($"[PollMachineLoop] Makine {machine.Id} için okuma başarılı. Adım No: {newStatus.AktifAdimNo}, Reçete Modu: {newStatus.IsInRecipeMode}");
+                        //    Debug.WriteLine($"[PollMachineLoop] Makine {machine.Id} için okuma başarılı. Adım No: {newStatus.AktifAdimNo}, Reçete Modu: {newStatus.IsInRecipeMode}");
 
                             var analyzer = _liveAnalyzers.TryGetValue(machine.Id, out var a) ? a : null;
                             if (newStatus.IsInRecipeMode && analyzer != null && _batchTotalTheoreticalTimes.TryGetValue(machine.Id, out double totalTheoreticalTime) && totalTheoreticalTime > 0)
@@ -219,7 +219,7 @@ namespace TekstilScada.Services
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Makine {machine.Id} için polling döngüsünde hata: {ex.Message}");
+                   // Console.WriteLine($"Makine {machine.Id} için polling döngüsünde hata: {ex.Message}");
                 }
 
                 await Task.Delay(_pollingIntervalMs, token);
@@ -242,7 +242,7 @@ namespace TekstilScada.Services
         {
             _currentBatches.TryGetValue(machineId, out string lastTrackedBatchId);
 
-            Debug.WriteLine($"[CheckAndLogBatchStartAndEnd] Makine {machineId} için kontrol. Mevcut Batch: '{currentStatus.BatchNumarasi}', Son Batch: '{lastTrackedBatchId}'");
+           // Debug.WriteLine($"[CheckAndLogBatchStartAndEnd] Makine {machineId} için kontrol. Mevcut Batch: '{currentStatus.BatchNumarasi}', Son Batch: '{lastTrackedBatchId}'");
 
             // YENİ BİR BATCH BAŞLADIĞINDA
             if (currentStatus.IsInRecipeMode && !string.IsNullOrEmpty(currentStatus.BatchNumarasi) && currentStatus.BatchNumarasi != lastTrackedBatchId)
@@ -257,7 +257,7 @@ namespace TekstilScada.Services
                         var lastStep = analyzer.GetLastCompletedStep();
                         if (lastStep != null && lastStep.WorkingTime == "İşleniyor...")
                         {
-                            Debug.WriteLine($"[CheckAndLogBatchStartAndEnd] Batch sonlanırken son adım ({lastStep.StepNumber}) kaydediliyor.");
+                         //   Debug.WriteLine($"[CheckAndLogBatchStartAndEnd] Batch sonlanırken son adım ({lastStep.StepNumber}) kaydediliyor.");
                             analyzer.FinalizeStep(lastStep.StepNumber, lastTrackedBatchId, machineId);
                         }
                     }
@@ -288,11 +288,11 @@ namespace TekstilScada.Services
                         _batchTotalTheoreticalTimes[machineId] = totalSeconds;
                         _batchStartTimes[machineId] = DateTime.Now;
                         _batchNonProductiveSeconds[machineId] = 0;
-                        Debug.WriteLine($"[CheckAndLogBatchStartAndEnd] YENİ BATCH BAŞLADI: Batch No: '{currentStatus.BatchNumarasi}'. LiveStepAnalyzer PLC'den okunan reçete ile oluşturuldu.");
+                      //  Debug.WriteLine($"[CheckAndLogBatchStartAndEnd] YENİ BATCH BAŞLADI: Batch No: '{currentStatus.BatchNumarasi}'. LiveStepAnalyzer PLC'den okunan reçete ile oluşturuldu.");
                     }
                     else
                     {
-                        Debug.WriteLine($"[CheckAndLogBatchStartAndEnd] HATA: Reçete PLC'den okunamadı. LiveStepAnalyzer oluşturulamadı. Hata: {recipeReadResult.Message}");
+                    //    Debug.WriteLine($"[CheckAndLogBatchStartAndEnd] HATA: Reçete PLC'den okunamadı. LiveStepAnalyzer oluşturulamadı. Hata: {recipeReadResult.Message}");
                     }
                 }
             }
@@ -360,7 +360,7 @@ namespace TekstilScada.Services
         private void ProcessLiveStepAnalysis(int machineId, FullMachineStatus currentStatus)
         {
             // Buraya ekleyin
-            Debug.WriteLine($"[ProcessLiveStepAnalysis] Metot çağrıldı. Makine: {machineId}, Reçete Modu: {currentStatus.IsInRecipeMode}");
+         //   Debug.WriteLine($"[ProcessLiveStepAnalysis] Metot çağrıldı. Makine: {machineId}, Reçete Modu: {currentStatus.IsInRecipeMode}");
 
             if (!currentStatus.IsInRecipeMode || string.IsNullOrEmpty(currentStatus.BatchNumarasi)) return;
             if (_liveAnalyzers.TryGetValue(machineId, out var analyzer))
