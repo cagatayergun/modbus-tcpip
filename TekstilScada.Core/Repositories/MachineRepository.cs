@@ -12,7 +12,7 @@ namespace TekstilScada.Repositories
     public class MachineRepository
     {
         private readonly string _connectionString = AppConfig.ConnectionString;
-       
+
 
         public List<Machine> GetAllMachines()
         {
@@ -109,8 +109,8 @@ namespace TekstilScada.Repositories
             using (var connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
-                // GÜNCELLENDİ: FTP alanları sorguya eklendi
-                string query = "INSERT INTO machines (MachineUserDefinedId, MachineName, IpAddress, Port, MachineType, IsEnabled, VncAddress, VncPassword, FtpUsername, FtpPassword) VALUES (@MachineUserDefinedId, @MachineName, @IpAddress, @Port, @MachineType, @IsEnabled, @VncAddress, @VncPassword, @FtpUsername, @FtpPassword, @MachineSubType);";
+                // DÜZELTME: MachineSubType sütunu INSERT sorgusuna eklendi.
+                string query = "INSERT INTO machines (MachineUserDefinedId, MachineName, IpAddress, Port, MachineType, IsEnabled, VncAddress, VncPassword, FtpUsername, FtpPassword, MachineSubType) VALUES (@MachineUserDefinedId, @MachineName, @IpAddress, @Port, @MachineType, @IsEnabled, @VncAddress, @VncPassword, @FtpUsername, @FtpPassword, @MachineSubType);";
                 var cmd = new MySqlCommand(query, connection);
                 cmd.Parameters.AddWithValue("@MachineUserDefinedId", machine.MachineUserDefinedId);
                 cmd.Parameters.AddWithValue("@MachineName", machine.MachineName);

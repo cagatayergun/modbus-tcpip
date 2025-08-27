@@ -26,6 +26,12 @@ namespace TekstilScada.UI.Controls
 
             // Daha akıcı çizim için Double Buffering
             this.SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            // YENİ DÜZENLEME: Tüm etiketlerin metin rengini siyah yapıyoruz.
+            lblMachineName.ForeColor = Color.Black;
+            lblRecipeName.ForeColor = Color.Black;
+            lblBatchId.ForeColor = Color.Black;
+            lblTemperature.ForeColor = Color.Black;
+            gaugeRpm.ForeColor = Color.Black;
         }
 
         public void UpdateData(FullMachineStatus status, List<ProcessDataPoint> trendData)

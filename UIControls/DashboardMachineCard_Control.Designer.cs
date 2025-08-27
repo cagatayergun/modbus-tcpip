@@ -32,7 +32,7 @@ namespace TekstilScada.UI.Controls
             // 
             lblMachineName.AutoSize = true;
             lblMachineName.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            lblMachineName.Location = new Point(23, 6);
+            lblMachineName.Location = new Point(23, 5);
             lblMachineName.Margin = new Padding(4, 0, 4, 0);
             lblMachineName.Name = "lblMachineName";
             lblMachineName.Size = new Size(97, 21);
@@ -42,35 +42,35 @@ namespace TekstilScada.UI.Controls
             // lblStatus
             // 
             lblStatus.AutoSize = true;
-            lblStatus.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold);
-            lblStatus.Location = new Point(24, 32);
+            lblStatus.Font = new Font("Arial Black", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 162);
+            lblStatus.Location = new Point(201, 34);
             lblStatus.Margin = new Padding(4, 0, 4, 0);
             lblStatus.Name = "lblStatus";
-            lblStatus.Size = new Size(69, 17);
+            lblStatus.Size = new Size(80, 18);
             lblStatus.TabIndex = 2;
             lblStatus.Text = "DURUYOR";
             // 
             // lblRecipeName
             // 
-            lblRecipeName.Font = new Font("Segoe UI", 8.25F);
-            lblRecipeName.Location = new Point(152, 9);
+            lblRecipeName.Font = new Font("Segoe UI Black", 8.25F, FontStyle.Bold, GraphicsUnit.Point, 162);
+            lblRecipeName.Location = new Point(23, 33);
             lblRecipeName.Margin = new Padding(4, 0, 4, 0);
             lblRecipeName.Name = "lblRecipeName";
             lblRecipeName.Size = new Size(131, 21);
             lblRecipeName.TabIndex = 4;
             lblRecipeName.Text = "Reçete: -";
-            lblRecipeName.TextAlign = ContentAlignment.MiddleRight;
+            lblRecipeName.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // lblBatchId
             // 
-            lblBatchId.Font = new Font("Segoe UI", 8.25F);
-            lblBatchId.Location = new Point(152, 31);
+            lblBatchId.Font = new Font("Segoe UI Black", 8.25F, FontStyle.Bold, GraphicsUnit.Point, 162);
+            lblBatchId.Location = new Point(23, 60);
             lblBatchId.Margin = new Padding(4, 0, 4, 0);
             lblBatchId.Name = "lblBatchId";
             lblBatchId.Size = new Size(131, 21);
             lblBatchId.TabIndex = 8;
             lblBatchId.Text = "Parti: -";
-            lblBatchId.TextAlign = ContentAlignment.MiddleRight;
+            lblBatchId.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // pnlSparkline
             // 
@@ -83,12 +83,12 @@ namespace TekstilScada.UI.Controls
             // 
             // lblTemperature
             // 
-            lblTemperature.Font = new Font("Segoe UI Semibold", 20F, FontStyle.Bold);
+            lblTemperature.Font = new Font("Arial Black", 20.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblTemperature.ForeColor = Color.FromArgb(64, 64, 64);
-            lblTemperature.Location = new Point(22, 66);
+            lblTemperature.Location = new Point(21, 87);
             lblTemperature.Margin = new Padding(4, 0, 4, 0);
             lblTemperature.Name = "lblTemperature";
-            lblTemperature.Size = new Size(130, 51);
+            lblTemperature.Size = new Size(130, 34);
             lblTemperature.TabIndex = 11;
             lblTemperature.Text = "25 °C";
             // 
@@ -130,7 +130,7 @@ namespace TekstilScada.UI.Controls
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.White;
+            BackColor = SystemColors.Info;
             BorderStyle = BorderStyle.FixedSingle;
             Controls.Add(gaugeRpm);
             Controls.Add(lblTemperature);

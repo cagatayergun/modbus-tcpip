@@ -122,10 +122,30 @@ namespace TekstilScada.UI
                     .OrderBy(f => f)
                     .ToList();
 
-                lstHmiRecipes.DataSource = recipeFiles;
+                // YENİ KOD: Dosyaları oku ve reçete adlarını al
+                var displayList = new List<object>();
+                foreach (var file in recipeFiles)
+                {
+                    try
+                    {
+                        string csvContent = await ftpService.DownloadFileAsync($"/{file}");
+                        var tempRecipe = RecipeCsvConverter.ToRecipe(csvContent, file);
+                        displayList.Add(new { FileName = file, DisplayName = $"{file} - {tempRecipe.RecipeName}" });
+                    }
+                    catch
+                    {
+                        // Bir dosya okunamasa bile diğerlerini listeye ekle
+                        displayList.Add(new { FileName = file, DisplayName = $"{file} - (Hata)" });
+                    }
+                }
 
-                // Eğer hiç .csv dosyası bulunamazsa bilgilendirme mesajı göster
-                if (!recipeFiles.Any() && files.Any())
+                if (displayList.Any())
+                {
+                    lstHmiRecipes.DisplayMember = "DisplayName";
+                    lstHmiRecipes.ValueMember = "FileName";
+                    lstHmiRecipes.DataSource = displayList;
+                }
+                else if (files.Any())
                 {
                     lstHmiRecipes.DataSource = new List<string> { "FTP'de .csv uzantılı reçete bulunamadı." };
                 }
@@ -258,12 +278,15 @@ namespace TekstilScada.UI
                 return;
             }
 
-            var selectedFile = lstHmiRecipes.SelectedItem as string;
-            if (string.IsNullOrEmpty(selectedFile) || !selectedFile.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
+            var selectedItem = lstHmiRecipes.SelectedItem as dynamic;
+            if (selectedItem == null)
             {
                 ClearPreview();
                 return;
             }
+            string selectedFile = selectedItem.FileName;
+
+
             var selectedMachine = clbMachines.CheckedItems.Cast<Machine>().FirstOrDefault();
 
             if (selectedFile == null || selectedMachine == null)
@@ -431,7 +454,7 @@ namespace TekstilScada.UI
                 mainEditor.SetReadOnly(true);
                 mainEditor.Dock = DockStyle.Top;
                 mainEditor.AutoSize = true;
-                pnlStepDetails.Controls.Add(mainEditor);
+                pnlPreviewArea.Controls.Add(mainEditor);
             }
         }
 

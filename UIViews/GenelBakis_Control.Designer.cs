@@ -175,22 +175,22 @@
             // 
             this.formsPlotHourlySteam.DisplayScale = 1F;
             this.formsPlotHourlySteam.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.formsPlotHourlySteam.Location = new System.Drawing.Point(3, 20);
-            this.formsPlotHourlySteam.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.formsPlotHourlySteam.Location = new Point(3, 20);
+            this.formsPlotHourlySteam.Margin = new Padding(3, 2, 3, 2);
             this.formsPlotHourlySteam.Name = "formsPlotHourlySteam";
-            this.formsPlotHourlySteam.Size = new System.Drawing.Size(288, 76);
+            this.formsPlotHourlySteam.Size = new Size(288, 76);
             this.formsPlotHourlySteam.TabIndex = 0;
             // 
             // gbHourlyConsumptionWater
             // 
             this.gbHourlyConsumptionWater.Controls.Add(this.formsPlotHourlyWater);
-            this.gbHourlyConsumptionWater.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gbHourlyConsumptionWater.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold);
-            this.gbHourlyConsumptionWater.Location = new System.Drawing.Point(3, 103);
-            this.gbHourlyConsumptionWater.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.gbHourlyConsumptionWater.Dock = DockStyle.Fill;
+            this.gbHourlyConsumptionWater.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
+            this.gbHourlyConsumptionWater.Location = new Point(3, 103);
+            this.gbHourlyConsumptionWater.Margin = new Padding(3, 2, 3, 2);
             this.gbHourlyConsumptionWater.Name = "gbHourlyConsumptionWater";
-            this.gbHourlyConsumptionWater.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.gbHourlyConsumptionWater.Size = new System.Drawing.Size(294, 98);
+            this.gbHourlyConsumptionWater.Padding = new Padding(3, 2, 3, 2);
+            this.gbHourlyConsumptionWater.Size = new Size(294, 98);
             this.gbHourlyConsumptionWater.TabIndex = 1;
             this.gbHourlyConsumptionWater.TabStop = false;
             this.gbHourlyConsumptionWater.Text = "Saatlik Su Tüketimi";
@@ -198,23 +198,23 @@
             // formsPlotHourlyWater
             // 
             this.formsPlotHourlyWater.DisplayScale = 1F;
-            this.formsPlotHourlyWater.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.formsPlotHourlyWater.Location = new System.Drawing.Point(3, 20);
-            this.formsPlotHourlyWater.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.formsPlotHourlyWater.Dock = DockStyle.Fill;
+            this.formsPlotHourlyWater.Location = new Point(3, 20);
+            this.formsPlotHourlyWater.Margin = new Padding(3, 2, 3, 2);
             this.formsPlotHourlyWater.Name = "formsPlotHourlyWater";
-            this.formsPlotHourlyWater.Size = new System.Drawing.Size(288, 76);
+            this.formsPlotHourlyWater.Size = new Size(288, 76);
             this.formsPlotHourlyWater.TabIndex = 0;
             // 
             // gbHourlyConsumption
             // 
             this.gbHourlyConsumption.Controls.Add(this.formsPlotHourly);
-            this.gbHourlyConsumption.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gbHourlyConsumption.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold);
-            this.gbHourlyConsumption.Location = new System.Drawing.Point(3, 3);
-            this.gbHourlyConsumption.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.gbHourlyConsumption.Dock = DockStyle.Fill;
+            this.gbHourlyConsumption.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
+            this.gbHourlyConsumption.Location = new Point(3, 3);
+            this.gbHourlyConsumption.Margin = new Padding(3, 2, 3, 2);
             this.gbHourlyConsumption.Name = "gbHourlyConsumption";
-            this.gbHourlyConsumption.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.gbHourlyConsumption.Size = new System.Drawing.Size(294, 98);
+            this.gbHourlyConsumption.Padding = new Padding(3, 2, 3, 2);
+            this.gbHourlyConsumption.Size = new Size(294, 98);
             this.gbHourlyConsumption.TabIndex = 0;
             this.gbHourlyConsumption.TabStop = false;
             this.gbHourlyConsumption.Text = "Saatlik Elektrik Tüketimi";
@@ -222,24 +222,24 @@
             // formsPlotHourly
             // 
             this.formsPlotHourly.DisplayScale = 1F;
-            this.formsPlotHourly.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.formsPlotHourly.Location = new System.Drawing.Point(3, 20);
-            this.formsPlotHourly.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.formsPlotHourly.Dock = DockStyle.Fill;
+            this.formsPlotHourly.Location = new Point(3, 20);
+            this.formsPlotHourly.Margin = new Padding(3, 2, 3, 2);
             this.formsPlotHourly.Name = "formsPlotHourly";
-            this.formsPlotHourly.Size = new System.Drawing.Size(288, 76);
+            this.formsPlotHourly.Size = new Size(288, 76);
             this.formsPlotHourly.TabIndex = 0;
             // 
             // YENİ KOD BAŞLANGICI
             // gbHourlyOee
             // 
             this.gbHourlyOee.Controls.Add(this.formsPlotHourlyOee);
-            this.gbHourlyOee.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gbHourlyOee.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold);
-            this.gbHourlyOee.Location = new System.Drawing.Point(3, 403);
-            this.gbHourlyOee.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.gbHourlyOee.Dock = DockStyle.Fill;
+            this.gbHourlyOee.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
+            this.gbHourlyOee.Location = new Point(3, 403);
+            this.gbHourlyOee.Margin = new Padding(3, 2, 3, 2);
             this.gbHourlyOee.Name = "gbHourlyOee";
-            this.gbHourlyOee.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.gbHourlyOee.Size = new System.Drawing.Size(294, 100);
+            this.gbHourlyOee.Padding = new Padding(3, 2, 3, 2);
+            this.gbHourlyOee.Size = new Size(294, 100);
             this.gbHourlyOee.TabIndex = 4;
             this.gbHourlyOee.TabStop = false;
             this.gbHourlyOee.Text = "Son 24 Saatin OEE Ortalaması";
@@ -247,25 +247,25 @@
             // formsPlotHourlyOee
             // 
             this.formsPlotHourlyOee.DisplayScale = 1F;
-            this.formsPlotHourlyOee.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.formsPlotHourlyOee.Location = new System.Drawing.Point(3, 20);
-            this.formsPlotHourlyOee.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.formsPlotHourlyOee.Dock = DockStyle.Fill;
+            this.formsPlotHourlyOee.Location = new Point(3, 20);
+            this.formsPlotHourlyOee.Margin = new Padding(3, 2, 3, 2);
             this.formsPlotHourlyOee.Name = "formsPlotHourlyOee";
-            this.formsPlotHourlyOee.Size = new System.Drawing.Size(288, 78);
+            this.formsPlotHourlyOee.Size = new Size(288, 78);
             this.formsPlotHourlyOee.TabIndex = 0;
             // YENİ KOD BİTİŞİ
             // 
             // GenelBakis_Control
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleDimensions = new SizeF(7F, 15F);
+            this.AutoScaleMode = AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLight;
             this.Controls.Add(this.pnlMain);
             this.Controls.Add(this.pnlHeader);
-            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Margin = new Padding(9, 8, 9, 8);
             this.Name = "GenelBakis_Control";
             this.Padding = new System.Windows.Forms.Padding(9, 8, 9, 8);
-            this.Size = new System.Drawing.Size(1050, 600);
+            this.Size = new Size(1050, 600);
             this.Load += new System.EventHandler(this.GenelBakis_Control_Load);
             this.pnlHeader.ResumeLayout(false);
             this.pnlMain.ResumeLayout(false);
