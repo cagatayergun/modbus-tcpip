@@ -35,8 +35,8 @@ namespace TekstilScada.Models
         // YENİ: Reçete Adı özelliği eklendi.
         public string RecipeName { get; set; }
 
-
-
+        
+            public int nameok_status { get; set; }     // D7764
         // Aktif Adım Bilgileri
         public short AktifAdimNo { get; set; }
         public string AktifAdimAdi { get; set; }

@@ -29,304 +29,313 @@ namespace TekstilScada.UI.Controls
         /// </summary>
         private void InitializeComponent()
         {
-            this.pnlMain = new System.Windows.Forms.Panel();
-            this.lblMachineIdValue = new System.Windows.Forms.Label();
-            this.lblMachineNameValue = new System.Windows.Forms.Label();
-            this.lblStepValue = new System.Windows.Forms.Label();
-            this.lblOperatorValue = new System.Windows.Forms.Label();
-            this.lblRecipeNameValue = new System.Windows.Forms.Label();
-            this.lblMachineIdTitle = new System.Windows.Forms.Label();
-            this.lblMachineNameTitle = new System.Windows.Forms.Label();
-            this.lblStepTitle = new System.Windows.Forms.Label();
-            this.lblOperatorTitle = new System.Windows.Forms.Label();
-            this.lblRecipeNameTitle = new System.Windows.Forms.Label();
-            this.lblPercentage = new System.Windows.Forms.Label();
-            this.progressBar = new System.Windows.Forms.ProgressBar();
-            this.lblProcessing = new System.Windows.Forms.Label();
-            this.pnlIcons = new System.Windows.Forms.Panel();
-            this.picConnection = new System.Windows.Forms.PictureBox();
-            this.btnInfo = new System.Windows.Forms.Button();
-            this.picAlarm = new System.Windows.Forms.PictureBox();
-            this.picPause = new System.Windows.Forms.PictureBox();
-            this.picPlay = new System.Windows.Forms.PictureBox();
-            this.btnVnc = new System.Windows.Forms.Button();
-            this.lblMachineNumber = new System.Windows.Forms.Label();
-            this.pnlMain.SuspendLayout();
-            this.pnlIcons.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picConnection)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picAlarm)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picPause)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picPlay)).BeginInit();
-            this.SuspendLayout();
+            pnlMain = new Panel();
+            lblMachineIdValue = new Label();
+            lblMachineNameValue = new Label();
+            lblStepValue = new Label();
+            lblOperatorValue = new Label();
+            lblRecipeNameValue = new Label();
+            lblMachineIdTitle = new Label();
+            lblMachineNameTitle = new Label();
+            lblStepTitle = new Label();
+            lblOperatorTitle = new Label();
+            lblRecipeNameTitle = new Label();
+            lblPercentage = new Label();
+            progressBar = new ProgressBar();
+            lblProcessing = new Label();
+            pnlIcons = new Panel();
+            picConnection = new PictureBox();
+            btnInfo = new Button();
+            picAlarm = new PictureBox();
+            picPause = new PictureBox();
+            picPlay = new PictureBox();
+            btnVnc = new Button();
+            lblMachineNumber = new Label();
+            pnlMain.SuspendLayout();
+            pnlIcons.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picConnection).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picAlarm).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picPause).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picPlay).BeginInit();
+            SuspendLayout();
             // 
             // pnlMain
             // 
-            this.pnlMain.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(223)))), ((int)(((byte)(230)))), ((int)(((byte)(233)))));
-            this.pnlMain.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pnlMain.Controls.Add(this.lblMachineIdValue);
-            this.pnlMain.Controls.Add(this.lblMachineNameValue);
-            this.pnlMain.Controls.Add(this.lblStepValue);
-            this.pnlMain.Controls.Add(this.lblOperatorValue);
-            this.pnlMain.Controls.Add(this.lblRecipeNameValue);
-            this.pnlMain.Controls.Add(this.lblMachineIdTitle);
-            this.pnlMain.Controls.Add(this.lblMachineNameTitle);
-            this.pnlMain.Controls.Add(this.lblStepTitle);
-            this.pnlMain.Controls.Add(this.lblOperatorTitle);
-            this.pnlMain.Controls.Add(this.lblRecipeNameTitle);
-            this.pnlMain.Controls.Add(this.lblPercentage);
-            this.pnlMain.Controls.Add(this.progressBar);
-            this.pnlMain.Controls.Add(this.lblProcessing);
-            this.pnlMain.Controls.Add(this.pnlIcons);
-            this.pnlMain.Controls.Add(this.lblMachineNumber);
-            this.pnlMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlMain.Location = new System.Drawing.Point(0, 0);
-            this.pnlMain.Name = "pnlMain";
-            this.pnlMain.Size = new System.Drawing.Size(320, 240);
-            this.pnlMain.TabIndex = 0;
+            pnlMain.BackColor = Color.FromArgb(223, 230, 233);
+            pnlMain.BorderStyle = BorderStyle.FixedSingle;
+            pnlMain.Controls.Add(lblMachineIdValue);
+            pnlMain.Controls.Add(lblMachineNameValue);
+            pnlMain.Controls.Add(lblStepValue);
+            pnlMain.Controls.Add(lblOperatorValue);
+            pnlMain.Controls.Add(lblRecipeNameValue);
+            pnlMain.Controls.Add(lblMachineIdTitle);
+            pnlMain.Controls.Add(lblMachineNameTitle);
+            pnlMain.Controls.Add(lblStepTitle);
+            pnlMain.Controls.Add(lblOperatorTitle);
+            pnlMain.Controls.Add(lblRecipeNameTitle);
+            pnlMain.Controls.Add(lblPercentage);
+            pnlMain.Controls.Add(progressBar);
+            pnlMain.Controls.Add(lblProcessing);
+            pnlMain.Controls.Add(pnlIcons);
+            pnlMain.Controls.Add(lblMachineNumber);
+            pnlMain.Dock = DockStyle.Fill;
+            pnlMain.Location = new Point(0, 0);
+            pnlMain.Margin = new Padding(3, 2, 3, 2);
+            pnlMain.Name = "pnlMain";
+            pnlMain.Size = new Size(280, 180);
+            pnlMain.TabIndex = 0;
             // 
             // lblMachineIdValue
             // 
-            this.lblMachineIdValue.BackColor = System.Drawing.Color.White;
-            this.lblMachineIdValue.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lblMachineIdValue.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblMachineIdValue.Location = new System.Drawing.Point(120, 200);
-            this.lblMachineIdValue.Name = "lblMachineIdValue";
-            this.lblMachineIdValue.Size = new System.Drawing.Size(180, 25);
-            this.lblMachineIdValue.TabIndex = 14;
-            this.lblMachineIdValue.Text = "---";
-            this.lblMachineIdValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            lblMachineIdValue.BackColor = Color.White;
+            lblMachineIdValue.BorderStyle = BorderStyle.FixedSingle;
+            lblMachineIdValue.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+            lblMachineIdValue.Location = new Point(105, 150);
+            lblMachineIdValue.Name = "lblMachineIdValue";
+            lblMachineIdValue.Size = new Size(158, 19);
+            lblMachineIdValue.TabIndex = 14;
+            lblMachineIdValue.Text = "---";
+            lblMachineIdValue.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // lblMachineNameValue
             // 
-            this.lblMachineNameValue.BackColor = System.Drawing.Color.White;
-            this.lblMachineNameValue.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lblMachineNameValue.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblMachineNameValue.Location = new System.Drawing.Point(120, 170);
-            this.lblMachineNameValue.Name = "lblMachineNameValue";
-            this.lblMachineNameValue.Size = new System.Drawing.Size(180, 25);
-            this.lblMachineNameValue.TabIndex = 13;
-            this.lblMachineNameValue.Text = "---";
-            this.lblMachineNameValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            lblMachineNameValue.BackColor = Color.White;
+            lblMachineNameValue.BorderStyle = BorderStyle.FixedSingle;
+            lblMachineNameValue.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+            lblMachineNameValue.Location = new Point(105, 128);
+            lblMachineNameValue.Name = "lblMachineNameValue";
+            lblMachineNameValue.Size = new Size(158, 19);
+            lblMachineNameValue.TabIndex = 13;
+            lblMachineNameValue.Text = "---";
+            lblMachineNameValue.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // lblStepValue
             // 
-            this.lblStepValue.BackColor = System.Drawing.Color.White;
-            this.lblStepValue.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lblStepValue.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblStepValue.Location = new System.Drawing.Point(120, 140);
-            this.lblStepValue.Name = "lblStepValue";
-            this.lblStepValue.Size = new System.Drawing.Size(180, 25);
-            this.lblStepValue.TabIndex = 12;
-            this.lblStepValue.Text = "---";
-            this.lblStepValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            lblStepValue.BackColor = Color.White;
+            lblStepValue.BorderStyle = BorderStyle.FixedSingle;
+            lblStepValue.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+            lblStepValue.Location = new Point(105, 105);
+            lblStepValue.Name = "lblStepValue";
+            lblStepValue.Size = new Size(158, 19);
+            lblStepValue.TabIndex = 12;
+            lblStepValue.Text = "---";
+            lblStepValue.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // lblOperatorValue
             // 
-            this.lblOperatorValue.BackColor = System.Drawing.Color.White;
-            this.lblOperatorValue.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lblOperatorValue.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblOperatorValue.Location = new System.Drawing.Point(120, 110);
-            this.lblOperatorValue.Name = "lblOperatorValue";
-            this.lblOperatorValue.Size = new System.Drawing.Size(180, 25);
-            this.lblOperatorValue.TabIndex = 11;
-            this.lblOperatorValue.Text = "---";
-            this.lblOperatorValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            lblOperatorValue.BackColor = Color.White;
+            lblOperatorValue.BorderStyle = BorderStyle.FixedSingle;
+            lblOperatorValue.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+            lblOperatorValue.Location = new Point(105, 82);
+            lblOperatorValue.Name = "lblOperatorValue";
+            lblOperatorValue.Size = new Size(158, 19);
+            lblOperatorValue.TabIndex = 11;
+            lblOperatorValue.Text = "---";
+            lblOperatorValue.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // lblRecipeNameValue
             // 
-            this.lblRecipeNameValue.BackColor = System.Drawing.Color.White;
-            this.lblRecipeNameValue.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lblRecipeNameValue.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblRecipeNameValue.Location = new System.Drawing.Point(120, 80);
-            this.lblRecipeNameValue.Name = "lblRecipeNameValue";
-            this.lblRecipeNameValue.Size = new System.Drawing.Size(180, 25);
-            this.lblRecipeNameValue.TabIndex = 10;
-            this.lblRecipeNameValue.Text = "---";
-            this.lblRecipeNameValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            lblRecipeNameValue.BackColor = Color.White;
+            lblRecipeNameValue.BorderStyle = BorderStyle.FixedSingle;
+            lblRecipeNameValue.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+            lblRecipeNameValue.Location = new Point(105, 60);
+            lblRecipeNameValue.Name = "lblRecipeNameValue";
+            lblRecipeNameValue.Size = new Size(158, 19);
+            lblRecipeNameValue.TabIndex = 10;
+            lblRecipeNameValue.Text = "---";
+            lblRecipeNameValue.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // lblMachineIdTitle
             // 
-            this.lblMachineIdTitle.AutoSize = true;
-            this.lblMachineIdTitle.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblMachineIdTitle.Location = new System.Drawing.Point(15, 202);
-            this.lblMachineIdTitle.Name = "lblMachineIdTitle";
-            this.lblMachineIdTitle.Size = new System.Drawing.Size(89, 20);
-            this.lblMachineIdTitle.TabIndex = 9;
-            this.lblMachineIdTitle.Text = "MAKİNA ID:";
+            lblMachineIdTitle.AutoSize = true;
+            lblMachineIdTitle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblMachineIdTitle.Location = new Point(13, 152);
+            lblMachineIdTitle.Name = "lblMachineIdTitle";
+            lblMachineIdTitle.Size = new Size(74, 15);
+            lblMachineIdTitle.TabIndex = 9;
+            lblMachineIdTitle.Text = "MAKİNA ID:";
             // 
             // lblMachineNameTitle
             // 
-            this.lblMachineNameTitle.AutoSize = true;
-            this.lblMachineNameTitle.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblMachineNameTitle.Location = new System.Drawing.Point(15, 172);
-            this.lblMachineNameTitle.Name = "lblMachineNameTitle";
-            this.lblMachineNameTitle.Size = new System.Drawing.Size(99, 20);
-            this.lblMachineNameTitle.TabIndex = 8;
-            this.lblMachineNameTitle.Text = "MAKİNA ADI:";
+            lblMachineNameTitle.AutoSize = true;
+            lblMachineNameTitle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblMachineNameTitle.Location = new Point(13, 129);
+            lblMachineNameTitle.Name = "lblMachineNameTitle";
+            lblMachineNameTitle.Size = new Size(82, 15);
+            lblMachineNameTitle.TabIndex = 8;
+            lblMachineNameTitle.Text = "MAKİNA ADI:";
             // 
             // lblStepTitle
             // 
-            this.lblStepTitle.AutoSize = true;
-            this.lblStepTitle.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblStepTitle.Location = new System.Drawing.Point(15, 142);
-            this.lblStepTitle.Name = "lblStepTitle";
-            this.lblStepTitle.Size = new System.Drawing.Size(54, 20);
-            this.lblStepTitle.TabIndex = 7;
-            this.lblStepTitle.Text = "ADIM:";
+            lblStepTitle.AutoSize = true;
+            lblStepTitle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblStepTitle.Location = new Point(13, 106);
+            lblStepTitle.Name = "lblStepTitle";
+            lblStepTitle.Size = new Size(42, 15);
+            lblStepTitle.TabIndex = 7;
+            lblStepTitle.Text = "ADIM:";
             // 
             // lblOperatorTitle
             // 
-            this.lblOperatorTitle.AutoSize = true;
-            this.lblOperatorTitle.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblOperatorTitle.Location = new System.Drawing.Point(15, 112);
-            this.lblOperatorTitle.Name = "lblOperatorTitle";
-            this.lblOperatorTitle.Size = new System.Drawing.Size(90, 20);
-            this.lblOperatorTitle.TabIndex = 6;
-            this.lblOperatorTitle.Text = "OPERATOR:";
+            lblOperatorTitle.AutoSize = true;
+            lblOperatorTitle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblOperatorTitle.Location = new Point(13, 84);
+            lblOperatorTitle.Name = "lblOperatorTitle";
+            lblOperatorTitle.Size = new Size(71, 15);
+            lblOperatorTitle.TabIndex = 6;
+            lblOperatorTitle.Text = "OPERATOR:";
             // 
             // lblRecipeNameTitle
             // 
-            this.lblRecipeNameTitle.AutoSize = true;
-            this.lblRecipeNameTitle.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblRecipeNameTitle.Location = new System.Drawing.Point(15, 82);
-            this.lblRecipeNameTitle.Name = "lblRecipeNameTitle";
-            this.lblRecipeNameTitle.Size = new System.Drawing.Size(95, 20);
-            this.lblRecipeNameTitle.TabIndex = 5;
-            this.lblRecipeNameTitle.Text = "RECETE ADI:";
+            lblRecipeNameTitle.AutoSize = true;
+            lblRecipeNameTitle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblRecipeNameTitle.Location = new Point(13, 62);
+            lblRecipeNameTitle.Name = "lblRecipeNameTitle";
+            lblRecipeNameTitle.Size = new Size(74, 15);
+            lblRecipeNameTitle.TabIndex = 5;
+            lblRecipeNameTitle.Text = "RECETE ADI:";
             // 
             // lblPercentage
             // 
-            this.lblPercentage.AutoSize = true;
-            this.lblPercentage.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblPercentage.Location = new System.Drawing.Point(260, 50);
-            this.lblPercentage.Name = "lblPercentage";
-            this.lblPercentage.Size = new System.Drawing.Size(35, 20);
-            this.lblPercentage.TabIndex = 3;
-            this.lblPercentage.Text = "0 %";
+            lblPercentage.AutoSize = true;
+            lblPercentage.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblPercentage.Location = new Point(228, 38);
+            lblPercentage.Name = "lblPercentage";
+            lblPercentage.Size = new Size(27, 15);
+            lblPercentage.TabIndex = 3;
+            lblPercentage.Text = "0 %";
             // 
             // progressBar
             // 
-            this.progressBar.Location = new System.Drawing.Point(120, 52);
-            this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(130, 15);
-            this.progressBar.TabIndex = 2;
+            progressBar.Location = new Point(105, 39);
+            progressBar.Margin = new Padding(3, 2, 3, 2);
+            progressBar.Name = "progressBar";
+            progressBar.Size = new Size(114, 11);
+            progressBar.TabIndex = 2;
             // 
             // lblProcessing
             // 
-            this.lblProcessing.AutoSize = true;
-            this.lblProcessing.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblProcessing.Location = new System.Drawing.Point(15, 50);
-            this.lblProcessing.Name = "lblProcessing";
-            this.lblProcessing.Size = new System.Drawing.Size(99, 20);
-            this.lblProcessing.TabIndex = 1;
-            this.lblProcessing.Text = "PROSESSING";
+            lblProcessing.AutoSize = true;
+            lblProcessing.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblProcessing.Location = new Point(13, 38);
+            lblProcessing.Name = "lblProcessing";
+            lblProcessing.Size = new Size(80, 15);
+            lblProcessing.TabIndex = 1;
+            lblProcessing.Text = "PROSESSING";
             // 
             // pnlIcons
             // 
-            this.pnlIcons.Controls.Add(this.picConnection);
-            this.pnlIcons.Controls.Add(this.btnInfo);
-            this.pnlIcons.Controls.Add(this.picAlarm);
-            this.pnlIcons.Controls.Add(this.picPause);
-            this.pnlIcons.Controls.Add(this.picPlay);
-            this.pnlIcons.Controls.Add(this.btnVnc);
-            this.pnlIcons.Location = new System.Drawing.Point(50, 5);
-            this.pnlIcons.Name = "pnlIcons";
-            this.pnlIcons.Size = new System.Drawing.Size(260, 40);
-            this.pnlIcons.TabIndex = 15;
+            pnlIcons.Controls.Add(picConnection);
+            pnlIcons.Controls.Add(btnInfo);
+            pnlIcons.Controls.Add(picAlarm);
+            pnlIcons.Controls.Add(picPause);
+            pnlIcons.Controls.Add(picPlay);
+            pnlIcons.Controls.Add(btnVnc);
+            pnlIcons.Location = new Point(44, 4);
+            pnlIcons.Margin = new Padding(3, 2, 3, 2);
+            pnlIcons.Name = "pnlIcons";
+            pnlIcons.Size = new Size(228, 30);
+            pnlIcons.TabIndex = 15;
             // 
             // picConnection
             // 
-            this.picConnection.BackColor = System.Drawing.Color.Red;
-            this.picConnection.Location = new System.Drawing.Point(170, 5);
-            this.picConnection.Name = "picConnection";
-            this.picConnection.Size = new System.Drawing.Size(30, 30);
-            this.picConnection.TabIndex = 6;
-            this.picConnection.TabStop = false;
+            picConnection.BackColor = Color.Transparent;
+            picConnection.Image = Properties.Resource1.yilmak_baglanti_2;
+            picConnection.InitialImage = Properties.Resource1.yilmak_baglanti;
+            picConnection.Location = new Point(149, 4);
+            picConnection.Margin = new Padding(3, 2, 3, 2);
+            picConnection.Name = "picConnection";
+            picConnection.Size = new Size(26, 22);
+            picConnection.SizeMode = PictureBoxSizeMode.StretchImage;
+            picConnection.TabIndex = 6;
+            picConnection.TabStop = false;
             // 
             // btnInfo
             // 
-            this.btnInfo.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnInfo.Location = new System.Drawing.Point(220, 5);
-            this.btnInfo.Name = "btnInfo";
-            this.btnInfo.Size = new System.Drawing.Size(30, 30);
-            this.btnInfo.TabIndex = 5;
-            this.btnInfo.Text = "i";
-            this.btnInfo.UseVisualStyleBackColor = true;
-            this.btnInfo.Click += new System.EventHandler(this.btnInfo_Click);
+            btnInfo.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnInfo.Location = new Point(192, 4);
+            btnInfo.Margin = new Padding(3, 2, 3, 2);
+            btnInfo.Name = "btnInfo";
+            btnInfo.Size = new Size(26, 22);
+            btnInfo.TabIndex = 5;
+            btnInfo.Text = "i";
+            btnInfo.UseVisualStyleBackColor = true;
+            btnInfo.Click += btnInfo_Click;
             // 
             // picAlarm
             // 
-            this.picAlarm.BackColor = System.Drawing.Color.Transparent;
-            // GÜNCELLENDİ: Resources'tan ikonu yükle
-            this.picAlarm.Image = global::TekstilScada.Properties.Resource1.alarm;
-            this.picAlarm.Location = new System.Drawing.Point(130, 5);
-            this.picAlarm.Name = "picAlarm";
-            this.picAlarm.Size = new System.Drawing.Size(30, 30);
-            this.picAlarm.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.picAlarm.TabIndex = 3;
-            this.picAlarm.TabStop = false;
+            picAlarm.BackColor = Color.Transparent;
+            picAlarm.Image = Properties.Resource1.alarm;
+            picAlarm.Location = new Point(114, 4);
+            picAlarm.Margin = new Padding(3, 2, 3, 2);
+            picAlarm.Name = "picAlarm";
+            picAlarm.Size = new Size(26, 22);
+            picAlarm.SizeMode = PictureBoxSizeMode.StretchImage;
+            picAlarm.TabIndex = 3;
+            picAlarm.TabStop = false;
             // 
             // picPause
             // 
-            this.picPause.BackColor = System.Drawing.Color.Transparent;
-            // GÜNCELLENDİ: Resources'tan ikonu yükle
-            this.picPause.Image = global::TekstilScada.Properties.Resource1.pause;
-            this.picPause.Location = new System.Drawing.Point(90, 5);
-            this.picPause.Name = "picPause";
-            this.picPause.Size = new System.Drawing.Size(30, 30);
-            this.picPause.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.picPause.TabIndex = 2;
-            this.picPause.TabStop = false;
+            picPause.BackColor = Color.Transparent;
+            picPause.Image = Properties.Resource1.pause;
+            picPause.Location = new Point(79, 4);
+            picPause.Margin = new Padding(3, 2, 3, 2);
+            picPause.Name = "picPause";
+            picPause.Size = new Size(26, 22);
+            picPause.SizeMode = PictureBoxSizeMode.StretchImage;
+            picPause.TabIndex = 2;
+            picPause.TabStop = false;
             // 
             // picPlay
             // 
-            this.picPlay.BackColor = System.Drawing.Color.Transparent;
-            // GÜNCELLENDİ: Resources'tan ikonu yükle
-            this.picPlay.Image = global::TekstilScada.Properties.Resource1.play;
-            this.picPlay.Location = new System.Drawing.Point(50, 5);
-            this.picPlay.Name = "picPlay";
-            this.picPlay.Size = new System.Drawing.Size(30, 30);
-            this.picPlay.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.picPlay.TabIndex = 1;
-            this.picPlay.TabStop = false;
+            picPlay.BackColor = Color.Transparent;
+            picPlay.Image = Properties.Resource1.play;
+            picPlay.Location = new Point(44, 4);
+            picPlay.Margin = new Padding(3, 2, 3, 2);
+            picPlay.Name = "picPlay";
+            picPlay.Size = new Size(26, 22);
+            picPlay.SizeMode = PictureBoxSizeMode.StretchImage;
+            picPlay.TabIndex = 1;
+            picPlay.TabStop = false;
             // 
             // btnVnc
             // 
-            this.btnVnc.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnVnc.Location = new System.Drawing.Point(10, 5);
-            this.btnVnc.Name = "btnVnc";
-            this.btnVnc.Size = new System.Drawing.Size(30, 30);
-            this.btnVnc.TabIndex = 0;
-            this.btnVnc.Text = "V";
-            this.btnVnc.UseVisualStyleBackColor = true;
-            this.btnVnc.Click += new System.EventHandler(this.btnVnc_Click);
+            btnVnc.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnVnc.Location = new Point(9, 4);
+            btnVnc.Margin = new Padding(3, 2, 3, 2);
+            btnVnc.Name = "btnVnc";
+            btnVnc.Size = new Size(26, 22);
+            btnVnc.TabIndex = 0;
+            btnVnc.Text = "V";
+            btnVnc.UseVisualStyleBackColor = true;
+            btnVnc.Click += btnVnc_Click;
             // 
             // lblMachineNumber
             // 
-            this.lblMachineNumber.AutoSize = true;
-            this.lblMachineNumber.Font = new System.Drawing.Font("Segoe UI", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblMachineNumber.Location = new System.Drawing.Point(10, 5);
-            this.lblMachineNumber.Name = "lblMachineNumber";
-            this.lblMachineNumber.Size = new System.Drawing.Size(41, 38);
-            this.lblMachineNumber.TabIndex = 0;
-            this.lblMachineNumber.Text = "1.";
+            lblMachineNumber.AutoSize = true;
+            lblMachineNumber.Font = new Font("Segoe UI", 16.2F, FontStyle.Bold);
+            lblMachineNumber.Location = new Point(9, 4);
+            lblMachineNumber.Name = "lblMachineNumber";
+            lblMachineNumber.Size = new Size(32, 30);
+            lblMachineNumber.TabIndex = 0;
+            lblMachineNumber.Text = "1.";
             // 
             // MachineCard_Control
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.pnlMain);
-            this.Margin = new System.Windows.Forms.Padding(10);
-            this.Name = "MachineCard_Control";
-            this.Size = new System.Drawing.Size(320, 240);
-            this.pnlMain.ResumeLayout(false);
-            this.pnlMain.PerformLayout();
-            this.pnlIcons.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.picConnection)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picAlarm)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picPause)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picPlay)).EndInit();
-            this.ResumeLayout(false);
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(pnlMain);
+            Margin = new Padding(9, 8, 9, 8);
+            Name = "MachineCard_Control";
+            Size = new Size(280, 180);
+            pnlMain.ResumeLayout(false);
+            pnlMain.PerformLayout();
+            pnlIcons.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)picConnection).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picAlarm).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picPause).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picPlay).EndInit();
+            ResumeLayout(false);
         }
 
         #endregion

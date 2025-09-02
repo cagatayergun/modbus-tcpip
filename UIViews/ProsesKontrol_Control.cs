@@ -30,6 +30,7 @@ namespace TekstilScada.UI.Views
         private CostRepository _costRepository;
         private FtpSync_Form _ftpFormInstance; // YENİ EKLENEN SATIR
         private PlcPollingService _plcPollingService;
+        private FtpTransferService _ftpTransferService;
         public ProsesKontrol_Control()
         {
             InitializeComponent();
@@ -46,13 +47,13 @@ namespace TekstilScada.UI.Views
             this.Load += ProsesKontrol_Control_Load;
         }
 
-        public void InitializeControl(RecipeRepository recipeRepo, MachineRepository machineRepo, Dictionary<int, IPlcManager> plcManagers, PlcPollingService plcPollingService)
+        public void InitializeControl(RecipeRepository recipeRepo, MachineRepository machineRepo, Dictionary<int, IPlcManager> plcManagers, PlcPollingService plcPollingService, FtpTransferService ftpTransferService)
         {
             _recipeRepository = recipeRepo;
             _machineRepository = machineRepo;
             _plcManagers = plcManagers;
            _plcPollingService = plcPollingService;
-
+            _ftpTransferService = ftpTransferService; // YENİ: Alanı atayın
         }
 
         private void ProsesKontrol_Control_Load(object sender, EventArgs e)
@@ -434,7 +435,7 @@ namespace TekstilScada.UI.Views
                     {
 
                         // FtpSync_Form'u seçilen makine tipiyle başlat.
-                        _ftpFormInstance = new FtpSync_Form(_machineRepository, _recipeRepository, _plcPollingService, selectedType);
+                        _ftpFormInstance = new FtpSync_Form(_machineRepository, _recipeRepository, _plcPollingService, selectedType, _ftpTransferService); // DÜZELTME
                         _ftpFormInstance.FormClosed += (s, args) => _ftpFormInstance = null;
                         _ftpFormInstance.Show(this);
                     }

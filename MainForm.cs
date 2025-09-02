@@ -18,6 +18,7 @@ namespace TekstilScada
     public partial class MainForm : Form
     {
         // Repository ve Servisler
+        private readonly FtpTransferService _ftpTransferService;
         private readonly MachineRepository _machineRepository;
         private readonly RecipeRepository _recipeRepository;
         private readonly ProcessLogRepository _processLogRepository;
@@ -34,7 +35,7 @@ namespace TekstilScada
         private readonly Raporlar_Control _raporlarView;
         private readonly LiveEventPopup_Form _liveEventPopup;
         private readonly GenelBakis_Control _genelBakisView;
-        private readonly FtpTransferService _ftpTransferService; // YENÝ: FTP transfer servisi eklendi
+       // private readonly FtpTransferService _ftpTransferService; // YENÝ: FTP transfer servisi eklendi
         private VncViewer_Form _activeVncViewerForm = null;
 
         public MainForm()
@@ -43,6 +44,7 @@ namespace TekstilScada
 
             // 1. ADIM: Tüm nesneler burada oluþturulur.
             // Bu, NullReferenceException hatasýný önlemek için kritiktir.
+
             _machineRepository = new MachineRepository();
             _recipeRepository = new RecipeRepository();
             _processLogRepository = new ProcessLogRepository();
@@ -51,6 +53,8 @@ namespace TekstilScada
             _pollingService = new PlcPollingService(_alarmRepository, _processLogRepository, _productionRepository, _recipeRepository);
             _dashboardRepository = new DashboardRepository(_recipeRepository);
             _costRepository = new CostRepository(); // YENÝ: Nesneyi oluþturun
+                                                    // DÜZELTME: FtpTransferService nesnesini burada oluþturun ve baðýmlýlýðý enjekte edin.
+            _ftpTransferService = new FtpTransferService(_pollingService);
             _prosesIzlemeView = new ProsesÝzleme_Control();
            _prosesKontrolView = new ProsesKontrol_Control();
             _ayarlarView = new Ayarlar_Control();
@@ -58,7 +62,7 @@ namespace TekstilScada
             _raporlarView = new Raporlar_Control();
             _liveEventPopup = new LiveEventPopup_Form();
             _genelBakisView = new GenelBakis_Control();
-            _ftpTransferService = new FtpTransferService(_pollingService);
+         //   _ftpTransferService = new FtpTransferService(_pollingService);
             //_prosesKontrolView = new ProsesKontrol_Control(_ftpTransferService);
             // Olay abonelikleri (Events)
             LanguageManager.LanguageChanged += LanguageManager_LanguageChanged;
@@ -103,7 +107,7 @@ namespace TekstilScada
 
             // Kontrolleri en güncel verilerle baþlat
             _prosesIzlemeView.InitializeView(machines, _pollingService);
-            _prosesKontrolView.InitializeControl(_recipeRepository, _machineRepository, plcManagers, _pollingService);
+            _prosesKontrolView.InitializeControl(_recipeRepository, _machineRepository, plcManagers, _pollingService, _ftpTransferService);
 
             _ayarlarView.InitializeControl(_machineRepository, plcManagers);
             // GÜNCELLENDÝ: CostRepository parametresini ekleyin

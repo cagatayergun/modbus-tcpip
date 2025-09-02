@@ -27,6 +27,13 @@ namespace TekstilScada.UI.Controls
         private readonly Image _originalPlayIcon;
         private readonly Image _originalPauseIcon;
         private readonly Image _originalAlarmIcon;
+        private readonly Image _originalPlay2Icon;
+        private readonly Image _originalPause2Icon;
+        private readonly Image _originalAlarmvarIcon;
+        private readonly Image _originalAlarmyokIcon;
+        private readonly Image _originalbaglantivarIcon;
+        private readonly Image _originalbaglantiyokIcon;
+
 
         public MachineCard_Control(int machineId, string machineUserDefinedId, string machineName, int displayIndex)
         {
@@ -37,18 +44,21 @@ namespace TekstilScada.UI.Controls
             lblMachineNumber.Text = $"{displayIndex}.";
 
             // Kaynaklardan orijinal ikonları bir kereliğine yükle
-            _originalPlayIcon = Properties.Resource1.play;
-            _originalPauseIcon = Properties.Resource1.pause;
-            _originalAlarmIcon = Properties.Resource1.alarm;
-
+            _originalPlayIcon = Properties.Resource1.play2;
+            _originalPauseIcon = Properties.Resource1.pause2;
+            _originalAlarmIcon = Properties.Resource1.alarm_var;
+            _originalAlarmyokIcon = Properties.Resource1.alarm_yok;
+            _originalbaglantivarIcon = Properties.Resource1.yilmak_baglanti_2;
+            _originalbaglantiyokIcon = Properties.Resource1.yilmak_baglanti;
             // GÜNCELLENDİ: PictureBox'ların arkaplanını şeffaf yap
             picPlay.BackColor = Color.Transparent;
             picPause.BackColor = Color.Transparent;
             picAlarm.BackColor = Color.Transparent;
-
             picPlay.Visible = false;
             picPause.Visible = false;
             picAlarm.Visible = false;
+            btnVnc.Visible = false;
+            btnInfo.Visible = false;
 
             UpdateView(new FullMachineStatus { ConnectionState = ConnectionStatus.Disconnected, MachineName = this.MachineName });
         }
@@ -99,14 +109,29 @@ namespace TekstilScada.UI.Controls
             switch (status.ConnectionState)
             {
                 case ConnectionStatus.Connected:
-                    picConnection.BackColor = _colorConnected;
+                    picConnection.Image = _originalbaglantivarIcon;
+                    picPlay.Visible = true;
+                    picPause.Visible = true;
+                    picAlarm.Visible = true;
+                    btnVnc.Visible = true;
+                    btnInfo.Visible = true;
                     break;
                 case ConnectionStatus.Connecting:
-                    picConnection.BackColor = _colorConnecting;
+                    picConnection.Image = _originalbaglantiyokIcon;
+                    picPlay.Visible = false;
+                    picPause.Visible = false;
+                    picAlarm.Visible = false;
+                    btnVnc.Visible = false;
+                    btnInfo.Visible = false;
                     break;
                 case ConnectionStatus.ConnectionLost:
                 case ConnectionStatus.Disconnected:
-                    picConnection.BackColor = _colorDisconnected;
+                    picConnection.Image = _originalbaglantiyokIcon;
+                    picPlay.Visible = false;
+                    picPause.Visible = false;
+                    picAlarm.Visible = false;
+                    btnVnc.Visible = false;
+                    btnInfo.Visible = false;
                     ClearData();
                     return;
             }
@@ -121,12 +146,13 @@ namespace TekstilScada.UI.Controls
             if (status.HasActiveAlarm)
             {
                 // Alarm varsa, diğer ikonları gizle ve sadece alarm ikonunu göster
-                picPlay.Visible = false;
-                picPause.Visible = false;
-                picAlarm.Visible = true;
+               
+               
                 // Alarm ikonunun kendisini göster, renk tonu değiştirme
-                if (picAlarm.Visible) picAlarm.Image = _originalAlarmIcon;
-
+               picAlarm.Image = _originalAlarmIcon;
+                picPause.Visible = status.IsPaused;
+                if (picPause.Visible) picPause.Image = _originalPauseIcon;
+                picPlay.Visible = status.IsInRecipeMode && !status.IsPaused;
                 if (progressBar.Value > 0)
                 {
                     _lastValidProgress = progressBar.Value;
@@ -137,6 +163,8 @@ namespace TekstilScada.UI.Controls
             }
             else
             {
+                picAlarm.Image = _originalAlarmyokIcon;
+
                 // Alarm yoksa, mevcut durum ikonlarını ve ilerlemeyi normal olarak işle
                 picPlay.Visible = status.IsInRecipeMode && !status.IsPaused;
                 if (picPlay.Visible) picPlay.Image = _originalPlayIcon;
@@ -144,7 +172,7 @@ namespace TekstilScada.UI.Controls
                 picPause.Visible = status.IsPaused;
                 if (picPause.Visible) picPause.Image = _originalPauseIcon;
 
-                picAlarm.Visible = false;
+               
 
                 _lastValidProgress = Math.Max(0, Math.Min(100, (int)status.ProsesYuzdesi));
                 progressBar.Value = _lastValidProgress;

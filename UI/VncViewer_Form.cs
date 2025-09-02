@@ -1,4 +1,5 @@
-﻿using System;
+﻿// VncViewer_Form.cs
+using System;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using VncSharpCore; // RemoteDesktop sınıfı için
@@ -24,10 +25,9 @@ namespace TekstilScada.UI
                 // Port ayrıştırma başarılı olmazsa _port varsayılan değeri (5900) korur
                 if (parts.Length > 1 && !int.TryParse(parts[1], out _port))
                 {
-                    // Hata ayıklama çıktısı ve kullanıcıya uyarı
                     System.Diagnostics.Debug.WriteLine($"Uyarı: Geçersiz port numarası algılandı: '{parts[1]}'. Varsayılan port (5900) kullanılacak.");
                     MessageBox.Show("Geçersiz port numarası. Varsayılan port (5900) kullanılacak.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    _port = 5900; // Hata durumunda _port'u açıkça varsayılana ayarla
+                    _port = 5900;
                 }
             }
             else
@@ -38,8 +38,6 @@ namespace TekstilScada.UI
             _password = password;
 
             // Olayları (events) bağlayalım
-            // Bu abonelikler, remoteDesktop1 kontrolü Form ile birlikte dispose edildiğinde otomatik olarak kaldırılacaktır.
-            // Ancak, açıkça belirtmek iyi bir pratiktir, özellikle karmaşık senaryolarda sızıntıları önler.
             remoteDesktop1.ConnectComplete += VncControl_ConnectComplete;
             remoteDesktop1.ConnectionLost += VncControl_ConnectionLost;
             remoteDesktop1.GetPassword = () => _password; // Şifre delegate'ini burada ayarla
@@ -51,8 +49,6 @@ namespace TekstilScada.UI
             try
             {
                 // Bağlantıyı arka planda başlatıyoruz.
-                // remoteDesktop1'in Connect metodu çağrıldığında, onun içindeki tüm UI etkileşimleri
-                // (SetState, SetupDesktop, Invalidate vb.) RemoteDesktop.cs'de Invoke ile korunmalıdır.
                 await Task.Run(() => remoteDesktop1.Connect(_address));
             }
             catch (Exception ex)
@@ -69,9 +65,6 @@ namespace TekstilScada.UI
 
         private void VncControl_ConnectComplete(object sender, ConnectEventArgs e)
         {
-            // UI güncellemeleri için Invoke kullanmak her zaman en güvenlisidir.
-            // Bu metot, RemoteDesktop içinden BeginInvoke ile çağrıldığından
-            // bu kontrol genellikle true olacaktır.
             if (InvokeRequired)
             {
                 Invoke(new Action(() => VncControl_ConnectComplete(sender, e)));
@@ -82,9 +75,6 @@ namespace TekstilScada.UI
 
         private void VncControl_ConnectionLost(object sender, EventArgs e)
         {
-            // UI güncellemeleri için Invoke kullanmak her zaman en güvenlisidir.
-            // Bu metot, RemoteDesktop içinden BeginInvoke ile çağrıldığından
-            // bu kontrol genellikle true olacaktır.
             if (InvokeRequired)
             {
                 Invoke(new Action(() => VncControl_ConnectionLost(sender, e)));
@@ -94,8 +84,6 @@ namespace TekstilScada.UI
             System.Diagnostics.Debug.WriteLine("VNC bağlantısı kesildi veya kaybedildi.");
             MessageBox.Show("VNC bağlantısı kesildi veya kaybedildi.", "Bağlantı Kesildi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
-            // Eğer form zaten kapanmıyorsa veya kapatma işlemi zaten bu olaydan başlatılmadıysa
-            // formu kapatma işlemine başla. Bu, Disconnect döngülerini önler.
             if (!_isClosingInitiated)
             {
                 _isClosingInitiated = true;
@@ -105,22 +93,13 @@ namespace TekstilScada.UI
 
         private void VncViewer_Form_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // _isClosingInitiated bayrağı, VncControl_ConnectionLost'tan veya
-            // VncViewer_Form_Load'daki bir hatadan `this.Close()` çağrıldığında `true` olur.
-            // Eğer kapanma nedeni `None` değilse (yani bir kullanıcı eylemi veya sistem kapatmasıysa)
-            // ve zaten kapatma süreci başlatılmışsa, tekrar `Disconnect()` çağırmadan çık.
             if (_isClosingInitiated && e.CloseReason != CloseReason.None)
             {
-                // Debug.WriteLine($"FormClosing: Kapatma zaten başlatılmış ({e.CloseReason}). Disconnect tekrar çağrılmıyor.");
                 return;
             }
 
-            // Eğer buraya gelinirse, ya kapanma işlemi ilk kez başlatılıyor ya da
-            // _isClosingInitiated olmasına rağmen neden None.
-            // Kapatma işleminin başlatıldığını işaretle.
             _isClosingInitiated = true;
 
-            // Form kapanırken bağlantıyı kes
             if (remoteDesktop1.IsConnected)
             {
                 try
@@ -138,13 +117,9 @@ namespace TekstilScada.UI
                 System.Diagnostics.Debug.WriteLine("VncViewer_Form_FormClosing: Bağlantı zaten kesik.");
             }
 
-            // Olay aboneliklerini iptal et. Bu, dispose döngüsünde RemoteDesktop kontrolü ile birlikte
-            // otomatik olarak yapılacaktır, ancak açıkça belirtmek iyi bir pratiktir.
             remoteDesktop1.ConnectComplete -= VncControl_ConnectComplete;
             remoteDesktop1.ConnectionLost -= VncControl_ConnectionLost;
             System.Diagnostics.Debug.WriteLine("VncViewer_Form_FormClosing: Event abonelikleri kaldırıldı.");
         }
-
-       
     }
 }

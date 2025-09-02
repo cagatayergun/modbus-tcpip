@@ -303,6 +303,7 @@ namespace TekstilScada.Services
 
                     job.Ilerleme = 100;
                     job.Durum = TransferStatus.Başarılı;
+
                 }
                 catch (Exception ex)
                 {
@@ -325,7 +326,9 @@ namespace TekstilScada.Services
                 string hedefDosyaAdi = $"XPR{currentRecipeNumber:D5}.csv";
                 foreach (var makine in makineler)
                 {
-                    if (!Jobs.Any(j => j.Makine.Id == makine.Id && j.YerelRecete?.Id == recete.Id && j.HedefDosyaAdi == hedefDosyaAdi))
+                    // DÜZELTME: Sadece beklemede olan işler için kontrol yap.
+                    // Eğer aynı makine ve reçete için beklemede bir iş yoksa yenisini ekle.
+                    if (!Jobs.Any(j => j.Makine.Id == makine.Id && j.YerelRecete?.Id == recete.Id && j.HedefDosyaAdi == hedefDosyaAdi && j.Durum == TransferStatus.Beklemede))
                     {
                         Jobs.Add(new TransferJob
                         {

@@ -268,15 +268,14 @@ namespace TekstilScada.UI.Views
 
         private void UpdateSidebarCharts()
         {
-            // Saatlik Tüketim Grafiği
-            // Saatlik Elektrik Tüketimi
+           
             var hourlyElecData = _dashboardRepository.GetHourlyFactoryConsumption(DateTime.Today);
             formsPlotHourly.Plot.Clear();
             if (hourlyElecData.Rows.Count > 0)
             {
                 double[] hours = hourlyElecData.AsEnumerable().Select(row => row.IsNull("Saat") ? 0.0 : Convert.ToDouble(row["Saat"])).ToArray();
                 double[] consumption = hourlyElecData.AsEnumerable().Select(row => row.IsNull("ToplamElektrik") ? 0.0 : Convert.ToDouble(row["ToplamElektrik"])).ToArray();
-                var barPlot = formsPlotHourly.Plot.Add.Bars(hours, consumption);
+                var barPlot = formsPlotHourly.Plot.Add.Scatter(hours, consumption);
                 barPlot.Color = ScottPlot.Colors.SteelBlue;
             }
             // formsPlotHourly.Plot.Title(Resources.SaatlikElektrik);
@@ -289,7 +288,7 @@ namespace TekstilScada.UI.Views
             {
                 double[] hours = hourlyWaterData.AsEnumerable().Select(row => row.IsNull("Saat") ? 0.0 : Convert.ToDouble(row["Saat"])).ToArray();
                 double[] consumption = hourlyWaterData.AsEnumerable().Select(row => row.IsNull("ToplamSu") ? 0.0 : Convert.ToDouble(row["ToplamSu"])).ToArray();
-                var barPlot = formsPlotHourlyWater.Plot.Add.Bars(hours, consumption);
+                var barPlot = formsPlotHourlyWater.Plot.Add.Scatter(hours, consumption);
                 barPlot.Color = ScottPlot.Colors.CornflowerBlue; // Farklı bir renk
             }
             // formsPlotHourlyWater.Plot.Title(Resources.SaatlikSu);
@@ -302,7 +301,7 @@ namespace TekstilScada.UI.Views
             {
                 double[] hours = hourlySteamData.AsEnumerable().Select(row => row.IsNull("Saat") ? 0.0 : Convert.ToDouble(row["Saat"])).ToArray();
                 double[] consumption = hourlySteamData.AsEnumerable().Select(row => row.IsNull("ToplamBuhar") ? 0.0 : Convert.ToDouble(row["ToplamBuhar"])).ToArray();
-                var barPlot = formsPlotHourlySteam.Plot.Add.Bars(hours, consumption);
+                var barPlot = formsPlotHourlySteam.Plot.Add.Scatter(hours, consumption);
                 barPlot.Color = ScottPlot.Colors.DimGray; // Farklı bir renk
             }
             // formsPlotHourlySteam.Plot.Title(Resources.SaatlikBuhar);
@@ -338,7 +337,7 @@ namespace TekstilScada.UI.Views
                 linePlot.MarkerStyle.Size = 5;
 
                 formsPlotHourlyOee.Plot.Axes.Bottom.Label.Text = "Saat";
-                formsPlotHourlyOee.Plot.Axes.Left.Label.Text = "Ortalama OEE (%)";
+             //   formsPlotHourlyOee.Plot.Axes.Left.Label.Text = "Ortalama OEE (%)";
             }
             // formsPlotHourlyOee.Plot.Title("24 Saatlik OEE");
             formsPlotHourlyOee.Plot.Axes.AutoScale();

@@ -30,15 +30,15 @@ namespace TekstilScada.UI
         private ScadaRecipe _previewRecipe;
         private readonly string _targetMachineType;
         private readonly PlcPollingService _plcPollingService; // <-- YENİ DEĞİŞKENİ EKLEYİN
-        public FtpSync_Form(MachineRepository machineRepo, RecipeRepository recipeRepo, PlcPollingService plcPollingService, string targetMachineType)
+        public FtpSync_Form(MachineRepository machineRepo, RecipeRepository recipeRepo, PlcPollingService plcPollingService, string targetMachineType, FtpTransferService transferService)
         {
             InitializeComponent();
             _machineRepository = machineRepo;
             _recipeRepository = recipeRepo;
-            _targetMachineType = targetMachineType; // Gelen parametreyi değişkene ata
-            _transferService = FtpTransferService.Instance;
+            _targetMachineType = targetMachineType;
+            _transferService = transferService; // DÜZELTME: Dışarıdan gelen nesneyi kullanın.
             _transferService.SetSyncContext(SynchronizationContext.Current);
-            _plcPollingService = plcPollingService; // <-- GELEN SERVİSİ DEĞİŞKENE ATAYIN
+            _plcPollingService = plcPollingService;
         }
 
         private void FtpSync_Form_Load(object sender, EventArgs e)
@@ -192,17 +192,35 @@ namespace TekstilScada.UI
 
         private void btnReceive_Click(object sender, EventArgs e)
         {
-            var selectedFiles = lstHmiRecipes.SelectedItems.Cast<string>().ToList();
-            var selectedMachine = clbMachines.CheckedItems.Count == 1
-                ? clbMachines.CheckedItems.Cast<Machine>().FirstOrDefault()
-                : null;
+            var selectedMachines = clbMachines.CheckedItems.Cast<Machine>().ToList();
 
-            if (!selectedFiles.Any() || selectedMachine == null)
+            if (!selectedMachines.Any() || selectedMachines.Count > 1)
             {
-                MessageBox.Show("Lütfen en az bir HMI dosyası ve listeden SADECE BİR tane kaynak makine seçin.", "Uyarı");
+                MessageBox.Show("Lütfen listeden SADECE BİR tane kaynak makine seçin.", "Uyarı");
                 return;
             }
-            _transferService.QueueReceiveJobs(selectedFiles, selectedMachine);
+
+            var selectedMachine = selectedMachines.First();
+            var selectedIndices = lstHmiRecipes.SelectedIndices;
+
+            if (selectedIndices.Count == 0)
+            {
+                MessageBox.Show("Lütfen indirmek için en az bir HMI reçetesi seçin.", "Uyarı");
+                return;
+            }
+
+            // Seçilen her bir öğenin indeksine göre doğru dosya adlarını oluştur.
+            var filesToReceive = new List<string>();
+            foreach (int index in selectedIndices)
+            {
+                // ListBox indeksi 0'dan başladığı için, reçete numarası için 1 ekliyoruz.
+                int recipeNumber = index + 1;
+                string remoteFileName = $"XPR{recipeNumber:D5}.csv";
+                filesToReceive.Add(remoteFileName);
+            }
+
+            // FtpTransferService'e doğru dosya adlarıyla kuyruğa ekleme emrini ver.
+            _transferService.QueueReceiveJobs(filesToReceive, selectedMachine);
         }
 
         private void btnRefreshHmi_Click(object sender, EventArgs e)
@@ -246,16 +264,18 @@ namespace TekstilScada.UI
 
         #region Ön İzleme Metotları
 
+        // FtpSync_Form.cs
+        // ...
+        // FtpSync_Form.cs
+
+        // ... Diğer metotlarınız ...
+
+        // FtpSync_Form.cs
+        // ...
+
         private async void lstHmiRecipes_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (lstHmiRecipes.SelectedItems.Count != 1)
-            {
-                ClearPreview();
-                return;
-            }
-
-            var selectedItem = lstHmiRecipes.SelectedItem as string;
-            if (string.IsNullOrEmpty(selectedItem))
+            if (lstHmiRecipes.SelectedItems.Count != 1 || lstHmiRecipes.SelectedIndex < 0)
             {
                 ClearPreview();
                 return;
@@ -268,16 +288,11 @@ namespace TekstilScada.UI
                 return;
             }
 
-            // Extract the recipe number from the selected item string (e.g., "5 - kot siyah" -> 5)
-            var recipeNumberMatch = Regex.Match(selectedItem, @"^(\d+)\s*-");
-            if (!recipeNumberMatch.Success)
-            {
-                ClearPreview();
-                return;
-            }
-            int recipeNumber = int.Parse(recipeNumberMatch.Groups[1].Value);
+            // Reçete numarasını ListBox'taki sırasına göre alıyoruz.
+            // İndeks 0'dan başladığı için 1 ekliyoruz.
+            int recipeNumber = lstHmiRecipes.SelectedIndex + 1;
 
-            // Construct the FTP filename based on the recipe number
+            // FTP dosya adını bu numaraya göre oluşturuyoruz.
             string remoteFileName = $"XPR{recipeNumber:D5}.csv";
 
             tabControlMain.SelectedTab = tabPagePreview;
@@ -290,10 +305,8 @@ namespace TekstilScada.UI
                 var ftpService = new FtpService(selectedMachine.VncAddress, selectedMachine.FtpUsername, selectedMachine.FtpPassword);
                 string csvContent = await ftpService.DownloadFileAsync($"/{remoteFileName}");
 
-                _previewRecipe = RecipeCsvConverter.ToRecipe(csvContent, "temp_preview");
-
-                // Use the recipe name directly from the selected item for the preview title
-                string previewName = selectedItem;
+                string previewName = lstHmiRecipes.SelectedItem.ToString();
+                _previewRecipe = RecipeCsvConverter.ToRecipe(csvContent, previewName);
 
                 lblPreviewStatus.Visible = false;
                 InitializeBYMakinesiEditor(previewName);
@@ -305,6 +318,10 @@ namespace TekstilScada.UI
                 lblPreviewStatus.Text = $"Ön izleme yüklenemedi: {ex.Message}";
             }
         }
+        // ...
+
+        // ... Diğer metotlarınız ...
+        // ...
 
         private void ClearPreview()
         {

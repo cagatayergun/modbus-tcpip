@@ -212,6 +212,7 @@ namespace TekstilScada.Services
                 if (!manuel_stat.IsSuccess) return OperateResult.CreateFailedResult<FullMachineStatus>(manuel_stat);
                 status.manuel_status = manuel_stat.Content;
 
+                
 
                 if (adimNoResult.IsSuccess)
                 {
@@ -426,26 +427,54 @@ namespace TekstilScada.Services
             }
 
         }
+        // BYMakinesiManager.cs veya KurutmaMakinesiManager.cs
+        // ...
+        private string ConvertTurkishCharactersToAscii(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+
+            return text
+                .Replace("ç", "c").Replace("Ç", "C")
+                .Replace("ğ", "g").Replace("Ğ", "G")
+                .Replace("ı", "i").Replace("İ", "I")
+                .Replace("ö", "o").Replace("Ö", "O")
+                .Replace("ş", "s").Replace("Ş", "S")
+                .Replace("ü", "u").Replace("Ü", "U");
+        }
+        // ...
         public async Task<OperateResult> WriteRecipeNameAsync(int recipeNumber, string recipeName)
         {
             try
             {
-                // Reçete isimleri D3212'den başlar, her isim 6 word (12 byte)
                 const int startAddress = 3212;
                 const int wordsPerName = 6;
+                const int byteLength = wordsPerName * 2;
 
-                // PLC adresini hesapla (1'den başlayan reçete numarası için)
                 int currentAddress = startAddress + (recipeNumber - 1) * wordsPerName;
+                string cleanName = ConvertTurkishCharactersToAscii(recipeName);
+                // Reçete adını önce 12 bayta (6 kelime) sığacak şekilde düzenle.
+                string paddedName = cleanName.PadRight(byteLength, ' ').Substring(0, byteLength);
+                byte[] nameBytes = Encoding.ASCII.GetBytes(paddedName);
 
-                // Reçete ismini 12 byte (6 word) uzunluğunda bir byte dizisine dönüştür.
-                // Fazla uzunsa kes, kısaysa null karakterlerle tamamla.
-                byte[] dataToWrite = new byte[wordsPerName * 2];
-                byte[] nameBytes = Encoding.ASCII.GetBytes(recipeName);
-                Buffer.BlockCopy(nameBytes, 0, dataToWrite, 0, Math.Min(nameBytes.Length, dataToWrite.Length));
+                // Baytları 2'şerli gruplar halinde takas et.
+                byte[] swappedBytes = new byte[byteLength];
+                for (int i = 0; i < byteLength; i += 2)
+                {
+                    swappedBytes[i] = nameBytes[i + 1];
+                    swappedBytes[i + 1] = nameBytes[i];
+                }
 
-                // PLC'ye yazma işlemini başlat.
-                var writeResult = await Task.Run(() => _plcClient.Write(currentAddress.ToString(), dataToWrite));
+                var writeonay = await Task.Run(() => _plcClient.Write("3813", 1));
+               // await Task.Delay(300);
+                var writeResult = await Task.Run(() => _plcClient.Write(currentAddress.ToString(), swappedBytes));
 
+
+               // await Task.Delay(300);
+              //  var writebitti = await Task.Run(() => _plcClient.Write("3813", 0));
+
+
+             //   await Task.Delay(100);
                 return writeResult;
             }
             catch (Exception ex)
@@ -453,6 +482,7 @@ namespace TekstilScada.Services
                 return new OperateResult($"Reçete adı yazılırken hata oluştu: {ex.Message}");
             }
         }
+      
         public async Task<OperateResult<List<PlcOperator>>> ReadPlcOperatorsAsync()
         {
             // DEĞİŞİKLİK: Modbus adres kullanılıyor
@@ -479,8 +509,8 @@ namespace TekstilScada.Services
                 {
                     SlotIndex = i,
                     Name = name,
-                    UserId = rawData[offset + 10],
-                    Password = rawData[offset + 11]
+                    UserId = rawData[offset +10],
+                    Password = rawData[offset +11]
                 });
             }
 
@@ -493,11 +523,34 @@ namespace TekstilScada.Services
             if (operator_write.IsSuccess) ;
                 // DEĞİŞİKLİK: Modbus adres kullanılıyor
                 string startAddress = (3087 + plcOperator.SlotIndex * 12).ToString();
-            byte[] dataToWrite = new byte[24];
-            byte[] nameBytes = Encoding.ASCII.GetBytes(plcOperator.Name.PadRight(20).Substring(0, 20));
+            byte[] dataToWrite1 = new byte[24];
+            byte[] nameBytes1 = Encoding.ASCII.GetBytes(plcOperator.Name.PadRight(20).Substring(0, 20));
+
+
+              byte[] dataToWrite = new byte[24];
+            //    for (int i = 0; i < 24; i += 2)
+            //    {
+            //    dataToWrite[i] = dataToWrite1[i + 1];
+           //     dataToWrite[i + 1] = dataToWrite1[i];
+           //     }
+            byte[] nameBytes = new byte[20];
+            for (int i = 0; i < 20; i += 2)
+            {
+                nameBytes[i] = nameBytes1[i + 1];
+                nameBytes[i + 1] = nameBytes1[i];
+            }
+
+
             Buffer.BlockCopy(nameBytes, 0, dataToWrite, 0, 20);
-            BitConverter.GetBytes(plcOperator.UserId).CopyTo(dataToWrite, 20);
-            BitConverter.GetBytes(plcOperator.Password).CopyTo(dataToWrite, 22);
+           // Buffer.BlockCopy(dataToWrite, 0, dataToWrite, 0, 24);
+
+            dataToWrite[21] = (byte)(plcOperator.UserId & 0xFF); // Düşük bayt
+            dataToWrite[20] = (byte)((plcOperator.UserId >> 8) & 0xFF); // Yüksek bayt
+
+            dataToWrite[23] = (byte)(plcOperator.Password & 0xFF); // Düşük bayt
+            dataToWrite[22] = (byte)((plcOperator.Password >> 8) & 0xFF); // Yüksek bayt
+                                                                          // BitConverter.GetBytes(plcOperator.UserId).CopyTo(dataToWrite, 20);
+                                                                          // BitConverter.GetBytes(plcOperator.Password).CopyTo(dataToWrite, 22);
             var writeResult = await Task.Run(() => _plcClient.Write(startAddress, dataToWrite));
             return writeResult;
         }
