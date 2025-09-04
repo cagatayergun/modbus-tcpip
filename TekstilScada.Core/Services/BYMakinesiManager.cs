@@ -142,9 +142,9 @@ namespace TekstilScada.Services
                 if (sicaklikResult.IsSuccess) status.AnlikSicaklik = sicaklikResult.Content;
                 else { Debug.WriteLine($"[HATA] {IpAddress} - {ANLIK_SICAKLIK} (Anlık Sıcaklık) okunamadı: {sicaklikResult.Message}"); anyReadFailed = true; }
 
-                var yuzdeResult = _plcClient.ReadInt16(PROSES_YUZDESI);
-                if (yuzdeResult.IsSuccess) status.ProsesYuzdesi = yuzdeResult.Content;
-                else { Debug.WriteLine($"[HATA] {IpAddress} - {PROSES_YUZDESI} (Proses Yüzdesi) okunamadı: {yuzdeResult.Message}"); anyReadFailed = true; }
+               // var yuzdeResult = _plcClient.ReadInt16(PROSES_YUZDESI);
+               // if (yuzdeResult.IsSuccess) status.ProsesYuzdesi = yuzdeResult.Content;
+               // else { Debug.WriteLine($"[HATA] {IpAddress} - {PROSES_YUZDESI} (Proses Yüzdesi) okunamadı: {yuzdeResult.Message}"); anyReadFailed = true; }
 
                 var operatorResult = ReadStringFromWords(OPERATOR_ISMI, 5);
                 if (operatorResult.IsSuccess) status.OperatorIsmi = operatorResult.Content;

@@ -47,7 +47,10 @@ namespace TekstilScada.UI.Views
             _recipeStepDesigner.Dock = DockStyle.Fill;
             tabPageRecipeDesigner.Controls.Add(_recipeStepDesigner);
         }
-
+        public void RefreshMachineSettingsView()
+        {
+            _machineSettings.RefreshMachineList();
+        }
         // DEĞİŞİKLİK: LsPlcManager -> IPlcManager
         public void InitializeControl(MachineRepository machineRepo, Dictionary<int, IPlcManager> plcManagers)
         {

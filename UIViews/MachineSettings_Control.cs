@@ -72,7 +72,7 @@ namespace TekstilScada.UI.Views
             cmbMachineType.DisplayMember = "Display"; // Kullanıcı çevrilmiş metni görecek
             cmbMachineType.ValueMember = "Value";     // Arka planda dilden bağımsız anahtar tutulacak
         }
-        private void RefreshMachineList()
+        public void RefreshMachineList()
         {
             try
             {

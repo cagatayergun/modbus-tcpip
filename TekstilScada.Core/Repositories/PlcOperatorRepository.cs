@@ -35,7 +35,21 @@ namespace TekstilScada.Repositories
             }
             return operators;
         }
-
+        public void AddDefaultOperator()
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                // Yeni boş bir operatör şablonu ekle
+                string query = "INSERT INTO plc_operator_templates (Name, UserId, Password) VALUES (@Name, @UserId, @Password);";
+                var cmd = new MySqlCommand(query, connection);
+                // Varsayılan boş veya sıfır değerleri ekliyoruz.
+                cmd.Parameters.AddWithValue("@Name", "");
+                cmd.Parameters.AddWithValue("@UserId", 0);
+                cmd.Parameters.AddWithValue("@Password", 0);
+                cmd.ExecuteNonQuery();
+            }
+        }
         public void SaveOrUpdate(PlcOperator op)
         {
             // Aynı isim ve ID'ye sahip bir kayıt var mı diye kontrol et

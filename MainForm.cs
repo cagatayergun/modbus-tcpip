@@ -75,6 +75,41 @@ namespace TekstilScada
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            // === YENÝ LÝSANS DOÐRULAMA KODU BAÞLANGICI ===
+            var (isValid, message, licenseData) = LicenseManager.ValidateLicense();
+
+            if (!isValid)
+            {
+                MessageBox.Show($"Lisans Hatasý: {message}", "Uygulama Lisansý", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+                return;
+            }
+
+            // Lisans baþarýlý, makine sayýsýný kontrol et
+            var machines = _machineRepository.GetAllMachines();
+            if (machines.Count > licenseData.MachineLimit)
+            {
+                var dialogResult = MessageBox.Show(
+                    $"Lisansýnýz {licenseData.MachineLimit} makine ile sýnýrlýdýr. Veritabanýnýzda {machines.Count} makine bulunmaktadýr.\nFazla makineler otomatik olarak silinecektir. Devam etmek istiyor musunuz?",
+                    "Makine Sayýsý Limiti Aþýldý",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
+
+                if (dialogResult == DialogResult.Yes)
+                {
+                    // Fazla makineleri silme mantýðý
+                    for (int i = licenseData.MachineLimit; i < machines.Count; i++)
+                    {
+                        _machineRepository.DeleteMachine(machines[i].Id);
+                    }
+                    MessageBox.Show($"{machines.Count - licenseData.MachineLimit} adet makine baþarýyla silindi.", "Ýþlem Tamamlandý");
+                }
+                else
+                {
+                    this.Close();
+                    return;
+                }
+            }
             // 2. ADIM: Form tamamen yüklendikten sonra bu metot çalýþýr.
             // Veritabaný ve PLC iþlemlerini baþlatan metotlar burada çaðrýlýr.
             ApplyLocalization();
@@ -96,6 +131,35 @@ namespace TekstilScada
         private void ReloadSystem(Control viewToShow)
         {
             _pollingService.Stop();
+            // === YENÝ LÝSANS KONTROLÜ BAÞLANGICI ===
+            var (isValid, message, licenseData) = LicenseManager.ValidateLicense();
+            if (!isValid)
+            {
+                MessageBox.Show($"Lisans Hatasý: {message}", "Uygulama Lisansý", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+                return;
+            }
+
+            // Makine sayýsýný kontrol et ve lisans limitini aþanlarý sil
+            var machines1 = _machineRepository.GetAllMachines();
+            if (machines1.Count > licenseData.MachineLimit)
+            {
+                MessageBox.Show(
+                    $"Lisansýnýz {licenseData.MachineLimit} makine ile sýnýrlýdýr. Veritabanýnýzda {machines1.Count} makine bulunmaktadýr.\nFazla makineler otomatik olarak silinecektir.",
+                    "Makine Sayýsý Limiti Aþýldý",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                // Sondan baþlayarak fazla makineleri sil
+                for (int i = machines1.Count - 1; i >= licenseData.MachineLimit; i--)
+                {
+                    _machineRepository.DeleteMachine(machines1[i].Id);
+                }
+
+                // Makine listesini yeniden oku
+                machines1 = _machineRepository.GetAllMachines();
+            }
+            // === YENÝ LÝSANS KONTROLÜ BÝTÝÞÝ ===
             List<Machine> machines = _machineRepository.GetAllEnabledMachines();
             if (machines == null)
             {
@@ -113,7 +177,7 @@ namespace TekstilScada
             // GÜNCELLENDÝ: CostRepository parametresini ekleyin
             _raporlarView.InitializeControl(_machineRepository, _alarmRepository, _productionRepository, _dashboardRepository, _processLogRepository, _recipeRepository, _costRepository);
             _genelBakisView.InitializeControl(_pollingService, _machineRepository, _dashboardRepository, _alarmRepository, _processLogRepository, _productionRepository);
-
+            _ayarlarView.RefreshMachineSettingsView();
             // HANGÝ SAYFANIN GÖSTERÝLECEÐÝNÝ KONTROL ET
             if (viewToShow != _genelBakisView)
             {

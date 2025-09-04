@@ -140,5 +140,23 @@ namespace TekstilScada.UI.Views
                 }
             }
         }
+
+        private void ekle_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Yeni bir boş operatör şablonu oluşturup veritabanına ekle
+                _plcOperatorRepository.AddDefaultOperator();
+
+                // Tabloyu yenile
+                RefreshGrid();
+
+                MessageBox.Show("Yeni bir boş operatör şablonu başarıyla eklendi. Düzenlemek için üzerine tıklayın ve kaydedin.", "Başarılı");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Yeni operatör eklenirken bir hata oluştu: {ex.Message}", "Hata");
+            }
+        }
     }
 }
