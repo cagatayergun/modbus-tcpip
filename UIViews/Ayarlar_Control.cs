@@ -46,6 +46,41 @@ namespace TekstilScada.UI.Views
                                                              // YENİ: Tasarımcı kontrolünü yeni sekmeye ekle
             _recipeStepDesigner.Dock = DockStyle.Fill;
             tabPageRecipeDesigner.Controls.Add(_recipeStepDesigner);
+            ApplyPermissions();
+        }
+        public void RefreshUserRoles()
+        {
+            _userSettings.LoadAllRoles();
+        }
+        public void ApplyPermissions1()
+        {
+            ApplyPermissions();
+        }
+        private void ApplyPermissions()
+        {
+
+            // === ANA MENÜ BUTONLARI İÇİN YETKİLENDİRME ===
+            // 5 numaralı role sahip kullanıcılar rapor alabilir
+            _machineSettings.Visible = PermissionService.HasAnyPermission(new List<int> { 6 });
+            _userSettings.Visible = PermissionService.HasAnyPermission(new List<int> { 7 });
+            _alarmSettings.Enabled = PermissionService.HasAnyPermission(new List<int> { 8 });
+            _costSettings.Enabled = PermissionService.HasAnyPermission(new List<int> { 9 });
+            _plcOperatorSettings.Enabled = PermissionService.HasAnyPermission(new List<int> { 10 });
+            _recipeStepDesigner.Visible = PermissionService.HasAnyPermission(new List<int> { 11 });
+            // btnVnc.Enabled = btnVnc.Visible; // Yetkisi yoksa butonun tıklanmasını engelle
+
+
+            var master = PermissionService.HasAnyPermission(new List<int> { 1000 });
+            if (master == true)
+            {
+                _machineSettings.Visible = PermissionService.HasAnyPermission(new List<int> { 1000 });
+                _userSettings.Visible = PermissionService.HasAnyPermission(new List<int> { 1000 });
+                _alarmSettings.Enabled = PermissionService.HasAnyPermission(new List<int> { 1000 });
+                _costSettings.Enabled = PermissionService.HasAnyPermission(new List<int> { 1000 });
+                _plcOperatorSettings.Enabled = PermissionService.HasAnyPermission(new List<int> { 1000 });
+                _recipeStepDesigner.Visible = PermissionService.HasAnyPermission(new List<int> { 1000 });
+            }
+
         }
         public void RefreshMachineSettingsView()
         {

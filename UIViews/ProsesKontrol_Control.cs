@@ -68,23 +68,38 @@ namespace TekstilScada.UI.Views
         private void ApplyPermissions()
         {
             // Reçete kaydetme yetkisi kontrolü
-            btnSaveRecipe.Enabled = PermissionService.CanEditRecipes;
+            // btnSaveRecipe.Enabled = PermissionService.CanEditRecipes;
+            btnDeleteRecipe.Enabled = PermissionService.HasAnyPermission(new List<int> { 5 });
+            btnFtpSync.Enabled = PermissionService.HasAnyPermission(new List<int> { 5 });
+            btnNewRecipe.Enabled = PermissionService.HasAnyPermission(new List<int> { 5 });
+            btnReadFromPlc.Enabled = PermissionService.HasAnyPermission(new List<int> { 5 });
+            btnSaveRecipe.Enabled = PermissionService.HasAnyPermission(new List<int> { 5 });
+            btnSendToPlc.Enabled = PermissionService.HasAnyPermission(new List<int> { 5 });
 
-            // Reçete silme yetkisi kontrolü (sadece Admin silebilir)
-            btnDeleteRecipe.Enabled = PermissionService.CanDeleteRecipes;
+            var master = PermissionService.HasAnyPermission(new List<int> { 1000 });
+            if (master == true)
+            {
 
+                btnDeleteRecipe.Enabled = PermissionService.HasAnyPermission(new List<int> { 1000 });
+                btnFtpSync.Enabled = PermissionService.HasAnyPermission(new List<int> { 1000 });
+                btnNewRecipe.Enabled = PermissionService.HasAnyPermission(new List<int> { 1000 });
+                btnReadFromPlc.Enabled = PermissionService.HasAnyPermission(new List<int> { 1000 });
+                btnSaveRecipe.Enabled = PermissionService.HasAnyPermission(new List<int> { 1000 });
+                btnSendToPlc.Enabled = PermissionService.HasAnyPermission(new List<int> { 1000 });
+
+            }
             // PLC'ye gönderme yetkisi kontrolü
-            btnSendToPlc.Enabled = PermissionService.CanTransferToPlc;
-            btnReadFromPlc.Enabled = PermissionService.CanTransferToPlc;
-            btnFtpSync.Enabled = PermissionService.CanTransferToPlc;
+            //  btnSendToPlc.Enabled = PermissionService.CanTransferToPlc;
+            //  btnReadFromPlc.Enabled = PermissionService.CanTransferToPlc;
+            //  btnFtpSync.Enabled = PermissionService.CanTransferToPlc;
 
             // Reçete Adı metin kutusunu sadece yetkisi olanlar düzenleyebilir
-            txtRecipeName.ReadOnly = !PermissionService.CanEditRecipes;
+            //  txtRecipeName.ReadOnly = !PermissionService.CanEditRecipes;
         }
         private void ApplyRolePermissions()
         {
             // Sadece Admin ve Muhendis (Mühendis) rolleri kaydedebilir.
-            btnSaveRecipe.Enabled = CurrentUser.HasRole("Admin") || CurrentUser.HasRole("Muhendis");
+          //  btnSaveRecipe.Enabled = CurrentUser.HasRole("Admin") || CurrentUser.HasRole("Muhendis");
 
 
         }

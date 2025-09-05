@@ -37,6 +37,7 @@ namespace TekstilScada
         private readonly GenelBakis_Control _genelBakisView;
        // private readonly FtpTransferService _ftpTransferService; // YENÝ: FTP transfer servisi eklendi
         private VncViewer_Form _activeVncViewerForm = null;
+        private readonly UserSettings_Control _user_setting;
 
         public MainForm()
         {
@@ -62,6 +63,7 @@ namespace TekstilScada
             _raporlarView = new Raporlar_Control();
             _liveEventPopup = new LiveEventPopup_Form();
             _genelBakisView = new GenelBakis_Control();
+            _user_setting = new UserSettings_Control();
          //   _ftpTransferService = new FtpTransferService(_pollingService);
             //_prosesKontrolView = new ProsesKontrol_Control(_ftpTransferService);
             // Olay abonelikleri (Events)
@@ -84,8 +86,7 @@ namespace TekstilScada
                 this.Close();
                 return;
             }
-
-            // Lisans baþarýlý, makine sayýsýný kontrol et
+             // Lisans baþarýlý, makine sayýsýný kontrol et
             var machines = _machineRepository.GetAllMachines();
             if (machines.Count > licenseData.MachineLimit)
             {
@@ -115,21 +116,46 @@ namespace TekstilScada
             ApplyLocalization();
             UpdateUserInfoAndPermissions();
             ReloadSystem(_genelBakisView);
-            ApplyPermissions(); // YENÝ: Yetkileri uygula
+          
         }
         private void ApplyPermissions()
         {
-            // Raporlar butonunu sadece yetkisi olanlar görebilir/kullanabilir.
-            btnRaporlar.Enabled = PermissionService.CanViewReports;
 
-            // Proses Kontrol (Reçete) butonunu yetkisi olanlar kullanabilir.
-            btnProsesKontrol.Enabled = PermissionService.CanEditRecipes;
+            // === ANA MENÜ BUTONLARI ÝÇÝN YETKÝLENDÝRME ===
+            // 5 numaralý role sahip kullanýcýlar rapor alabilir
+            btnProsesKontrol.Visible = PermissionService.HasAnyPermission(new List<int> { 1 });
+            btnProsesKontrol.Enabled = btnProsesKontrol.Visible; // Yetkisi yoksa butonun týklanmasýný engelle
 
-            // Ayarlar butonunu sadece Admin görebilir/kullanabilir.
-            btnAyarlar.Enabled = PermissionService.CanViewSettings;
+            btnRaporlar.Visible = PermissionService.HasAnyPermission(new List<int> { 2 });
+            btnRaporlar.Enabled = btnRaporlar.Visible; // Yetkisi yoksa butonun týklanmasýný engelle
+
+            // 8 numaralý role sahip kullanýcýlar ayarlar ekranýna eriþebilir
+            btnAyarlar.Visible = PermissionService.HasAnyPermission(new List<int> { 3 });
+            btnAyarlar.Enabled = btnAyarlar.Visible; // Yetkisi yoksa butonun týklanmasýný engelle
+
+            // === ANA MENÜ BUTONLARI ÝÇÝN YETKÝLENDÝRME ===
+            var master = PermissionService.HasAnyPermission(new List<int> { 1000 });
+            if (master == true)
+            {
+
+                // 5 numaralý role sahip kullanýcýlar rapor alabilir
+                btnProsesKontrol.Visible = PermissionService.HasAnyPermission(new List<int> { 1000 });
+                btnProsesKontrol.Enabled = btnProsesKontrol.Visible; // Yetkisi yoksa butonun týklanmasýný engelle
+
+                btnRaporlar.Visible = PermissionService.HasAnyPermission(new List<int> { 1000 });
+                btnRaporlar.Enabled = btnRaporlar.Visible; // Yetkisi yoksa butonun týklanmasýný engelle
+
+                // 8 numaralý role sahip kullanýcýlar ayarlar ekranýna eriþebilir
+                btnAyarlar.Visible = PermissionService.HasAnyPermission(new List<int> { 1000 });
+                btnAyarlar.Enabled = btnAyarlar.Visible; // Yetkisi yoksa butonun týklanmasýný engelle
+            }
+            _ayarlarView.ApplyPermissions1();
+            _user_setting.LoadAllRoles();
+
         }
         private void ReloadSystem(Control viewToShow)
         {
+            //MessageBox.Show($"{btnRaporlar.Visible}");
             _pollingService.Stop();
             // === YENÝ LÝSANS KONTROLÜ BAÞLANGICI ===
             var (isValid, message, licenseData) = LicenseManager.ValidateLicense();
@@ -227,22 +253,14 @@ namespace TekstilScada
                 lblStatusCurrentUser.Text = $"{Resources.Loggedin}: -";
             }
             // Ayarlar butonunu sadece "Admin" rolüne sahip kullanýcýlar için etkinleþtir.
-            btnAyarlar.Enabled = CurrentUser.HasRole("Admin");
+            _user_setting.LoadAllRoles();
+            _ayarlarView.RefreshUserRoles();
+            ApplyPermissions(); // YENÝ: Yetkileri uygula
         }
 
         private void ShowView(UserControl view)
         {
-            if (view is Ayarlar_Control && !PermissionService.CanViewSettings)
-
-            {
-                MessageBox.Show(Resources.NoAccess, Resources.AccessDenied);
-                return;
-            }
-            if (view is Raporlar_Control && !PermissionService.CanViewReports)
-            {
-                MessageBox.Show(Resources.NoAccess, Resources.AccessDenied);
-                return;
-            }
+          
             pnlContent.Controls.Clear();
             view.Dock = DockStyle.Fill;
             pnlContent.Controls.Add(view);
@@ -264,24 +282,23 @@ namespace TekstilScada
 
         private void çýkýþYapToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var result = MessageBox.Show(Resources.Cikiseminmisin, Resources.Confirim, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (result == DialogResult.Yes)
-            {
-                this.Hide();
-                _pollingService.Stop();
+            // Kullanýcý çýkýþ yapýyorsa, CurrentUser'ý sýfýrla
+            CurrentUser.User = null;
+            UpdateUserInfoAndPermissions();
+            ShowView(_genelBakisView); // Çýkýþ yaptýktan sonra genel bakýþ ekranýna dön
 
-                using (var loginForm = new LoginForm())
+            // Yeni bir LoginForm açarak kullanýcý giriþi yapmasýný iste
+            using (var loginForm = new LoginForm())
+            {
+                if (loginForm.ShowDialog() == DialogResult.OK)
                 {
-                    if (loginForm.ShowDialog() == DialogResult.OK)
-                    {
-                        UpdateUserInfoAndPermissions();
-                        ReloadSystem(_genelBakisView);
-                        this.Show();
-                    }
-                    else
-                    {
-                        Application.Exit();
-                    }
+                    UpdateUserInfoAndPermissions();
+                    ReloadSystem(_genelBakisView);
+                }
+                else
+                {
+                    // Giriþ yapmayý iptal ederse, programý kapat
+                    //Application.Exit();
                 }
             }
         }

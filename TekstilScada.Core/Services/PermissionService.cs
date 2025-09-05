@@ -5,6 +5,16 @@
     /// </summary>
     public static class PermissionService
     {
+        public static bool HasAnyPermission(List<int> requiredRoleIds)
+        {
+            if (CurrentUser.User == null || CurrentUser.User.Roles == null)
+            {
+                return false;
+            }
+
+            var userRoleIds = CurrentUser.User.Roles.Select(r => r.Id).ToList();
+            return userRoleIds.Any(roleId => requiredRoleIds.Contains(roleId));
+        }
         // AYARLAR EKRANI
         public static bool CanViewSettings => CurrentUser.HasRole("Admin");
 

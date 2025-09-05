@@ -9,7 +9,7 @@ namespace TekstilScada.Services
     /// </summary>
     public static class CurrentUser
     {
-        public static User User { get; private set; }
+        public static User User { get; set; }
         public static bool IsLoggedIn => User != null;
 
         public static void Login(User user)

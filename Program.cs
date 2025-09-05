@@ -37,14 +37,24 @@ namespace TekstilScada
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            using (var loginForm = new LoginForm())
+            // === YENÝ LÝSANS DOÐRULAMA KODU BAÞLANGICI ===
+            var (isValid, message, licenseData) = LicenseManager.ValidateLicense();
+
+            if (!isValid)
             {
-                if (loginForm.ShowDialog() == DialogResult.OK)
-                {
-                    Application.Run(new MainForm());
-                    
-                }
+                MessageBox.Show($"Lisans Hatasý: {message}", "Uygulama Lisansý", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return; // Uygulamayý sonlandýr
             }
+
+            // Geçici MessageBox: Baðlantý dizesini kontrol etmek için
+            // Testten sonra bu satýrý silmeyi unutmayýn!
+           // MessageBox.Show($"Lisans dosyasý baþarýyla doðrulandý. Baðlantý dizesi: {licenseData.EncryptedConnectionString}", "Lisans Baþarýlý");
+
+            // Lisans baþarýlýysa, baðlantý dizesini ayarla
+            AppConfig.SetConnectionString(licenseData.EncryptedConnectionString);
+
+            // === LÝSANS DOÐRULAMA KODU BÝTÝÞÝ ===
+            Application.Run(new MainForm());
         }
     }
 }

@@ -8,16 +8,10 @@ namespace TekstilScada.Core
     {
         public static string ConnectionString { get; private set; }
 
-        static AppConfig()
+        // YENİ: Bağlantı dizesini dışarıdan ayarlamak için metot
+        public static void SetConnectionString(string connectionString)
         {
-            var configuration = new ConfigurationBuilder()
-                // Çalışan uygulamanın bulunduğu dizini baz al
-                .SetBasePath(Directory.GetCurrentDirectory())
-                // Bu dizindeki appsettings.json dosyasını oku
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .Build();
-
-            ConnectionString = configuration.GetConnectionString("DefaultConnection");
+            ConnectionString = connectionString;
         }
     }
 }

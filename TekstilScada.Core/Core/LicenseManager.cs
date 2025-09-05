@@ -13,6 +13,7 @@ namespace TekstilScada.Core
         public string HardwareKey { get; set; }
         public int MachineLimit { get; set; }
         public string Signature { get; set; }
+        public string EncryptedConnectionString { get; set; } // YENİ EKLENEN
     }
 
     public static class LicenseManager
@@ -66,6 +67,11 @@ namespace TekstilScada.Core
                 {
                     return (false, "Lisans, bu bilgisayar için geçerli değil.", null);
                 }
+                string connectionString = DecryptConnectionString(licenseData.EncryptedConnectionString);
+
+                // Lisans verisini ve şifresi çözülmüş bağlantı dizesini döndür
+                licenseData.EncryptedConnectionString = connectionString;
+              //  return (true, "Lisans başarıyla doğrulandı.", licenseData);
 
                 return (true, "Lisans başarıyla doğrulandı.", licenseData);
             }
@@ -73,7 +79,15 @@ namespace TekstilScada.Core
             {
                 return (false, $"Lisans doğrulaması sırasında beklenmedik bir hata oluştu: {ex.Message}", null);
             }
+
         }
+        private static string DecryptConnectionString(string encryptedData)
+        {
+            byte[] encryptedBytes = Convert.FromBase64String(encryptedData);
+            byte[] decryptedData = ProtectedData.Unprotect(encryptedBytes, null, DataProtectionScope.CurrentUser);
+            return Encoding.UTF8.GetString(decryptedData);
+        }
+
 
         // Donanım key'ini oluşturan metot
         public static string GenerateHardwareKey()

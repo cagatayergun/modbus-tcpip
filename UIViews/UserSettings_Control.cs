@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using TekstilScada.Models;
 using TekstilScada.Properties;
 using TekstilScada.Repositories;
+using TekstilScada.Services;
 
 namespace TekstilScada.UI.Views
 {
@@ -42,12 +43,32 @@ namespace TekstilScada.UI.Views
             btnSave.Text = Resources.Save;
             btnDelete.Text = Resources.Delete;
         }
-        private void LoadAllRoles()
+        public void LoadAllRoles()
         {
+           
             _allRoles = _repository.GetAllRoles();
-            clbRoles.DataSource = _allRoles;
+            
+            var filteredRoles = _allRoles.Where(r => r.Id != 1000).ToList();
+            // ComboBox'ın veri kaynağını sıfırla
+            
+            if (PermissionService.HasAnyPermission(new List<int> { 1000 }))
+            {
+                clbRoles.DataSource = null;
+                clbRoles.Items.Clear();
+                clbRoles.DataSource = _allRoles;
+            }
+            else
+            {
+                clbRoles.DataSource = null;
+                clbRoles.Items.Clear();
+                clbRoles.DataSource = filteredRoles;
+            }
+
+
+
             clbRoles.DisplayMember = "RoleName";
             clbRoles.ValueMember = "Id";
+            RefreshUserList();
         }
 
         private void RefreshUserList()

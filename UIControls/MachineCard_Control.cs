@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging; // ColorMatrix için bu using ifadesi gerekli
 using System.Windows.Forms;
 using TekstilScada.Models;
+using TekstilScada.Services;
 
 namespace TekstilScada.UI.Controls
 {
@@ -96,7 +97,21 @@ namespace TekstilScada.UI.Controls
             return newBitmap;
         }
 
+        private void ApplyPermissions()
+        {
 
+            // === ANA MENÜ BUTONLARI İÇİN YETKİLENDİRME ===
+            // 5 numaralı role sahip kullanıcılar rapor alabilir
+            btnVnc.Visible = PermissionService.HasAnyPermission(new List<int> { 4 });
+            btnVnc.Enabled = btnVnc.Visible; // Yetkisi yoksa butonun tıklanmasını engelle
+            var master = PermissionService.HasAnyPermission(new List<int> { 1000 });
+            if (master == true)
+            {
+                btnVnc.Visible = PermissionService.HasAnyPermission(new List<int> { 1000 });
+                btnVnc.Enabled = btnVnc.Visible; // Yetkisi yoksa butonun tıklanmasını engelle
+            }
+
+        }
         public void UpdateView(FullMachineStatus status)
         {
             if (this.IsDisposed || !this.IsHandleCreated) return;
@@ -178,6 +193,7 @@ namespace TekstilScada.UI.Controls
                 progressBar.Value = _lastValidProgress;
                 lblPercentage.Text = $"{_lastValidProgress} %";
             }
+            ApplyPermissions();
         }
 
         private void ClearData()
