@@ -451,7 +451,7 @@
     <value>Giriş Yapan</value>
   </data>
   <data name="Logout" xml:space="preserve">
-    <value>Çıkış Yap</value>
+    <value>Oturum</value>
   </data>
   <data name="namesurname" xml:space="preserve">
     <value>Ad Soyad</value>

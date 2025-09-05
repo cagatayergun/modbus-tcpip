@@ -943,7 +943,7 @@ namespace TekstilScada.Properties {
         }
         
         /// <summary>
-        ///   Çıkış Yap benzeri yerelleştirilmiş bir dize arar.
+        ///   Oturum benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
         public static string Logout {
             get {

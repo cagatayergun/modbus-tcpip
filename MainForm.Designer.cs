@@ -226,7 +226,7 @@ namespace TekstilScada
             // 
             çıkışYapToolStripMenuItem.Name = "çıkışYapToolStripMenuItem";
             çıkışYapToolStripMenuItem.Size = new Size(121, 22);
-            çıkışYapToolStripMenuItem.Text = "Çıkış Yap";
+            çıkışYapToolStripMenuItem.Text = "Oturum";
             çıkışYapToolStripMenuItem.Click += çıkışYapToolStripMenuItem_Click;
             // 
             // statusStrip1

@@ -451,7 +451,7 @@
     <value>Logged in as</value>
   </data>
   <data name="Logout" xml:space="preserve">
-    <value>Logout</value>
+    <value>Log</value>
   </data>
   <data name="namesurname" xml:space="preserve">
     <value>Full Name</value>
