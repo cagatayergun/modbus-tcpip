@@ -18,15 +18,15 @@ namespace TekstilScada.Services
         public string IpAddress { get; private set; }
 
         // **ÖNEMLİ**: Bu adresleri PLC'nizin Modbus haritasına göre doğrulamanız gerekir.
-        private const string IS_RUNNING_COIL = "8000"; // M8000
-        private const string LIVE_TEMP_REG = "8000"; // D8000
-        private const string FAN_RPM_REG = "8002"; // D8002
-        private const string ALARM_NO_REG = "8010"; // D8010
-        private const string BATCH_NO_REG = "8200"; // D8200
-        private const string IS_PRODUCTION_COIL = "8501"; // M8501
-        private const string DOWNTIME_SECONDS_REG = "8800"; // D8800
-        private const string TOTAL_PROD_COUNT_REG = "8802"; // D8802
-        private const string DEFECTIVE_PROD_COUNT_REG = "8804"; // D8804
+        private const string IS_RUNNING_COIL = "0"; // M8000
+        private const string LIVE_TEMP_REG = "3000"; // D8000
+        private const string FAN_RPM_REG = "3001"; // D8002
+        private const string ALARM_NO_REG = "3002"; // D8010
+        private const string BATCH_NO_REG = "3003"; // D8200
+        private const string IS_PRODUCTION_COIL = "3013"; // M8501
+        private const string DOWNTIME_SECONDS_REG = "3014"; // D8800
+        private const string TOTAL_PROD_COUNT_REG = "3015"; // D8802
+        private const string DEFECTIVE_PROD_COUNT_REG = "3016"; // D8804
 
         public KurutmaMakinesiManager(string ipAddress, int port)
         {
@@ -73,8 +73,8 @@ namespace TekstilScada.Services
 
                 var alarmNoResult = _plcClient.ReadInt16(ALARM_NO_REG);
                 if (!alarmNoResult.IsSuccess) return OperateResult.CreateFailedResult<FullMachineStatus>(alarmNoResult);
-                status.ActiveAlarmNumber = alarmNoResult.Content;
-                status.HasActiveAlarm = alarmNoResult.Content > 0;
+                status.ActiveAlarmNumber = alarmNoResult.Content+25;
+                status.HasActiveAlarm = alarmNoResult.Content > 25;
 
                 var batchNoResult = _plcClient.ReadString(BATCH_NO_REG, 20, Encoding.ASCII);
                 if (!batchNoResult.IsSuccess) return OperateResult.CreateFailedResult<FullMachineStatus>(batchNoResult);
@@ -108,18 +108,12 @@ namespace TekstilScada.Services
         // ... Diğer metodlar için Modbus'a özgü adresler ve metotlar kullanıldı ...
         public async Task<OperateResult> ResetOeeCountersAsync()
         {
-            await Task.Run(() => _plcClient.Write(DOWNTIME_SECONDS_REG, 0));
-            await Task.Run(() => _plcClient.Write(DEFECTIVE_PROD_COUNT_REG, 0));
-            return OperateResult.CreateSuccessResult();
+            throw new NotImplementedException("Kurutma makineleri operatör yönetimini desteklemez.");
         }
 
         public async Task<OperateResult> IncrementProductionCounterAsync()
         {
-            var readResult = await Task.Run(() => _plcClient.ReadInt16(TOTAL_PROD_COUNT_REG));
-            if (!readResult.IsSuccess) return new OperateResult($"Üretim sayacı okunamadı: {readResult.Message}");
-
-            short newCount = (short)(readResult.Content + 1);
-            return await Task.Run(() => _plcClient.Write(TOTAL_PROD_COUNT_REG, newCount));
+            throw new NotImplementedException("Kurutma makineleri operatör yönetimini desteklemez.");
         }
         public Task<OperateResult> AcknowledgeAlarm()
         {
@@ -128,12 +122,12 @@ namespace TekstilScada.Services
         public async Task<OperateResult> WriteRecipeToPlcAsync(ScadaRecipe recipe, int? recipeSlot = null)
         {
             // Adresler sabit adresler olarak varsayıldı
-            string setTempAddress = "3545";
-            string setHumidityAddress = "3595";
-            string setDurationAddress = "3580";
-            string setRpmAddress = "3680";
-            string setCoolingTimeAddress = "3720";
-            string controlWordAddress = "3700";
+            string setTempAddress = "0";
+            string setHumidityAddress = "1";
+            string setDurationAddress = "2";
+            string setRpmAddress = "3";
+            string setCoolingTimeAddress = "4";
+            string controlWordAddress = "5";
 
             if (!recipeSlot.HasValue || recipeSlot < 1 || recipeSlot > 20)
                 return new OperateResult("Geçersiz reçete numarası (1-20 arası olmalıdır).");
@@ -143,7 +137,7 @@ namespace TekstilScada.Services
 
             try
             {
-                var isRunningResult = await Task.Run(() => _plcClient.ReadCoil("30"));
+                var isRunningResult = await Task.Run(() => _plcClient.ReadCoil("1"));
                 if (!isRunningResult.IsSuccess) return isRunningResult;
                 if (isRunningResult.Content)
                 {
@@ -158,6 +152,11 @@ namespace TekstilScada.Services
                 short setCoolingTime = firstStep.StepDataWords[4];
                 short controlWord = firstStep.StepDataWords[5];
 
+                await Task.Run(() => _plcClient.Write("3017", (short)recipeSlot.Value));
+                await Task.Delay(500);
+
+                await Task.Run(() => _plcClient.Write("2", true));
+
                 await Task.Run(() => _plcClient.Write(setTempAddress, setTemperature));
                 await Task.Run(() => _plcClient.Write(setHumidityAddress, setHumidity));
                 await Task.Run(() => _plcClient.Write(setDurationAddress, setDuration));
@@ -165,11 +164,11 @@ namespace TekstilScada.Services
                 await Task.Run(() => _plcClient.Write(setCoolingTimeAddress, setCoolingTime));
                 await Task.Run(() => _plcClient.Write(controlWordAddress, controlWord));
 
-                await Task.Run(() => _plcClient.Write("3610", (short)recipeSlot.Value));
+               
 
-                await Task.Run(() => _plcClient.Write("1", true));
-                await Task.Delay(500);
-                await Task.Run(() => _plcClient.Write("1", false));
+              
+                
+              //  await Task.Run(() => _plcClient.Write("1", false));
 
                 return OperateResult.CreateSuccessResult();
             }
@@ -205,36 +204,7 @@ namespace TekstilScada.Services
         }
         public async Task<OperateResult<ScadaRecipe>> ReadFullRecipeDataAsync()
         {
-            var readResult = await ReadRecipeFromPlcAsync(); // Kendi metodunuzu çağırın
-            if (!readResult.IsSuccess)
-            {
-                return OperateResult.CreateFailedResult<ScadaRecipe>(readResult);
-            }
-
-            var recipeData = readResult.Content;
-            var recipe = new ScadaRecipe
-            {
-                Steps = new List<ScadaRecipeStep>()
-            };
-
-            const int wordsPerStep = 25; // Her adım için 25 kelime (word) varsayımı
-            int totalSteps = recipeData.Length / wordsPerStep;
-
-            for (int i = 0; i < totalSteps; i++)
-            {
-                var stepWords = new short[wordsPerStep];
-                Array.Copy(recipeData, i * wordsPerStep, stepWords, 0, wordsPerStep);
-
-                // Adım numarası ve diğer verileri PLC verilerinden çekin
-                var step = new ScadaRecipeStep
-                {
-                    StepNumber = i + 1, // Adım numarası
-                    StepDataWords = stepWords
-                };
-                recipe.Steps.Add(step);
-            }
-
-            return OperateResult.CreateSuccessResult(recipe);
+            throw new NotImplementedException("Kurutma makineleri operatör yönetimini desteklemez.");
         }
         public async Task<OperateResult<Dictionary<int, string>>> ReadRecipeNamesFromPlcAsync()
         {
@@ -242,9 +212,9 @@ namespace TekstilScada.Services
             try
             {
                 // Reçete isimleri D3212-D3812 arasında, her bir isim 6 word (12 byte)
-                const int startAddress = 3212;
+                const int startAddress = 4000;
                 const int wordsPerName = 6;
-                const int numRecipes = 99;
+                const int numRecipes = 20;
                 const int totalWords = numRecipes * wordsPerName;
                 var readResult = await Task.Run(() => _plcClient.ReadInt16(startAddress.ToString(), (ushort)totalWords));
                 if (!readResult.IsSuccess)
@@ -279,7 +249,7 @@ namespace TekstilScada.Services
             try
             {
                 // Reçete isimleri D3212'den başlar, her isim 6 word (12 byte)
-                const int startAddress = 3212;
+                const int startAddress = 4000;
                 const int wordsPerName = 6;
 
                 // PLC adresini hesapla (1'den başlayan reçete numarası için)
@@ -305,22 +275,29 @@ namespace TekstilScada.Services
         {
             try
             {
+              //  string setTempAddress = "0";
+              //  string setHumidityAddress = "1";
+              //  string setDurationAddress = "2";
+              //  string setRpmAddress = "3";
+              //  string setCoolingTimeAddress = "4";
+               // string controlWordAddress = "5";
                 // DEĞİŞİKLİK: Modbus adres kullanılıyor
-                var tempResult = await Task.Run(() => _plcClient.ReadInt16("3570"));
+                var tempResult = await Task.Run(() => _plcClient.ReadInt16("0"));
                 if (!tempResult.IsSuccess) return OperateResult.CreateFailedResult<short[]>(tempResult);
 
-                var humidityResult = await Task.Run(() => _plcClient.ReadInt16("3600"));
+                var humidityResult = await Task.Run(() => _plcClient.ReadInt16("1"));
                 if (!humidityResult.IsSuccess) return OperateResult.CreateFailedResult<short[]>(humidityResult);
 
-                var durationResult = await Task.Run(() => _plcClient.ReadInt16("3615"));
+                var durationResult = await Task.Run(() => _plcClient.ReadInt16("2"));
                 if (!durationResult.IsSuccess) return OperateResult.CreateFailedResult<short[]>(durationResult);
 
-                var rpmResult = await Task.Run(() => _plcClient.ReadInt16("7000"));
+                var rpmResult = await Task.Run(() => _plcClient.ReadInt16("3"));
                 if (!rpmResult.IsSuccess) return OperateResult.CreateFailedResult<short[]>(rpmResult);
 
-                var coolingResult = await Task.Run(() => _plcClient.ReadInt16("3724"));
+                var coolingResult = await Task.Run(() => _plcClient.ReadInt16("4"));
                 if (!coolingResult.IsSuccess) return OperateResult.CreateFailedResult<short[]>(coolingResult);
-
+                var controlWordAddress = await Task.Run(() => _plcClient.ReadInt16("5"));
+                if (!controlWordAddress.IsSuccess) return OperateResult.CreateFailedResult<short[]>(controlWordAddress);
                 // Okunan değerleri standart bir dizi formatında geri döndür
                 short[] recipeData = new short[5];
                 recipeData[0] = tempResult.Content;
@@ -328,7 +305,7 @@ namespace TekstilScada.Services
                 recipeData[2] = durationResult.Content;
                 recipeData[3] = rpmResult.Content;
                 recipeData[4] = coolingResult.Content;
-
+                recipeData[5] = controlWordAddress.Content;
                 return OperateResult.CreateSuccessResult(recipeData);
             }
             catch (Exception ex)
