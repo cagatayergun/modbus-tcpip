@@ -23,6 +23,7 @@
             this.tabPageTrendAnalysis = new System.Windows.Forms.TabPage();
             this.tabPageRecipeOptimization = new System.Windows.Forms.TabPage();
             this.tabPageGenelUretim = new System.Windows.Forms.TabPage();
+            this.tabPageActionLog = new System.Windows.Forms.TabPage();
             this.tabControlReports.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -35,6 +36,7 @@
             this.tabControlReports.Controls.Add(this.tabPageRecipeOptimization);
             this.tabControlReports.Controls.Add(this.tabPageManualReport); // YENİ
             this.tabControlReports.Controls.Add(this.tabPageGenelUretim); // YENİ
+            this.tabControlReports.Controls.Add(this.tabPageActionLog);
             this.tabControlReports.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControlReports.Location = new System.Drawing.Point(0, 0);
             this.tabControlReports.Name = "tabControlReports";
@@ -102,6 +104,15 @@
             this.tabPageGenelUretim.TabIndex = 6;
             this.tabPageGenelUretim.Text = "Genel Tüketim Raporu";
             this.tabPageGenelUretim.UseVisualStyleBackColor = true;
+            // Yeni tabPage'in ayarlarını yapın
+           // this.tabPageActionLog.Controls.Add(this.actionLogReport_Control1);
+            this.tabPageActionLog.Location = new System.Drawing.Point(4, 29);
+            this.tabPageActionLog.Name = "tabPageActionLog";
+            this.tabPageActionLog.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageActionLog.Size = new System.Drawing.Size(992, 608);
+            this.tabPageActionLog.TabIndex = 4;
+            this.tabPageActionLog.Text = "Eylem Kayıtları";
+            this.tabPageActionLog.UseVisualStyleBackColor = true;
             // 
             // Raporlar_Control
             // 
@@ -114,6 +125,7 @@
             this.ResumeLayout(false);
         }
         #endregion
+        private System.Windows.Forms.TabPage tabPageActionLog;
         private System.Windows.Forms.TabControl tabControlReports;
         private System.Windows.Forms.TabPage tabPageAlarmReport;
         private System.Windows.Forms.TabPage tabPageProductionReport;

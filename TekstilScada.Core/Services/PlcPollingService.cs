@@ -21,6 +21,7 @@ namespace TekstilScada.Services
         private readonly AlarmRepository _alarmRepository;
         private readonly ProcessLogRepository _processLogRepository;
         private readonly ProductionRepository _productionRepository;
+        private readonly MachineRepository _machinerepository;
         private ConcurrentDictionary<int, string> _currentBatches;
         private ConcurrentDictionary<int, DateTime> _reconnectAttempts;
         private ConcurrentDictionary<int, ConnectionStatus> _connectionStates;
@@ -49,8 +50,8 @@ namespace TekstilScada.Services
             _processLogRepository = processLogRepository;
             _productionRepository = productionRepository;
             _recipeRepository = recipeRepository;
-
-            _plcManagers = new ConcurrentDictionary<int, IPlcManager>();
+           
+        _plcManagers = new ConcurrentDictionary<int, IPlcManager>();
             MachineDataCache = new ConcurrentDictionary<int, FullMachineStatus>();
             _reconnectAttempts = new ConcurrentDictionary<int, DateTime>();
             _connectionStates = new ConcurrentDictionary<int, ConnectionStatus>();
@@ -278,7 +279,28 @@ namespace TekstilScada.Services
 
                 if (_plcManagers.TryGetValue(machineId, out var plcManager))
                 {
-                    var recipeReadResult = await plcManager.ReadFullRecipeDataAsync();
+                    // DÜZELTME: Makine tipini MachineRepository'den çekiyoruz.
+                    var machine = _machinerepository.GetAllMachines().FirstOrDefault(m => m.Id == machineId);
+
+                    if (machine != null && machine.MachineType == "Kurutma Makinesi")
+                    {
+                        var recipeReadResult = await plcManager.ReadRecipeFromPlcAsync();
+                        if (recipeReadResult.IsSuccess && recipeReadResult.Content != null)
+                        {
+                            var dryingRecipe = new ScadaRecipe { Steps = { new ScadaRecipeStep { StepDataWords = recipeReadResult.Content } } };
+                            dryingRecipe.RecipeName = currentStatus.RecipeName;
+                            _liveAnalyzers[machineId] = new LiveStepAnalyzer(dryingRecipe, _productionRepository);
+
+                            // Kurutma makinesi için özel teorik süre hesaplaması
+                            double totalSeconds = RecipeAnalysis.CalculateTotalTheoreticalTimeForDryingMachine(dryingRecipe);
+                            _batchTotalTheoreticalTimes[machineId] = totalSeconds;
+                            _batchStartTimes[machineId] = DateTime.Now;
+                            _batchNonProductiveSeconds[machineId] = 0;
+                        }
+                    }
+                    else // BYMakinesi için mevcut mantık devam eder
+                    {
+                        var recipeReadResult = await plcManager.ReadFullRecipeDataAsync();
                     if (recipeReadResult.IsSuccess && recipeReadResult.Content != null)
                     {
                         var fullRecipe = recipeReadResult.Content;
@@ -293,6 +315,7 @@ namespace TekstilScada.Services
                     else
                     {
                     //    Debug.WriteLine($"[CheckAndLogBatchStartAndEnd] HATA: Reçete PLC'den okunamadı. LiveStepAnalyzer oluşturulamadı. Hata: {recipeReadResult.Message}");
+                    }
                     }
                 }
             }

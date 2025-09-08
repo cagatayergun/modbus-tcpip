@@ -27,6 +27,7 @@ namespace TekstilScada
         private readonly PlcPollingService _pollingService;
         private readonly DashboardRepository _dashboardRepository;
         private readonly CostRepository _costRepository; // YENÝ: Alaný ekleyin
+        private readonly UserRepository _userRepository ; // YENÝ: Alaný ekleyin
         // Arayüz Kontrolleri (Views)
         private readonly ProsesÝzleme_Control _prosesIzlemeView;
         private readonly ProsesKontrol_Control _prosesKontrolView;
@@ -54,7 +55,7 @@ namespace TekstilScada
             _pollingService = new PlcPollingService(_alarmRepository, _processLogRepository, _productionRepository, _recipeRepository);
             _dashboardRepository = new DashboardRepository(_recipeRepository);
             _costRepository = new CostRepository(); // YENÝ: Nesneyi oluþturun
-                                                    // DÜZELTME: FtpTransferService nesnesini burada oluþturun ve baðýmlýlýðý enjekte edin.
+                                                 // DÜZELTME: FtpTransferService nesnesini burada oluþturun ve baðýmlýlýðý enjekte edin.
             _ftpTransferService = new FtpTransferService(_pollingService);
             _prosesIzlemeView = new ProsesÝzleme_Control();
            _prosesKontrolView = new ProsesKontrol_Control();
@@ -247,6 +248,7 @@ namespace TekstilScada
             if (CurrentUser.IsLoggedIn)
             {
                 lblStatusCurrentUser.Text = $"{Resources.Loggedin}: {CurrentUser.User.FullName}";
+              
             }
             else
             {
@@ -256,6 +258,7 @@ namespace TekstilScada
             _user_setting.LoadAllRoles();
             _ayarlarView.RefreshUserRoles();
             ApplyPermissions(); // YENÝ: Yetkileri uygula
+          
         }
 
         private void ShowView(UserControl view)
@@ -324,6 +327,10 @@ namespace TekstilScada
             var machine = _machineRepository.GetAllMachines().FirstOrDefault(m => m.Id == machineId);
             if (machine != null && !string.IsNullOrEmpty(machine.VncAddress))
             {
+                if (CurrentUser.IsLoggedIn )
+                {
+                    _userRepository.LogAction(CurrentUser.User.Id, "VNC Baðlantýsý", $"{machine.MachineName} makinesine VNC ile baðlandý.");
+                }
                 try
                 {
                     var vncForm = new VncViewer_Form(machine.VncAddress, machine.VncPassword);

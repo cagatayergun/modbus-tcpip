@@ -155,6 +155,21 @@ namespace TekstilScada.Models
         // Word 9: Sıkma Süre (DK)
         public short SikmaSure { get => _data[9]; set => _data[9] = value; }
     }
+    public class KurutmaParams : BaseStepParams
+    {
+        public KurutmaParams(short[] data) : base(data) { }
+
+        public short Temperature { get => _data[0]; set => _data[0] = value; }
+        public short Humidity { get => _data[1]; set => _data[1] = value; }
+        public short DurationMinutes { get => _data[2]; set => _data[2] = value; }
+        public short Rpm { get => _data[3]; set => _data[3] = value; }
+        public short CoolingTimeMinutes { get => _data[4]; set => _data[4] = value; }
+        public short ControlWord { get => _data[5]; set => _data[5] = value; }
+
+        public bool HumidityControlActive { get => GetBit(5, 0); set => SetBit(5, 0, value); }
+        public bool TimeControlActive { get => GetBit(5, 1); set => SetBit(5, 1, value); }
+        public bool Alarm { get => GetBit(5, 2); set => SetBit(5, 2, value); }
+    }
 
     #endregion
 }

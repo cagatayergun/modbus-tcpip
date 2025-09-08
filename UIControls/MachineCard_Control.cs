@@ -219,6 +219,7 @@ namespace TekstilScada.UI.Controls
 
         private void btnVnc_Click(object sender, EventArgs e)
         {
+
             VncRequested?.Invoke(this, EventArgs.Empty);
         }
     }

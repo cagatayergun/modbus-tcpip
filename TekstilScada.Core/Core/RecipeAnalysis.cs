@@ -70,5 +70,35 @@ namespace TekstilScada.Core
             if (recipe == null || recipe.Steps == null) return 0;
             return CalculateTheoreticalTimeForSteps(recipe.Steps);
         }
+        public static double CalculateTotalTheoreticalTimeForDryingMachine(ScadaRecipe recipe)
+        {
+            if (recipe == null || !recipe.Steps.Any()) return 0;
+            var firstStep = recipe.Steps.First();
+            if (firstStep == null) return 0;
+
+            var paramsDrying = new KurutmaParams(firstStep.StepDataWords);
+
+            // Zaman bazlı çalışma (sadece süre kontrolü aktifse)
+            if ((paramsDrying.ControlWord & 2) != 0)
+            {
+                return (paramsDrying.DurationMinutes + paramsDrying.CoolingTimeMinutes) * 60;
+            }
+            // Nem bazlı çalışma (sadece nem kontrolü aktifse)
+            else if ((paramsDrying.ControlWord & 1) != 0)
+            {
+                // Nem bazlı süre tahmini burada yapılır. Bu bilgi olmadan basit bir ortalama süre kullanılabilir.
+                // Şimdilik sadece soğutma süresini ekleyelim, çünkü nem süresi dinamik olarak hesaplanamaz.
+                return paramsDrying.CoolingTimeMinutes * 60;
+            }
+            // Hem nem hem de süre kontrolü aynı anda aktifse (hangisi önce biterse)
+            else if ((paramsDrying.ControlWord & 3) == 3)
+            {
+                // Burada teorik süre, daha kısa olanın süresi olur. Ancak elimizde nem için teorik süre yok.
+                // Bu durumda sadece süre bilgisini alıp soğutma süresini ekleyebiliriz.
+                return (paramsDrying.DurationMinutes + paramsDrying.CoolingTimeMinutes) * 60;
+            }
+
+            return 0;
+        }
     }
 }

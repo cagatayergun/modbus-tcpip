@@ -27,20 +27,19 @@ namespace TekstilScada.UI.Controls
             if (recipe != null && recipe.Steps.Count > 0)
             {
                 _recipeStep = recipe.Steps[0];
-
+                var kurutmaParams = new KurutmaParams(_recipeStep.StepDataWords);
                 // Değerleri PLC hafıza haritasına göre kontrollerden oku
                 // Word0 = Sıcaklık, Word1 = Nem, Word2 = Zaman
                 // Word3 = Çalışma Devri, Word4 = Soğutma Zamanı
-                numSicaklik.Value = _recipeStep.StepDataWords[0] / 10.0m;
-                numNem.Value = _recipeStep.StepDataWords[1];
-                numZaman.Value = _recipeStep.StepDataWords[2];
-                numCalismaDevri.Value = _recipeStep.StepDataWords[3];
-                numSogutmaZamani.Value = _recipeStep.StepDataWords[4];
+                numSicaklik.Value = kurutmaParams.Temperature / 10.0m;
+                numNem.Value = kurutmaParams.Humidity;
+                numZaman.Value = kurutmaParams.DurationMinutes;
+                numCalismaDevri.Value = kurutmaParams.Rpm;
+                numSogutmaZamani.Value = kurutmaParams.CoolingTimeMinutes;
 
                 // Kontrol bitlerini oku (Word 5)
-                short controlWord = _recipeStep.StepDataWords[5];
-                chkNemAktif.Checked = (controlWord & 1) != 0;      // Bit 0
-                chkZamanAktif.Checked = (controlWord & 2) != 0;    // Bit 1
+                chkNemAktif.Checked = kurutmaParams.HumidityControlActive;
+                chkZamanAktif.Checked = kurutmaParams.TimeControlActive;
             }
         }
 
@@ -48,18 +47,18 @@ namespace TekstilScada.UI.Controls
         {
             if (_recipeStep == null) return;
 
+            var kurutmaParams = new KurutmaParams(_recipeStep.StepDataWords);
+
             // Değişiklikleri anında _recipeStep nesnesine kaydet
-            _recipeStep.StepDataWords[0] = (short)(numSicaklik.Value * 10);
-            _recipeStep.StepDataWords[1] = (short)numNem.Value;
-            _recipeStep.StepDataWords[2] = (short)numZaman.Value;
-            _recipeStep.StepDataWords[3] = (short)numCalismaDevri.Value;
-            _recipeStep.StepDataWords[4] = (short)numSogutmaZamani.Value;
+            kurutmaParams.Temperature = (short)(numSicaklik.Value * 10);
+            kurutmaParams.Humidity = (short)numNem.Value;
+            kurutmaParams.DurationMinutes = (short)numZaman.Value;
+            kurutmaParams.Rpm = (short)numCalismaDevri.Value;
+            kurutmaParams.CoolingTimeMinutes = (short)numSogutmaZamani.Value;
 
             // Kontrol bitlerini yaz (Word 5)
-            short controlWord = 0;
-            if (chkNemAktif.Checked) controlWord |= 1;  // Bit 0
-            if (chkZamanAktif.Checked) controlWord |= 2; // Bit 1
-            _recipeStep.StepDataWords[5] = controlWord;
+            kurutmaParams.HumidityControlActive = chkNemAktif.Checked;
+            kurutmaParams.TimeControlActive = chkZamanAktif.Checked;
 
             ValueChanged?.Invoke(this, EventArgs.Empty);
         }

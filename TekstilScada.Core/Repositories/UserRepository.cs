@@ -4,8 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TekstilScada.Core;
-using TekstilScada.Models;
 using TekstilScada.Core; // Bu satırı ekleyin
+using TekstilScada.Models;
+using TekstilScada.Core.Models;
 namespace TekstilScada.Repositories
 {
     public class UserRepository
@@ -43,7 +44,82 @@ namespace TekstilScada.Repositories
             }
             return user;
         }
+        public void LogAction(int userId, string actionType, string details)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                string query = "INSERT INTO action_log (UserId, Timestamp, ActionType, Details) VALUES (@UserId, @Timestamp, @ActionType, @Details);";
+                var cmd = new MySqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("@UserId", userId);
+                cmd.Parameters.AddWithValue("@Timestamp", DateTime.Now);
+                cmd.Parameters.AddWithValue("@ActionType", actionType);
+                cmd.Parameters.AddWithValue("@Details", details);
+                cmd.ExecuteNonQuery();
+            }
+        }
+        public List<ActionLogEntry> GetActionLogs(DateTime? startDate, DateTime? endDate, string username, string details)
+        {
+            var logs = new List<ActionLogEntry>();
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
 
+                string query = @"
+                    SELECT 
+                        al.Id,
+                        al.UserId,
+                        al.Timestamp,
+                        al.ActionType,
+                        al.Details,
+                        u.Username 
+                    FROM action_log al
+                    JOIN users u ON al.UserId = u.Id
+                    WHERE 1=1";
+
+                if (startDate.HasValue)
+                {
+                    query += " AND al.Timestamp >= @StartDate";
+                }
+                if (endDate.HasValue)
+                {
+                    query += " AND al.Timestamp <= @EndDate";
+                }
+                if (!string.IsNullOrEmpty(username))
+                {
+                    query += " AND u.Username LIKE @Username";
+                }
+                if (!string.IsNullOrEmpty(details))
+                {
+                    query += " AND al.Details LIKE @Details";
+                }
+
+                query += " ORDER BY al.Timestamp DESC;";
+
+                var cmd = new MySqlCommand(query, connection);
+                if (startDate.HasValue) cmd.Parameters.AddWithValue("@StartDate", startDate.Value);
+                if (endDate.HasValue) cmd.Parameters.AddWithValue("@EndDate", endDate.Value);
+                if (!string.IsNullOrEmpty(username)) cmd.Parameters.AddWithValue("@Username", $"%{username}%");
+                if (!string.IsNullOrEmpty(details)) cmd.Parameters.AddWithValue("@Details", $"%{details}%");
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        logs.Add(new ActionLogEntry
+                        {
+                            Id = reader.GetInt32("Id"),
+                            UserId = reader.GetInt32("UserId"),
+                            Timestamp = reader.GetDateTime("Timestamp"),
+                            ActionType = reader.GetString("ActionType"),
+                            Details = reader.GetString("Details"),
+                            Username = reader.GetString("Username")
+                        });
+                    }
+                }
+            }
+            return logs;
+        }
         public List<Role> GetUserRoles(int userId)
         {
             var roles = new List<Role>();

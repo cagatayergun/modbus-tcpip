@@ -3,6 +3,7 @@ using TekstilScada.Repositories;
 using System.Windows.Forms;
 using TekstilScada.Properties;
 using TekstilScada.Localization;
+using TekstilScada.UIViews;
 
 namespace TekstilScada.UI.Views
 {
@@ -15,7 +16,7 @@ namespace TekstilScada.UI.Views
         private readonly RecipeOptimization_Control _recipeOptimization;
         private readonly ManualUsageReport_Control _manualUsageReport;
         private readonly GenelUretimRaporu_Control _genelUretimRaporu;
-
+        private readonly ActionLogReport_Control _actionLogReport_Control;
         public Raporlar_Control()
         {
             InitializeComponent();
@@ -28,6 +29,8 @@ namespace TekstilScada.UI.Views
             _recipeOptimization = new RecipeOptimization_Control();
             _manualUsageReport = new ManualUsageReport_Control();
             _genelUretimRaporu = new GenelUretimRaporu_Control();
+            _genelUretimRaporu = new GenelUretimRaporu_Control();
+            _actionLogReport_Control = new ActionLogReport_Control();
 
             _genelUretimRaporu.Dock = DockStyle.Fill;
             tabPageGenelUretim.Controls.Add(_genelUretimRaporu);
@@ -49,6 +52,9 @@ namespace TekstilScada.UI.Views
 
             _manualUsageReport.Dock = DockStyle.Fill;
             tabPageManualReport.Controls.Add(_manualUsageReport);
+
+            _actionLogReport_Control.Dock = DockStyle.Fill;
+            tabPageManualReport.Controls.Add(_actionLogReport_Control);
         }
 
         private void ApplyLocalization()

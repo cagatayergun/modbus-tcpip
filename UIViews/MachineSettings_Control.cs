@@ -7,13 +7,14 @@ using TekstilScada.Core;
 using TekstilScada.Models;
 using TekstilScada.Properties;
 using TekstilScada.Repositories;
+using TekstilScada.Services;
 
 namespace TekstilScada.UI.Views
 {
     public partial class MachineSettings_Control : UserControl
     {
         public event EventHandler MachineListChanged;
-
+        private readonly UserRepository _userRepository;
         private readonly MachineRepository _repository;
         private List<TekstilScada.Models.Machine> _machines;
         private TekstilScada.Models.Machine _selectedMachine;
@@ -124,7 +125,7 @@ namespace TekstilScada.UI.Views
             txtMachineId.Text = "";
             txtMachineName.Text = "";
             txtIpAddress.Text = "";
-            txtPort.Text = "2004";
+            txtPort.Text = "502";
             txtVncAddress.Text = "";
             chkIsEnabled.Checked = true;
             cmbMachineType.SelectedIndex = 0;
@@ -167,6 +168,10 @@ namespace TekstilScada.UI.Views
                     }; 
                     _repository.AddMachine(newMachine);
                     MessageBox.Show($"{Resources.yenimakinebasarili}", $"{Resources.Confirim}", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    if (CurrentUser.IsLoggedIn)
+                    {
+                        _userRepository.LogAction(CurrentUser.User.Id, "Makine Ayarları", $"'{newMachine.MachineName}' adlı yeni makine eklendi.");
+                    }
                 }
                 else // Güncelleme
                 {
@@ -184,6 +189,10 @@ namespace TekstilScada.UI.Views
                     _repository.UpdateMachine(_selectedMachine);
                   
                     MessageBox.Show($"{Resources.makinebilgilerigüncellendi}", $"{Resources.Confirim}", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    if (CurrentUser.IsLoggedIn)
+                    {
+                        _userRepository.LogAction(CurrentUser.User.Id, "Makine Ayarları", $"'{_selectedMachine.MachineName}' makinesinin ayarları güncellendi.");
+                    }
                 }
 
                 RefreshMachineList();
