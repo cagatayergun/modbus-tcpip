@@ -9,7 +9,18 @@ namespace TekstilScada.Services
     /// </summary>
     public static class CurrentUser
     {
-        public static User User { get; set; }
+        private static User _user; // Yeni bir özel alan tanımlayın
+
+        public static User User
+        {
+            get => _user;
+            set
+            {
+                _user = value;
+                // Hata ayıklama için bu satırı ekleyin
+                System.Diagnostics.Debug.WriteLine($"[CurrentUser] User nesnesi değişti. Yeni değer null mı? {value == null}");
+            }
+        }
         public static bool IsLoggedIn => User != null;
 
         public static void Login(User user)
@@ -63,5 +74,6 @@ namespace TekstilScada.Services
             CurrentUser.Logout();
             return false;
         }
+      
     }
 }

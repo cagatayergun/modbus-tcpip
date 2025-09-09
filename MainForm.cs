@@ -65,6 +65,7 @@ namespace TekstilScada
             _liveEventPopup = new LiveEventPopup_Form();
             _genelBakisView = new GenelBakis_Control();
             _user_setting = new UserSettings_Control();
+            _userRepository = new UserRepository();
          //   _ftpTransferService = new FtpTransferService(_pollingService);
             //_prosesKontrolView = new ProsesKontrol_Control(_ftpTransferService);
             // Olay abonelikleri (Events)
@@ -248,17 +249,41 @@ namespace TekstilScada
             if (CurrentUser.IsLoggedIn)
             {
                 lblStatusCurrentUser.Text = $"{Resources.Loggedin}: {CurrentUser.User.FullName}";
-              
+                try
+                {
+                    if (CurrentUser.IsLoggedIn && CurrentUser.User != null)
+                    {
+                        _userRepository.LogAction(CurrentUser.User.Id, "Log", $"Session Login");
+                    }
+                }
+                catch (Exception logEx)
+                {
+                    // Loglama sýrasýnda oluþan hatayý kullanýcýya göster
+                    MessageBox.Show($" 'Session Login' is Log error : {logEx.Message}", Resources.Error);
+                }
             }
             else
             {
                 lblStatusCurrentUser.Text = $"{Resources.Loggedin}: -";
+                try
+                {
+                    if (CurrentUser.IsLoggedIn && CurrentUser.User != null)
+                    {
+                        _userRepository.LogAction(CurrentUser.User.Id, "Log", $"Session Logout");
+                    }
+                }
+                catch (Exception logEx)
+                {
+                    // Loglama sýrasýnda oluþan hatayý kullanýcýya göster
+                    MessageBox.Show($" 'Session Logout' is Log error : {logEx.Message}", Resources.Error);
+                }
             }
             // Ayarlar butonunu sadece "Admin" rolüne sahip kullanýcýlar için etkinleþtir.
             _user_setting.LoadAllRoles();
             _ayarlarView.RefreshUserRoles();
             ApplyPermissions(); // YENÝ: Yetkileri uygula
-          
+                                // LogAction çaðrýsýný try-catch bloðuna taþýyoruz
+
         }
 
         private void ShowView(UserControl view)
@@ -327,11 +352,24 @@ namespace TekstilScada
             var machine = _machineRepository.GetAllMachines().FirstOrDefault(m => m.Id == machineId);
             if (machine != null && !string.IsNullOrEmpty(machine.VncAddress))
             {
-                if (CurrentUser.IsLoggedIn )
-                {
-                    _userRepository.LogAction(CurrentUser.User.Id, "VNC Baðlantýsý", $"{machine.MachineName} makinesine VNC ile baðlandý.");
-                }
+               
+
+                // LogAction çaðrýsýný try-catch bloðuna taþýyoruz
                 try
+                {
+                    if (CurrentUser.IsLoggedIn && CurrentUser.User != null)
+                    {
+                        _userRepository.LogAction(CurrentUser.User.Id, "VNC Baðlantýsý", $"{machine.MachineName} makinesine VNC ile baðlandý.");
+                    }
+                }
+                catch (Exception logEx)
+                {
+                    // Loglama sýrasýnda oluþan hatayý kullanýcýya göster
+                    MessageBox.Show($"VNC baðlantýsý loglanýrken bir hata oluþtu: {logEx.Message}", Resources.Error);
+                }
+
+                
+                    try
                 {
                     var vncForm = new VncViewer_Form(machine.VncAddress, machine.VncPassword);
                     vncForm.Text = $"{machine.MachineName} - {Resources.VncConnectionTo}";

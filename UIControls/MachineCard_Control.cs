@@ -102,6 +102,10 @@ namespace TekstilScada.UI.Controls
 
             // === ANA MENÜ BUTONLARI İÇİN YETKİLENDİRME ===
             // 5 numaralı role sahip kullanıcılar rapor alabilir
+            var fullmachine = new FullMachineStatus();
+            var status = fullmachine.ConnectionState;
+            if(status==ConnectionStatus.Connected)
+            { 
             btnVnc.Visible = PermissionService.HasAnyPermission(new List<int> { 4 });
             btnVnc.Enabled = btnVnc.Visible; // Yetkisi yoksa butonun tıklanmasını engelle
             var master = PermissionService.HasAnyPermission(new List<int> { 1000 });
@@ -110,7 +114,7 @@ namespace TekstilScada.UI.Controls
                 btnVnc.Visible = PermissionService.HasAnyPermission(new List<int> { 1000 });
                 btnVnc.Enabled = btnVnc.Visible; // Yetkisi yoksa butonun tıklanmasını engelle
             }
-
+            }
         }
         public void UpdateView(FullMachineStatus status)
         {

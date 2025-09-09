@@ -17,6 +17,7 @@ namespace TekstilScada.UI.Views
         private readonly ManualUsageReport_Control _manualUsageReport;
         private readonly GenelUretimRaporu_Control _genelUretimRaporu;
         private readonly ActionLogReport_Control _actionLogReport_Control;
+     
         public Raporlar_Control()
         {
             InitializeComponent();
@@ -31,7 +32,7 @@ namespace TekstilScada.UI.Views
             _genelUretimRaporu = new GenelUretimRaporu_Control();
             _genelUretimRaporu = new GenelUretimRaporu_Control();
             _actionLogReport_Control = new ActionLogReport_Control();
-
+           
             _genelUretimRaporu.Dock = DockStyle.Fill;
             tabPageGenelUretim.Controls.Add(_genelUretimRaporu);
 
@@ -54,7 +55,7 @@ namespace TekstilScada.UI.Views
             tabPageManualReport.Controls.Add(_manualUsageReport);
 
             _actionLogReport_Control.Dock = DockStyle.Fill;
-            tabPageManualReport.Controls.Add(_actionLogReport_Control);
+            tabPageActionLog.Controls.Add(_actionLogReport_Control);
         }
 
         private void ApplyLocalization()
@@ -76,7 +77,8 @@ namespace TekstilScada.UI.Views
             DashboardRepository dashboardRepo,
             ProcessLogRepository processLogRepo,
             RecipeRepository recipeRepo,
-            CostRepository costRepo) // YENİ: CostRepository parametresi eklendi
+            CostRepository costRepo
+           ) // YENİ: CostRepository parametresi eklendi
         {
             _genelUretimRaporu.InitializeControl(machineRepo, productionRepo, costRepo); // YENİ: costRepo parametresi geçildi
             _alarmReport.InitializeControl(machineRepo, alarmRepo);
@@ -85,6 +87,7 @@ namespace TekstilScada.UI.Views
             _trendAnaliz.InitializeControl(machineRepo, processLogRepo);
             _recipeOptimization.InitializeControl(recipeRepo);
             _manualUsageReport.InitializeControl(machineRepo, processLogRepo);
+           
         }
     }
 }
