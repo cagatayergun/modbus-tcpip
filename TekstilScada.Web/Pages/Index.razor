@@ -1,0 +1,144 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Authorization
+@using System.Net.Http.Json
+@using TekstilScada.Models
+@using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.AspNetCore.Components.Authorization
+@using Blazored.LocalStorage
+@inject HttpClient Http
+@inject ILocalStorageService localStorage
+@inject NavigationManager NavManager
+
+@attribute [Authorize]
+
+<PageTitle>Anasayfa</PageTitle>
+
+<h3>Canlı Makine Durumları</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        API'den veri çekilirken bir hata oluştu: @errorMessage
+    </div>
+}
+else if (machines == null)
+{
+    <p><em>Yükleniyor...</em></p>
+}
+else
+{
+    <div class="row">
+        @foreach (var machine in machines)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-header @(GetStatusClass(machine))">
+                        @machine.MachineName
+                    </div>
+                    <div class="card-body">
+                        <p><b>Durum:</b> @machine.ConnectionState</p>
+                        <p><b>Aktif Adım:</b> @machine.AktifAdimAdi</p>
+                        <p><b>Proses Yüzdesi:</b> @machine.ProsesYuzdesi%</p>
+                        <p><b>Batch No:</b> @machine.BatchNumarasi</p>
+                        <p><b>Reçete Adı:</b> @machine.RecipeName</p>
+                        <p><b>Aktif Alarm:</b> @(machine.HasActiveAlarm? machine.ActiveAlarmText: "Yok")</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<FullMachineStatus> machines;
+    private HubConnection hubConnection;
+    private bool isHubConnected => hubConnection?.State == HubConnectionState.Connected;
+    private string errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await GetInitialData();
+            await StartSignalRConnection();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Beklenmedik bir hata oluştu: {ex.Message}";
+        }
+    }
+
+    // Sayfa kapatıldığında veya bileşen yok edildiğinde bağlantıyı kes
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+
+    private async Task GetInitialData()
+    {
+        try
+        {
+            machines = await Http.GetFromJsonAsync<List<FullMachineStatus>>("api/Machine/live-status");
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = $"API isteği başarısız oldu. Durum kodu: {ex.StatusCode}. Hata: {ex.Message}";
+            machines = new List<FullMachineStatus>();
+        }
+    }
+
+    private async Task StartSignalRConnection()
+    {
+        var token = await localStorage.GetItemAsync<string>("authToken");
+
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavManager.ToAbsoluteUri("/machine-hub"), options =>
+            {
+                options.AccessTokenProvider = () => Task.FromResult(token.Replace("\"", ""));
+            })
+            .WithAutomaticReconnect()
+            .Build();
+
+        // Sunucudan veri geldiğinde çalışacak metot
+        hubConnection.On<FullMachineStatus>("ReceiveMachineStatus", status =>
+        {
+            var machineIndex = machines.FindIndex(m => m.MachineId == status.MachineId);
+            if (machineIndex != -1)
+            {
+                machines[machineIndex] = status;
+                StateHasChanged(); // Arayüzü güncelle
+            }
+        });
+
+        try
+        {
+            await hubConnection.StartAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"SignalR bağlantı hatası: {ex.Message}";
+        }
+    }
+
+    private string GetStatusClass(FullMachineStatus machine)
+    {
+        if (machine.HasActiveAlarm)
+        {
+            return "bg-danger text-white";
+        }
+        switch (machine.ConnectionState)
+        {
+            case ConnectionStatus.Connected:
+                return "bg-success text-white";
+            case ConnectionStatus.Connecting:
+                return "bg-warning";
+            case ConnectionStatus.ConnectionLost:
+            case ConnectionStatus.Disconnected:
+            default:
+                return "bg-secondary text-white";
+        }
+    }
+}
