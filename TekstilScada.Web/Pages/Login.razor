@@ -2,7 +2,7 @@
 @using System.Net.Http.Json
 @using TekstilScada.Web.Models
 @using TekstilScada.Web.Auth
-@using Microsoft.AspNetCore.Components.Authorization // Bu satırı ekle
+@using Microsoft.AspNetCore.Components.Authorization
 @inject HttpClient Http
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavManager
@@ -31,6 +31,9 @@
             </div>
 
             <button type="submit" class="btn btn-primary mt-2">Login</button>
+            <div class="login-message-container">
+                @* Hata mesajı artık yukarıda gösteriliyor *@
+            </div>
         </EditForm>
     </div>
 </div>
@@ -43,21 +46,33 @@
     public async Task OnLogin()
     {
         ShowAuthError = false;
-
-        var result = await Http.PostAsJsonAsync("api/Auth/login", loginModel);
-
-        if (result.IsSuccessStatusCode)
+        try
         {
-            var tokenResponse = await result.Content.ReadFromJsonAsync<TokenResponse>();
+            var result = await Http.PostAsJsonAsync("api/Auth/login", loginModel);
 
-            // AuthStateProvider'ı token ile güncelle
-            await ((CustomAuthStateProvider)AuthStateProvider).MarkUserAsAuthenticated(tokenResponse.Token);
-
-            NavManager.NavigateTo("/", true);
+            if (result.IsSuccessStatusCode)
+            {
+                var tokenResponse = await result.Content.ReadFromJsonAsync<TokenResponse>();
+                // AuthStateProvider'ı token ile güncelle
+                await ((CustomAuthStateProvider)AuthStateProvider).MarkUserAsAuthenticated(tokenResponse.Token);
+                NavManager.NavigateTo("/", true);
+            }
+            else
+            {
+                Error = "Kullanıcı adı veya şifre hatalı.";
+                ShowAuthError = true;
+            }
         }
-        else
+        catch (HttpRequestException ex)
         {
-            Error = "Kullanıcı adı veya şifre hatalı.";
+            // API'ye bağlanma hatasını yakala
+            Error = $"API'ye bağlanılamadı: {ex.Message}";
+            ShowAuthError = true;
+        }
+        catch (Exception ex)
+        {
+            // Diğer olası hataları yakala
+            Error = $"Beklenmedik bir hata oluştu: {ex.Message}";
             ShowAuthError = true;
         }
     }

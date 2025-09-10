@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\modbus-tcpip\TekstilScada.Core\TekstilScada.Core.csproj" />
+    <ProjectReference Include="..\TekstilScada.Core\TekstilScada.Core.csproj" />
   </ItemGroup>
 
 </Project>
