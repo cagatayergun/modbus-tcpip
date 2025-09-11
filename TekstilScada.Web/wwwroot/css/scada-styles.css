@@ -400,3 +400,83 @@
     cursor: pointer;
     font-weight: bold;
 }
+/* Machine Card Stillendirmesi */
+.machine-card {
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: #2d3748; /* bg-gray-800 */
+    color: #e2e8f0; /* text-gray-200 */
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+    .machine-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .machine-card .header {
+        border-bottom: 2px solid #4a5568; /* border-gray-600 */
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .machine-card .status-indicators .icon {
+        display: inline-block;
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+/* Durum ikonları için basit stil */
+.status-indicators .alarm-icon {
+    background-color: #ef4444; /* Kırmızı */
+}
+
+.status-indicators .pause-icon {
+    background-color: #f59e0b; /* Sarı */
+}
+
+.status-indicators .play-icon {
+    background-color: #22c55e; /* Yeşil */
+}
+
+.machine-card .details .detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.25rem 0;
+}
+
+.machine-card .details .label {
+    font-weight: 500;
+    color: #cbd5e1; /* text-gray-400 */
+}
+
+.machine-card .details .value {
+    font-weight: 600;
+}
+
+/* İlerleme çubuğu */
+.progress-bar-container {
+    height: 1.25rem;
+    background-color: #4a5568; /* bg-gray-600 */
+    border-radius: 9999px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #3b82f6; /* bg-blue-500 */
+    transition: width 0.3s ease-in-out;
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+}
+

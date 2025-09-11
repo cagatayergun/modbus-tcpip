@@ -1,35 +1,54 @@
 ﻿@page "/proses-izleme"
+@using TekstilScada.Models
+@using TekstilScada.Web.Components
+@inject HttpClient Http
 
-<h3>Proses İzleme</h3>
+<PageTitle>Proses İzleme</PageTitle>
 
-<div class="proses-izleme-container">
-    @* Burada makine kartları listelenecek *@
-    <MachineStatusCard MachineName="Makine 1"
-                       Status="ÇALIŞIYOR"
-                       Temp="95"
-                       RpmValue="1250 RPM"
-                       WaterValue="50 L"
-                       RunTimeValue="45 dk"
-                       ProgressBarValue="75" />
-    <MachineStatusCard MachineName="Makine 2"
-                       Status="DURUYOR"
-                       Temp="25"
-                       RpmValue="0 RPM"
-                       WaterValue="0 L"
-                       RunTimeValue="0 dk"
-                       ProgressBarValue="0" />
-    <MachineStatusCard MachineName="Makine 3"
-                       Status="ÇALIŞIYOR"
-                       Temp="80"
-                       RpmValue="900 RPM"
-                       WaterValue="20 L"
-                       RunTimeValue="60 dk"
-                       ProgressBarValue="90" />
-    <MachineStatusCard MachineName="Makine 4"
-                       Status="ÇALIŞIYOR"
-                       Temp="70"
-                       RpmValue="1100 RPM"
-                       WaterValue="35 L"
-                       RunTimeValue="25 dk"
-                       ProgressBarValue="50" />
+<div class="p-6">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Proses İzleme</h1>
+
+    @if (makineler == null)
+    {
+        <div class="flex items-center justify-center p-10 bg-gray-100 rounded-lg shadow-inner">
+            <span class="text-gray-500 text-lg">Makineler yükleniyor...</span>
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            @if (makineler.Any())
+            {
+                var displayIndex = 1;
+                foreach (var makine in makineler)
+                {
+                    <MachineStatusCard Machine="makine" DisplayIndex="displayIndex" />
+                    displayIndex++;
+                }
+            }
+            else
+            {
+                <div class="col-span-full flex items-center justify-center p-10 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                    <span class="text-lg">Sistemde aktif makine bulunamadı.</span>
+                </div>
+            }
+        </div>
+    }
 </div>
+
+@code {
+    private List<FullMachineStatus> makineler;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            makineler = await Http.GetFromJsonAsync<List<FullMachineStatus>>("api/Machine/GetAllMachineStatus");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Makine listesi çekilirken hata oluştu: {ex.Message}");
+            // Hata mesajı gösterebilirsiniz.
+        }
+    }
+}
