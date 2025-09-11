@@ -1,0 +1,35 @@
+﻿@page "/proses-izleme"
+
+<h3>Proses İzleme</h3>
+
+<div class="proses-izleme-container">
+    @* Burada makine kartları listelenecek *@
+    <MachineStatusCard MachineName="Makine 1"
+                       Status="ÇALIŞIYOR"
+                       Temp="95"
+                       RpmValue="1250 RPM"
+                       WaterValue="50 L"
+                       RunTimeValue="45 dk"
+                       ProgressBarValue="75" />
+    <MachineStatusCard MachineName="Makine 2"
+                       Status="DURUYOR"
+                       Temp="25"
+                       RpmValue="0 RPM"
+                       WaterValue="0 L"
+                       RunTimeValue="0 dk"
+                       ProgressBarValue="0" />
+    <MachineStatusCard MachineName="Makine 3"
+                       Status="ÇALIŞIYOR"
+                       Temp="80"
+                       RpmValue="900 RPM"
+                       WaterValue="20 L"
+                       RunTimeValue="60 dk"
+                       ProgressBarValue="90" />
+    <MachineStatusCard MachineName="Makine 4"
+                       Status="ÇALIŞIYOR"
+                       Temp="70"
+                       RpmValue="1100 RPM"
+                       WaterValue="35 L"
+                       RunTimeValue="25 dk"
+                       ProgressBarValue="50" />
+</div>

@@ -15,14 +15,9 @@ builder.Services.AddScoped<JwtHttpClientHandler>();
 
 // HttpClient servisini kaydet ve JWT Handler'ý kullanmasýný söyle
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7253/") });
-// YENÝ EKLENECEK SATIRLAR
-builder.Services.AddAuthorizationCore();
-builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
-// YENÝ EKLENECEK SATIRLAR SONU
-// Yetkilendirme ve kimlik doðrulama servislerini kaydet
+
 builder.Services.AddAuthorizationCore();
 builder.Services.AddBlazoredLocalStorage();
-// Yeni using ifadesini dosyanýn en üstüne eklemeyi unutma: using TekstilScada.Web.Auth;
-builder.Services.AddScoped<AuthenticationStateProvider, TempAuthProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 
 await builder.Build().RunAsync();

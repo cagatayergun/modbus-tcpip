@@ -1,0 +1,15 @@
+﻿<div class="kpi-card" style="background-color: @Color;">
+    <div class="kpi-card-title">@Title</div>
+    <div class="kpi-card-value">@Value</div>
+</div>
+
+@code {
+    [Parameter]
+    public string Title { get; set; }
+
+    [Parameter]
+    public string Value { get; set; }
+
+    [Parameter]
+    public string Color { get; set; }
+}

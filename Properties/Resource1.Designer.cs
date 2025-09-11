@@ -131,6 +131,15 @@ namespace TekstilScada.Properties {
         }
         
         /// <summary>
+        ///    benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string String1 {
+            get {
+                return ResourceManager.GetString("String1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
         internal static System.Drawing.Bitmap yilmak {

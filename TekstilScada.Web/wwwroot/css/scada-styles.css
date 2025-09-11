@@ -1,0 +1,402 @@
+﻿/* scada-styles.css dosyasının tamamı */
+
+/* Ana Düzen ve Paneller */
+.scada-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.scada-main {
+    display: flex;
+    flex: 1;
+}
+
+.scada-content {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    background-color: #f0f0ff; /* Windows Forms'taki ControlLight rengine yakın */
+}
+
+/* Navigasyon Paneli */
+.scada-nav-menu {
+    width: 250px;
+    background-color: #000040; /* Color.FromArgb(0, 0, 64) */
+    color: white;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-link {
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    padding: 12px 15px;
+    text-align: left;
+    border-radius: 0;
+    transition: background-color 0.3s;
+}
+
+    .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+.scada-logo {
+    width: 100%;
+    max-width: 150px;
+    margin: 0 auto 20px auto;
+}
+
+/* Üst Menü */
+.scada-top-menu {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 0;
+    font-size: 0.9rem;
+    display: flex; /* Menü öğelerini yan yana hizalamak için */
+}
+
+    .scada-top-menu .nav {
+        display: flex;
+        list-style: none; /* Liste işaretlerini kaldır */
+        margin: 0;
+        padding: 0;
+    }
+
+    .scada-top-menu .nav-item {
+        position: relative;
+    }
+
+    .scada-top-menu .nav-link {
+        display: block;
+        color: #495057;
+        padding: 8px 12px;
+    }
+
+        .scada-top-menu .nav-link:hover {
+            background-color: #e9ecef;
+            color: #000;
+        }
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    list-style: none;
+    padding: 5px 0;
+    min-width: 150px;
+}
+
+.nav-item:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu a.dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 8px 15px;
+    clear: both;
+    font-weight: 400;
+    color: #212529;
+    text-align: inherit;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+}
+
+    .dropdown-menu a.dropdown-item:hover {
+        background-color: #f8f9fa;
+        color: #000;
+    }
+
+/* Durum Çubuğu */
+.scada-status-bar {
+    background-color: #e9ecef;
+    padding: 0.5rem 1rem;
+    border-top: 1px solid #d4d4d4;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+}
+
+    .scada-status-bar a {
+        color: #007bff; /* Mavi link rengi */
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+/* Genel Bakış Sayfası */
+.scada-dashboard-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.scada-dashboard-main {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 1rem;
+}
+
+.scada-machine-group-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #f0f0f0;
+    border: 1px solid #dcdcdc;
+    border-radius: 5px;
+}
+
+.scada-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.scada-group-box {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 1rem;
+}
+
+    .scada-group-box legend {
+        font-weight: bold;
+        font-size: 1rem;
+        padding: 0 0.5rem;
+    }
+
+/* Bileşen Kartları */
+.kpi-card {
+    background-color: #2ecc71; /* KpiCard_Control.Designer.cs'deki renge yakın */
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    width: 220px;
+}
+
+.kpi-card-title {
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.kpi-card-value {
+    font-size: 2rem;
+    font-weight: bold;
+}
+.scada-nav-menu .scada-logo img {
+    max-width: 150px;
+    height: auto;
+    display: block; /* Gereksiz boşlukları önler */
+    margin: 0 auto; /* Logoyu ortalar */
+}
+/* Proses İzleme Sayfası */
+.proses-izleme-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+/* MachineStatusCard Bileşeni */
+.machine-status-card {
+    display: flex;
+    width: 350px; /* Genişlik sabitlemesi */
+    min-height: 120px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+    transition: transform 0.2s ease-in-out;
+}
+
+    .machine-status-card:hover {
+        transform: translateY(-5px);
+    }
+
+.status-indicator-bar {
+    width: 10px;
+    height: 100%;
+}
+
+.card-content-wrapper {
+    flex: 1;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-header-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.machine-name {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.machine-status {
+    font-weight: bold;
+    font-size: 1rem;
+    text-transform: uppercase;
+}
+
+.main-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.info-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-label {
+    font-weight: bold;
+    color: #555;
+}
+
+.info-value {
+    font-weight: normal;
+    color: #333;
+}
+
+.detailed-status {
+    display: flex;
+    gap: 2rem;
+    margin-top: auto;
+}
+
+.status-block {
+    display: flex;
+    flex-direction: column;
+}
+
+.status-label {
+    font-weight: bold;
+    font-size: 0.8rem;
+    color: #777;
+}
+
+.status-state {
+    font-weight: bold;
+    color: #000;
+}
+/* Proses İzleme Sayfası için Karta Özgü Stiller */
+.machine-status-card-proses-izleme {
+    width: 290px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.card-inner-panel {
+    border: 1px solid #ccc;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.machine-name-header {
+    text-align: center;
+    padding: 10px 0;
+}
+
+.machine-name-text {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.status-panel {
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    padding: 8px;
+    text-transform: uppercase;
+}
+
+.progress-bar-container {
+    height: 15px;
+    background-color: #e0e0e0;
+    margin-top: 5px;
+}
+
+.progress-bar {
+    height: 100%;
+    transition: width 0.3s ease-in-out;
+}
+
+.data-table {
+    display: table;
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+}
+
+.data-row {
+    display: table-row;
+}
+
+.data-cell {
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+    padding: 10px;
+}
+
+.data-value {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.data-label {
+    display: block;
+    font-size: 0.8rem;
+    color: #555;
+}
+
+/* Info butonu ve ikonlar için yer tutucu stiller */
+.info-and-icons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.info-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-weight: bold;
+}

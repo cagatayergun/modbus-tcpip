@@ -1,79 +1,41 @@
-﻿@page "/"
-@inject HttpClient Http
-@using TekstilScada.Models
+﻿@page "/genel-bakis"
 
+<h3>Genel Bakış</h3>
 
-<PageTitle>Genel Bakış</PageTitle>
+<div class="scada-dashboard-header">
+    <KpiCard Title="Toplam Makine Sayısı" Value="5" Color="#3498db" />
+    <KpiCard Title="Çalışan Makine Sayısı" Value="3" Color="#2ecc71" />
+    <KpiCard Title="Durmuş Makine Sayısı" Value="2" Color="#e74c3c" />
+    <KpiCard Title="Ortalama OEE" Value="85.5%" Color="#f39c12" />
+</div>
 
-<h1>Genel Bakış</h1>
-
-@if (makineDurumlari == null)
-{
-    <p class="loading-text"><em>Makine durumları yükleniyor...</em></p>
-}
-else
-{
-    <div class="machine-grid">
-        @foreach (var durum in makineDurumlari)
-        {
-            // GetStatus fonksiyonu ile durumu anlık olarak hesaplıyoruz
-            var statusText = GetStatus(durum);
-            <div class="machine-card @GetStatusCssClass(statusText)">
-                <div class="card-header">
-                    <h4>@durum.MachineName</h4>
-                </div>
-                <div class="card-body">
-                    <p><strong>Durum:</strong> @statusText</p>
-                    <p><strong>Reçete:</strong> @(string.IsNullOrEmpty(durum.RecipeName) ? "Boşta" : durum.RecipeName)</p>
-                    <p><strong>Sıcaklık:</strong> @durum.AnlikSicaklik °C</p>
-                    <p><strong>Adım:</strong> @durum.AktifAdimNo</p>
-                </div>
-                <div class="card-footer">
-                    <a href="/proses-izleme/@durum.MachineId" class="btn-details">Detayları Gör</a>
-                </div>
-            </div>
-        }
+<div class="scada-dashboard-main">
+    <div class="scada-machine-group-container">
+        <DashboardMachineCard MachineName="Makine 1" Status="ÇALIŞIYOR" RecipeName="Kumaş Yıkama" BatchId="Batch-001" Temperature="95 °C" RpmValue="450" />
+        <DashboardMachineCard MachineName="Makine 2" Status="DURUYOR" RecipeName="-" BatchId="-" Temperature="30 °C" RpmValue="0" />
+        <DashboardMachineCard MachineName="Makine 3" Status="ÇALIŞIYOR" RecipeName="Boyama" BatchId="Batch-002" Temperature="80 °C" RpmValue="300" />
     </div>
-}
 
-
-@code {
-    private FullMachineStatus[] makineDurumlari;
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            makineDurumlari = await Http.GetFromJsonAsync<FullMachineStatus[]>("api/Machine/GetAllMachineStatus");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Veri çekilirken hata oluştu: {ex.Message}");
-        }
-    }
-
-    // Durum metnini modeldeki verilere göre oluşturan fonksiyon
-    private string GetStatus(FullMachineStatus status)
-    {
-        if (status.ConnectionState != ConnectionStatus.Connected) return "BAĞLANTI YOK";
-        if (status.HasActiveAlarm) return "ARIZA";
-        if (status.IsPaused) return "BEKLEMEDE";
-        if (status.IsMachineInProduction) return "ÇALIŞIYOR";
-        if (status.IsInRecipeMode) return "REÇETEDE";
-        return "DURDU";
-    }
-
-    // Durum metnine göre CSS sınıfı atayan fonksiyon
-    private string GetStatusCssClass(string status)
-    {
-        return status switch
-        {
-            "ÇALIŞIYOR" => "status-running",
-            "DURDU" => "status-stopped",
-            "ARIZA" => "status-error",
-            "BEKLEMEDE" => "status-idle",
-            _ => "status-unknown"
-        };
-    }
-}
-
+    <div class="scada-sidebar">
+        <div class="scada-group-box">
+            <legend>Saatlik Elektrik Tüketimi</legend>
+            <div class="plot-placeholder">Grafik Alanı</div>
+        </div>
+        <div class="scada-group-box">
+            <legend>Saatlik Su Tüketimi</legend>
+            <div class="plot-placeholder">Grafik Alanı</div>
+        </div>
+        <div class="scada-group-box">
+            <legend>Saatlik Buhar Tüketimi</legend>
+            <div class="plot-placeholder">Grafik Alanı</div>
+        </div>
+        <div class="scada-group-box">
+            <legend>Son 24 Saatin Popüler Alarmları</legend>
+            <div class="plot-placeholder">Grafik Alanı</div>
+        </div>
+        <div class="scada-group-box">
+            <legend>Son 24 Saatin OEE Ortalaması</legend>
+            <div class="plot-placeholder">Grafik Alanı</div>
+        </div>
+    </div>
+</div>

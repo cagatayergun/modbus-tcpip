@@ -1,0 +1,76 @@
+﻿@* Components/MachineStatusCard.razor *@
+<div class="machine-status-card-proses-izleme">
+    <div class="card-inner-panel">
+        <div class="machine-name-header">
+            <h5 class="machine-name-text">@MachineName</h5>
+        </div>
+        <div class="status-panel" style="background-color: @GetStatusColor(Status);">
+            <span class="status-text-panel">@Status</span>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar" style="width: @(ProgressBarValue)%; background-color: #3498db;"></div>
+        </div>
+        <div class="data-table">
+            <div class="data-row">
+                <div class="data-cell">
+                    <span class="data-value">@Temp°C</span>
+                    <span class="data-label">Sıcaklık</span>
+                </div>
+                <div class="data-cell">
+                    <span class="data-value">@RpmValue</span>
+                    <span class="data-label">RPM</span>
+                </div>
+            </div>
+            <div class="data-row">
+                <div class="data-cell">
+                    <span class="data-value">@WaterValue</span>
+                    <span class="data-label">Su (L)</span>
+                </div>
+                <div class="data-cell">
+                    <span class="data-value">@RunTimeValue</span>
+                    <span class="data-label">Çalışma Süresi</span>
+                </div>
+            </div>
+        </div>
+        @* Info butonu ve ikonlar için yer tutucular *@
+        <div class="info-and-icons">
+            <button class="info-button">i</button>
+            <div class="status-icons">
+                @* İkonlar için yer tutucu *@
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string MachineName { get; set; }
+
+    [Parameter]
+    public string Status { get; set; }
+
+    [Parameter]
+    public string Temp { get; set; }
+
+    [Parameter]
+    public string RpmValue { get; set; }
+
+    [Parameter]
+    public string WaterValue { get; set; }
+
+    [Parameter]
+    public string RunTimeValue { get; set; }
+
+    [Parameter]
+    public double ProgressBarValue { get; set; } = 50; // Örnek değer
+
+    private string GetStatusColor(string status)
+    {
+        return status switch
+        {
+            "ÇALIŞIYOR" => "#2ecc71",
+            "DURUYOR" => "#e74c3c",
+            _ => "#95a5a6"
+        };
+    }
+}

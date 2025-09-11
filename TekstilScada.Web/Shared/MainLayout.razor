@@ -1,23 +1,42 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager NavManager
 
-<div class="page">
-    <div class="sidebar">
+<div class="scada-container">
+    <header class="scada-top-menu">
+        <ul class="nav">
+            <li class="nav-item dropdown">
+                <a class="nav-link" href="#" id="dilDropdown">Dil</a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#">Türkçe</a></li>
+                    <li><a class="dropdown-item" href="#">English</a></li>
+                </ul>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link" href="#" id="oturumDropdown">Oturum</a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#">Çıkış Yap</a></li>
+                </ul>
+            </li>
+        </ul>
+    </header>
+
+    <div class="scada-main">
         <NavMenu />
+
+        <main class="scada-content">
+            @Body
+        </main>
     </div>
 
-    <main>
-        <div class="top-row px-4">
-            @* Buraya kullanıcı adı ve giriş/çıkış butonu gelecek *@
-            <LoginDisplay />
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-
-    <footer class="alarm-footer">
-        @* Buraya alt alarm paneli gelecek *@
-        <AlarmBanner />
+    <footer class="scada-status-bar">
+        <span>Giriş Yapan: -</span>
+        <a href="#" @onclick="ShowLiveEvents">Canlı Olay Akışı Göster</a>
     </footer>
 </div>
+
+@code {
+    private void ShowLiveEvents()
+    {
+        // Canlı olay akışı pop-up'ını burada göster
+    }
+}
