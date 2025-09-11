@@ -1,7 +1,10 @@
 ﻿@page "/login"
 @using TekstilScada.Core
+@using TekstilScada.Web.Auth
+@using TekstilScada.Web.Models
 @inject NavigationManager Navigation
 @inject HttpClient Http
+@inject AuthenticationStateProvider AuthStateProvider
 
 <div class="flex items-center justify-center h-screen bg-gray-100">
     <div class="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md">
@@ -44,12 +47,12 @@
         try
         {
             var response = await Http.PostAsJsonAsync("api/Auth/login", loginModel);
-
             if (response.IsSuccessStatusCode)
             {
-                var token = await response.Content.ReadAsStringAsync();
-                // TODO: Token local storage’a kaydedilecek
-                Navigation.NavigateTo("/main");
+                var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
+                ((CustomAuthStateProvider)AuthStateProvider).MarkUserAsAuthenticated(loginResponse.Token);
+              //  ((CustomAuthStateProvider)AuthStateProvider).MarkUserAsAuthenticated(token);
+                Navigation.NavigateTo("/genel-bakis");
             }
             else
             {

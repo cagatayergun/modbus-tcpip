@@ -1,0 +1,10 @@
+﻿@page "/redirecttologin"
+@inject NavigationManager Navigation
+<Redirecting.../>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Navigation.NavigateTo($"/login?redirectUri={Uri.EscapeDataString(Navigation.Uri)}");
+    }
+}

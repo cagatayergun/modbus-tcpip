@@ -1,6 +1,12 @@
 ﻿@page "/proses-izleme/{MachineId:int}"
-@inject HttpClient Http
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@attribute [Authorize]
 @using TekstilScada.Models
+@inject HttpClient Http
+
+
+
 
 <PageTitle>Proses İzleme - @(makineDetay?.MachineName ?? "Yükleniyor...")</PageTitle>
 
