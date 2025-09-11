@@ -1,25 +1,60 @@
+// Gerekli using ifadeleri
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using TekstilScada.Core;
-using TekstilScada.Repositories;
-using TekstilScada.Services;
-using Microsoft.AspNetCore.Authorization;
 using TekstilScada.Api.Hubs;
 using TekstilScada.Api.Services;
+using TekstilScada.Core;
+using TekstilScada.Repositories; // Bu using önemli
+using TekstilScada.Services;     // Bu using önemli
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Baðlantý dizesini appsettings.json'dan al
+//--------------------------------------------------------------------
+// 1. ADIM: TÜM SERVÝSLERÝ BURADA TANIMLA ('builder.Services')
+//--------------------------------------------------------------------
+
+// Baðlantý dizesini ve AppConfig'i ayarla
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 AppConfig.SetConnectionString(connectionString);
 
-// Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-// Repositories ve Servisleri DI konteynerine Singleton olarak ekle
+// JWT Kimlik Doðrulama servisini DOÐRU YERE taþýdýk
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        // Konfigürasyonu en saðlam yöntemle oku
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("AppSettings:Secret").Value)),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+    };
+});
+
+// Yetkilendirme (Authorization) servisini DOÐRU YERE taþýdýk
+builder.Services.AddAuthorization();
+
+// CORS servisi
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("BlazorAppPolicy", policyBuilder =>
+    {
+        policyBuilder.AllowAnyOrigin()
+                     .AllowAnyMethod()
+                     .AllowAnyHeader();
+    });
+});
+
+// SignalR ve diðer tüm servisler
+builder.Services.AddSignalR();
 builder.Services.AddSingleton<AlarmRepository>();
 builder.Services.AddSingleton<MachineRepository>();
 builder.Services.AddSingleton<ProductionRepository>();
@@ -31,56 +66,21 @@ builder.Services.AddSingleton<DashboardRepository>();
 builder.Services.AddSingleton<RecipeConfigurationRepository>();
 builder.Services.AddSingleton<PlcOperatorRepository>();
 builder.Services.AddSingleton<AuthService>();
-
-// PLC Polling Service ve onun sarmalayýcýsýný Singleton olarak kaydet.
 builder.Services.AddSingleton<PlcPollingService>();
 builder.Services.AddSingleton<IHostedService, PlcPollingHostedService>();
-
-// SignalR Notifier Service'i Hosted Service olarak kaydet
 builder.Services.AddSingleton<IHostedService, SignalRNotifierService>();
 builder.Services.AddSingleton<FtpTransferService>();
 
-// SignalR servislerini ekle
-builder.Services.AddSignalR();
-
-// CORS servisini ekle ve Blazor uygulamanýn origin'ine izin ver
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("BlazorAppPolicy",
-        builder =>
-        {
-            builder.WithOrigins("https://localhost:7264") // Blazor uygulamanýn adresi
-                   .AllowAnyHeader()
-                   .AllowAnyMethod()
-                   .AllowCredentials();
-        });
-});
-
-// JWT Kimlik Doðrulamasýný Ekle
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["AppSettings:Secret"])),
-        ValidateIssuer = false,
-        ValidateAudience = false,
-    };
-});
-
-// Yetkilendirme (Authorization) hizmetini ekle
-builder.Services.AddAuthorization();
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
+//--------------------------------------------------------------------
+// 2. ADIM: UYGULAMAYI OLUÞTUR ('builder.Build()')
+// Bu satýrdan sonra 'builder.Services' ile servis eklenemez.
+//--------------------------------------------------------------------
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+//--------------------------------------------------------------------
+// 3. ADIM: HTTP ISTEK HATTINI YAPILANDIR ('app.Use...')
+//--------------------------------------------------------------------
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -88,17 +88,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-// CORS politikasýný HTTP isteði hattýna ekle
+app.UseRouting();
 app.UseCors("BlazorAppPolicy");
 
-// Kimlik Doðrulama ve Yetkilendirme middleware'lerini ekle
+// Kimlik doðrulama ve Yetkilendirme middleware'lerini doðru sýrayla ekle
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-// SignalR Hub'ýný bir uç noktaya eþle
 app.MapHub<MachineHub>("/machine-hub");
 
 app.Run();

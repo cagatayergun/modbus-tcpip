@@ -1,28 +1,38 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">TekstilScada.Web</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
+    <a class="navbar-brand" href="">Tekstil Scada</a>
 </div>
 
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Ana Sayfa
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Genel Bakış
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="proses-izleme">
+                <span class="bi bi-display-fill-nav-menu" aria-hidden="true"></span> Proses İzleme
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="recete-yonetimi">
+                <span class="bi bi-journal-richtext-nav-menu" aria-hidden="true"></span> Reçete Yönetimi
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="raporlar">
+                <span class="bi bi-bar-chart-line-fill-nav-menu" aria-hidden="true"></span> Raporlar
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="ayarlar">
+                <span class="bi bi-gear-fill-nav-menu" aria-hidden="true"></span> Ayarlar
             </NavLink>
         </div>
     </nav>
 </div>
 
-@code {
-    private bool collapseNavMenu = true;
-    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
-}

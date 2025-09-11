@@ -10,11 +10,13 @@ namespace TekstilScada.Web.Auth
     {
         private readonly HttpClient _httpClient;
         private readonly ILocalStorageService _localStorage;
+        private readonly AuthenticationState _anonymous;
 
         public CustomAuthStateProvider(HttpClient httpClient, ILocalStorageService localStorage)
         {
             _httpClient = httpClient;
             _localStorage = localStorage;
+            _anonymous = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -23,32 +25,31 @@ namespace TekstilScada.Web.Auth
             {
                 var authToken = await _localStorage.GetItemAsync<string>("authToken");
 
-                var identity = new ClaimsIdentity();
-                _httpClient.DefaultRequestHeaders.Authorization = null;
-
-                if (!string.IsNullOrEmpty(authToken))
+                if (string.IsNullOrEmpty(authToken))
                 {
-                    identity = new ClaimsIdentity(ParseClaimsFromJwt(authToken), "jwt");
-                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken.Replace("\"", ""));
+                    return _anonymous;
                 }
 
+                // Token'daki tırnak işaretlerini temizle
+                authToken = authToken.Replace("\"", "");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+
+                var claims = ParseClaimsFromJwt(authToken);
+                var identity = new ClaimsIdentity(claims, "jwt");
                 var user = new ClaimsPrincipal(identity);
                 return new AuthenticationState(user);
             }
             catch
             {
-                // Geçersiz token durumunda tüm kimlik doğrulama bilgilerini temizle
-                await _localStorage.RemoveItemAsync("authToken");
-                _httpClient.DefaultRequestHeaders.Authorization = null;
-                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+                // Herhangi bir hata durumunda (bozuk token vb.) tüm kimlik doğrulama bilgilerini temizle
+                await MarkUserAsLoggedOut();
+                return _anonymous;
             }
         }
 
         public async Task MarkUserAsAuthenticated(string authToken)
         {
-            // Token'ı tırnak işaretlerinden arındırmadan kaydet
             await _localStorage.SetItemAsync("authToken", authToken);
-
             var authenticatedUser = new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(authToken), "jwt"));
             var authState = Task.FromResult(new AuthenticationState(authenticatedUser));
             NotifyAuthenticationStateChanged(authState);
@@ -57,41 +58,25 @@ namespace TekstilScada.Web.Auth
         public async Task MarkUserAsLoggedOut()
         {
             await _localStorage.RemoveItemAsync("authToken");
-            var anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
-            var authState = Task.FromResult(new AuthenticationState(anonymousUser));
+            var authState = Task.FromResult(_anonymous);
             NotifyAuthenticationStateChanged(authState);
         }
 
         private IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
         {
             var claims = new List<Claim>();
-
-            // JWT token'ının üç parçalı formatını kontrol edin
-            var parts = jwt.Split('.');
-            if (parts.Length != 3)
-            {
-                // Geçersiz format, boş bir liste döndür
-                return claims;
-            }
-
             try
             {
-                // Payload'ı alın
-                var payload = parts[1];
+                var payload = jwt.Split('.')[1];
                 var jsonBytes = ParseBase64WithoutPadding(payload);
-
-                // JSON'u bir sözlüğe dönüştürün
                 var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
-
-                // Claim'leri oluşturun
                 claims.AddRange(keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString())));
             }
             catch (Exception)
             {
-                // JSON çözme veya başka bir hata oluştuğunda boş liste döndür
+                // Hata oluşursa boş bir liste döndür
                 return new List<Claim>();
             }
-
             return claims;
         }
 

@@ -1,0 +1,79 @@
+﻿@page "/"
+@inject HttpClient Http
+@using TekstilScada.Models
+
+
+<PageTitle>Genel Bakış</PageTitle>
+
+<h1>Genel Bakış</h1>
+
+@if (makineDurumlari == null)
+{
+    <p class="loading-text"><em>Makine durumları yükleniyor...</em></p>
+}
+else
+{
+    <div class="machine-grid">
+        @foreach (var durum in makineDurumlari)
+        {
+            // GetStatus fonksiyonu ile durumu anlık olarak hesaplıyoruz
+            var statusText = GetStatus(durum);
+            <div class="machine-card @GetStatusCssClass(statusText)">
+                <div class="card-header">
+                    <h4>@durum.MachineName</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>Durum:</strong> @statusText</p>
+                    <p><strong>Reçete:</strong> @(string.IsNullOrEmpty(durum.RecipeName) ? "Boşta" : durum.RecipeName)</p>
+                    <p><strong>Sıcaklık:</strong> @durum.AnlikSicaklik °C</p>
+                    <p><strong>Adım:</strong> @durum.AktifAdimNo</p>
+                </div>
+                <div class="card-footer">
+                    <a href="/proses-izleme/@durum.MachineId" class="btn-details">Detayları Gör</a>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+
+@code {
+    private FullMachineStatus[] makineDurumlari;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            makineDurumlari = await Http.GetFromJsonAsync<FullMachineStatus[]>("api/Machine/GetAllMachineStatus");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Veri çekilirken hata oluştu: {ex.Message}");
+        }
+    }
+
+    // Durum metnini modeldeki verilere göre oluşturan fonksiyon
+    private string GetStatus(FullMachineStatus status)
+    {
+        if (status.ConnectionState != ConnectionStatus.Connected) return "BAĞLANTI YOK";
+        if (status.HasActiveAlarm) return "ARIZA";
+        if (status.IsPaused) return "BEKLEMEDE";
+        if (status.IsMachineInProduction) return "ÇALIŞIYOR";
+        if (status.IsInRecipeMode) return "REÇETEDE";
+        return "DURDU";
+    }
+
+    // Durum metnine göre CSS sınıfı atayan fonksiyon
+    private string GetStatusCssClass(string status)
+    {
+        return status switch
+        {
+            "ÇALIŞIYOR" => "status-running",
+            "DURDU" => "status-stopped",
+            "ARIZA" => "status-error",
+            "BEKLEMEDE" => "status-idle",
+            _ => "status-unknown"
+        };
+    }
+}
+

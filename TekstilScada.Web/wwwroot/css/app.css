@@ -75,3 +75,206 @@
 code {
     color: #c02d76;
 }
+/* Ana Layout Stilleri */
+.page {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+}
+
+.sidebar {
+    background-image: linear-gradient(180deg, #2c3e50 0%, #34495e 70%);
+    width: 250px;
+    height: 100vh;
+    color: white;
+}
+
+main {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.top-row {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #d6d5d5;
+    justify-content: flex-end;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.content {
+    padding-top: 1.1rem;
+}
+
+/* NavMenu Stilleri */
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.nav-item {
+    font-size: 1rem;
+    padding-bottom: 0.5rem;
+}
+
+    .nav-item a.active {
+        background-color: rgba(255,255,255,0.25);
+        color: white;
+    }
+
+    .nav-item a:hover {
+        background-color: rgba(255,255,255,0.1);
+        color: white;
+    }
+
+.nav-link {
+    color: #d7d7d7;
+}
+/* Genel Bakýþ Sayfasý Stilleri */
+
+.loading-text {
+    font-size: 1.2rem;
+    color: #555;
+}
+
+.machine-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.machine-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    transition: transform 0.2s ease-in-out;
+    border-left: 5px solid #ccc; /* Varsayýlan durum rengi */
+}
+
+    .machine-card:hover {
+        transform: translateY(-5px);
+    }
+
+.card-header {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+    .card-header h4 {
+        margin: 0;
+        font-size: 1.25rem;
+    }
+
+.card-body {
+    padding: 15px;
+    flex-grow: 1;
+}
+
+    .card-body p {
+        margin: 0 0 10px 0;
+    }
+
+.card-footer {
+    padding: 10px 15px;
+    background-color: #f9f9f9;
+    border-top: 1px solid #eee;
+    text-align: right;
+}
+
+.btn-details {
+    text-decoration: none;
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+/* Durum Renkleri */
+.status-running {
+    border-left-color: #28a745;
+}
+/* Yeþil */
+.status-stopped {
+    border-left-color: #6c757d;
+}
+/* Gri */
+.status-error {
+    border-left-color: #dc3545;
+}
+/* Kýrmýzý */
+.status-idle {
+    border-left-color: #ffc107;
+}
+/* Sarý */
+.status-unknown {
+    border-left-color: #17a2b8;
+}
+/* Mavi */
+/* Proses Ýzleme Sayfasý Stilleri */
+
+.proses-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.status-badge {
+    padding: 5px 15px;
+    border-radius: 20px;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.proses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+}
+
+.proses-card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+    .proses-card h3 {
+        margin-top: 0;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+.value-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.value-item {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+    .value-item .label {
+        font-size: 0.9rem;
+        color: #555;
+        margin-bottom: 5px;
+    }
+
+    .value-item .value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+    }

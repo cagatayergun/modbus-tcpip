@@ -16,4 +16,10 @@
     <ProjectReference Include="..\TekstilScada.Core\TekstilScada.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
