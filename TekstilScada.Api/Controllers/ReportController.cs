@@ -7,7 +7,7 @@ using TekstilScada.Models;
 using Microsoft.AspNetCore.Authorization; // Bu satırı ekle
 namespace TekstilScada.Api.Controllers
 {
-    [Authorize] // Bu etiketi ekle
+    //[Authorize] // Bu etiketi ekle
     [Route("api/[controller]")]
     [ApiController]
     public class ReportController : ControllerBase

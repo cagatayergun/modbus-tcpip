@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Authorization; // Bu satırı ekle
 
 namespace TekstilScada.Api.Controllers
 {
-    [Authorize] // Bu etiketi ekle
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/Machine")] // Adresi elle, kesin olarak yazdık.
+  
     public class MachineController : ControllerBase
     {
         private readonly PlcPollingService _pollingService;
@@ -17,8 +17,8 @@ namespace TekstilScada.Api.Controllers
             _pollingService = pollingService;
         }
 
-        [HttpGet("live-status")]
-        public IActionResult GetLiveStatus()
+        [HttpGet("GetAllMachineStatus")]
+        public IActionResult GetAllMachineStatus() // Metodun adını da değiştirmek iyi bir pratiktir.
         {
             // Canlı makine verilerini al ve döndür
             var liveData = _pollingService.MachineDataCache.Values;

@@ -1,6 +1,5 @@
 ﻿@inherits LayoutComponentBase
 
-@*
 <div class="page">
     <div class="sidebar">
         <NavMenu />
@@ -8,16 +7,17 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            @* Buraya kullanıcı adı ve giriş/çıkış butonu gelecek *@
+            <LoginDisplay />
         </div>
 
         <article class="content px-4">
-            @Body 
+            @Body
         </article>
     </main>
-</div>
-*@
 
-<article class="content px-4">
-    @Body
-</article>
+    <footer class="alarm-footer">
+        @* Buraya alt alarm paneli gelecek *@
+        <AlarmBanner />
+    </footer>
+</div>
