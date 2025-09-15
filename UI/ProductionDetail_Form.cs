@@ -215,12 +215,13 @@ namespace TekstilScada.UI
                 tempPlot.Color = ScottPlot.Colors.Red;
                 tempPlot.LegendText = "Sıcaklık";
                 // 2. YENİ: Teorik Veri Grafiğini Çiz
-                var recipe = _recipeRepository.GetAllRecipes().FirstOrDefault(r => r.RecipeName == _reportItem.RecipeName);
-                if (recipe != null)
+                var productionRepo = new ProductionRepository();
+                var batchRecipe = productionRepo.GetBatchRecipe(_reportItem.MachineId, _reportItem.BatchId);
+
+                // 2. Eğer reçete verisi bulunduysa, RampCalculator'ı kullanarak teorik veriyi oluşturun.
+                if (batchRecipe != null && batchRecipe.Steps.Any())
                 {
-                    var fullRecipe = _recipeRepository.GetRecipeById(recipe.Id);
-                    // RampCalculator'ı kullanarak teorik veriyi oluştur
-                    var (theoTimestamps, theoTemperatures) = RampCalculator.GenerateTheoreticalRamp(fullRecipe, _reportItem.StartTime);
+                    var (theoTimestamps, theoTemperatures) = RampCalculator.GenerateTheoreticalRamp(batchRecipe, _reportItem.StartTime);
 
                     if (theoTimestamps.Any())
                     {

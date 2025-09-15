@@ -231,14 +231,24 @@ namespace TekstilScada.Services
         private string GetStepTypeName(short controlWord)
         {
             var stepTypes = new List<string>();
+
             if ((controlWord & 1) != 0) stepTypes.Add("Su Alma");
             if ((controlWord & 2) != 0) stepTypes.Add("Isıtma");
             if ((controlWord & 4) != 0) stepTypes.Add("Çalışma");
             if ((controlWord & 8) != 0) stepTypes.Add("Dozaj");
             if ((controlWord & 16) != 0) stepTypes.Add("Boşaltma");
             if ((controlWord & 32) != 0) stepTypes.Add("Sıkma");
+            if ((controlWord & 100) != 0) stepTypes.Add("Nem Çalışma");
+            if ((controlWord & 101) != 0) stepTypes.Add("Zaman Çalışma");
+            if ((controlWord & 102) != 0) stepTypes.Add("Nem/Zaman Çalışma");
+            if ((controlWord & 103) != 0) stepTypes.Add("Soğutma Çalışma");
+            if ((controlWord & 104) != 0) stepTypes.Add("");
+            if ((controlWord & 105) != 0) stepTypes.Add("");
             return stepTypes.Any() ? string.Join(" + ", stepTypes) : "Bekliyor...";
+
+
         }
+      
         private async void CheckAndLogBatchStartAndEnd(int machineId, FullMachineStatus currentStatus)
         {
             _currentBatches.TryGetValue(machineId, out string lastTrackedBatchId);
@@ -282,24 +292,6 @@ namespace TekstilScada.Services
                     // DÜZELTME: Makine tipini MachineRepository'den çekiyoruz.
                     var machine = _machinerepository.GetAllMachines().FirstOrDefault(m => m.Id == machineId);
 
-                    if (machine != null && machine.MachineType == "Kurutma Makinesi")
-                    {
-                        var recipeReadResult = await plcManager.ReadRecipeFromPlcAsync();
-                        if (recipeReadResult.IsSuccess && recipeReadResult.Content != null)
-                        {
-                            var dryingRecipe = new ScadaRecipe { Steps = { new ScadaRecipeStep { StepDataWords = recipeReadResult.Content } } };
-                            dryingRecipe.RecipeName = currentStatus.RecipeName;
-                            _liveAnalyzers[machineId] = new LiveStepAnalyzer(dryingRecipe, _productionRepository);
-
-                            // Kurutma makinesi için özel teorik süre hesaplaması
-                            double totalSeconds = RecipeAnalysis.CalculateTotalTheoreticalTimeForDryingMachine(dryingRecipe);
-                            _batchTotalTheoreticalTimes[machineId] = totalSeconds;
-                            _batchStartTimes[machineId] = DateTime.Now;
-                            _batchNonProductiveSeconds[machineId] = 0;
-                        }
-                    }
-                    else // BYMakinesi için mevcut mantık devam eder
-                    {
                         var recipeReadResult = await plcManager.ReadFullRecipeDataAsync();
                     if (recipeReadResult.IsSuccess && recipeReadResult.Content != null)
                     {
@@ -310,13 +302,14 @@ namespace TekstilScada.Services
                         _batchTotalTheoreticalTimes[machineId] = totalSeconds;
                         _batchStartTimes[machineId] = DateTime.Now;
                         _batchNonProductiveSeconds[machineId] = 0;
-                      //  Debug.WriteLine($"[CheckAndLogBatchStartAndEnd] YENİ BATCH BAŞLADI: Batch No: '{currentStatus.BatchNumarasi}'. LiveStepAnalyzer PLC'den okunan reçete ile oluşturuldu.");
+                        _productionRepository.SaveBatchRecipe(machineId, currentStatus.BatchNumarasi, fullRecipe);
+                        //  Debug.WriteLine($"[CheckAndLogBatchStartAndEnd] YENİ BATCH BAŞLADI: Batch No: '{currentStatus.BatchNumarasi}'. LiveStepAnalyzer PLC'den okunan reçete ile oluşturuldu.");
                     }
                     else
                     {
                     //    Debug.WriteLine($"[CheckAndLogBatchStartAndEnd] HATA: Reçete PLC'den okunamadı. LiveStepAnalyzer oluşturulamadı. Hata: {recipeReadResult.Message}");
                     }
-                    }
+                    
                 }
             }
             // BATCH BİTİŞ DURUMU
@@ -329,7 +322,7 @@ namespace TekstilScada.Services
                     var lastStep = analyzer.GetLastCompletedStep();
                     if (lastStep != null && lastStep.WorkingTime == "İşleniyor...")
                     {
-                        Debug.WriteLine($"[CheckAndLogBatchStartAndEnd] Batch bitişi algılandı. Son adım ({lastStep.StepNumber}) kaydediliyor.");
+                       // Debug.WriteLine($"[CheckAndLogBatchStartAndEnd] Batch bitişi algılandı. Son adım ({lastStep.StepNumber}) kaydediliyor.");
                         analyzer.FinalizeStep(lastStep.StepNumber, lastTrackedBatchId, machineId);
                     }
 
@@ -443,7 +436,7 @@ namespace TekstilScada.Services
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Makine {machineStatus.MachineId} için veri loglama hatası: {ex.Message}");
+                       // Console.WriteLine($"Makine {machineStatus.MachineId} için veri loglama hatası: {ex.Message}");
                     }
                 }
             }

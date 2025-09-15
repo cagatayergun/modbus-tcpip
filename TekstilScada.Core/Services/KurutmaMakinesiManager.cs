@@ -501,9 +501,27 @@ namespace TekstilScada.Services
             return OperateResult.CreateSuccessResult(plcOperator);
         }
 
-        public Task<OperateResult<BatchSummaryData>> ReadBatchSummaryDataAsync()
+        public async Task<OperateResult<BatchSummaryData>> ReadBatchSummaryDataAsync()
         {
-            throw new NotImplementedException("");
+            try
+            {
+                var summary = new BatchSummaryData();
+                // DEĞİŞİKLİK: Modbus adres kullanılıyor
+                var waterResult = await Task.Run(() => _plcClient.ReadInt16(SU_MIKTARI));
+                if (!waterResult.IsSuccess) return OperateResult.CreateFailedResult<BatchSummaryData>(waterResult);
+                summary.TotalWater = waterResult.Content;
+                var electricityResult = await Task.Run(() => _plcClient.ReadInt16(ELEKTRIK_HARCAMA));
+                if (!electricityResult.IsSuccess) return OperateResult.CreateFailedResult<BatchSummaryData>(electricityResult);
+                summary.TotalElectricity = electricityResult.Content;
+                var steamResult = await Task.Run(() => _plcClient.ReadInt16(BUHAR_HARCAMA));
+                if (!steamResult.IsSuccess) return OperateResult.CreateFailedResult<BatchSummaryData>(steamResult);
+                summary.TotalSteam = steamResult.Content;
+                return OperateResult.CreateSuccessResult(summary);
+            }
+            catch (Exception ex)
+            {
+                return new OperateResult<BatchSummaryData>($"Özet verileri okunurken istisna oluştu: {ex.Message}");
+            }
         }
 
         public Task<OperateResult<List<ChemicalConsumptionData>>> ReadChemicalConsumptionDataAsync()

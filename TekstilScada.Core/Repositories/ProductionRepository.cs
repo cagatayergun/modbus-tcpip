@@ -412,5 +412,87 @@ namespace TekstilScada.Repositories
                 cmd.ExecuteNonQuery();
             }
         }
+        public void SaveBatchRecipe(int machineId, string batchId, ScadaRecipe recipe)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        // Reçetenin kendisini production_batches tablosuna güncelleyin (opsiyonel)
+                        string updateQuery = "UPDATE production_batches SET RecipeName = @RecipeName WHERE MachineId = @MachineId AND BatchId = @BatchId;";
+                        var updateCmd = new MySqlCommand(updateQuery, connection, transaction);
+                        updateCmd.Parameters.AddWithValue("@RecipeName", recipe.RecipeName);
+                        updateCmd.Parameters.AddWithValue("@MachineId", machineId);
+                        updateCmd.Parameters.AddWithValue("@BatchId", batchId);
+                        updateCmd.ExecuteNonQuery();
+
+                        // Yeni tabloya reçete adımlarını kaydet
+                        string stepQuery = "INSERT INTO batch_recipe_steps (MachineId, BatchId, StepNumber, Word0, Word1, Word2, Word3, Word4, Word5, Word6, Word7, Word8, Word9, Word10, Word11, Word12, Word13, Word14, Word15, Word16, Word17, Word18, Word19, Word20, Word24) " +
+                                           "VALUES (@MachineId, @BatchId, @StepNumber, @Word0, @Word1, @Word2, @Word3, @Word4, @Word5, @Word6, @Word7, @Word8, @Word9, @Word10, @Word11, @Word12, @Word13, @Word14, @Word15, @Word16, @Word17, @Word18, @Word19, @Word20, @Word24);";
+
+                        foreach (var step in recipe.Steps)
+                        {
+                            var stepCmd = new MySqlCommand(stepQuery, connection, transaction);
+                            stepCmd.Parameters.AddWithValue("@MachineId", machineId);
+                            stepCmd.Parameters.AddWithValue("@BatchId", batchId);
+                            stepCmd.Parameters.AddWithValue("@StepNumber", step.StepNumber);
+                            for (int i = 0; i <= 24; i++)
+                            {
+                                if (i >= 21 && i <= 23) continue;
+                                stepCmd.Parameters.AddWithValue($"@Word{i}", step.StepDataWords[i]);
+                            }
+                            stepCmd.ExecuteNonQuery();
+                        }
+                        transaction.Commit();
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
+        public ScadaRecipe GetBatchRecipe(int machineId, string batchId)
+        {
+            var recipe = new ScadaRecipe();
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                string query = "SELECT * FROM batch_recipe_steps WHERE MachineId = @MachineId AND BatchId = @BatchId ORDER BY StepNumber;";
+                var cmd = new MySqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("@MachineId", machineId);
+                cmd.Parameters.AddWithValue("@BatchId", batchId);
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var step = new ScadaRecipeStep
+                        {
+                            StepNumber = reader.GetInt32("StepNumber")
+                        };
+
+                        // Sayısal Word değerlerini oku
+                        for (int i = 0; i <= 20; i++)
+                        {
+                            step.StepDataWords[i] = reader.GetInt16($"Word{i}");
+                        }
+
+                        // String Word değerlerini oku
+                      
+
+                        // Son sayısal Word değerini oku
+                        step.StepDataWords[24] = reader.GetInt16("Word24");
+
+                        recipe.Steps.Add(step);
+                    }
+                }
+            }
+            return recipe;
+        }
     }
 }
