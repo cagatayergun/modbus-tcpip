@@ -41,7 +41,7 @@ namespace TekstilScada.UIViews
             // dtpEndDate
             // 
             dtpEndDate.Format = DateTimePickerFormat.Short;
-            dtpEndDate.Location = new Point(240, 15);
+            dtpEndDate.Location = new Point(244, 15);
             dtpEndDate.Name = "dtpEndDate";
             dtpEndDate.Size = new Size(106, 23);
             dtpEndDate.TabIndex = 1;
@@ -57,18 +57,18 @@ namespace TekstilScada.UIViews
             // 
             // txtDetails
             // 
-            txtDetails.Location = new Point(630, 15);
+            txtDetails.Location = new Point(642, 15);
             txtDetails.Name = "txtDetails";
             txtDetails.Size = new Size(176, 23);
             txtDetails.TabIndex = 3;
             // 
             // btnFilter
             // 
-            btnFilter.Location = new Point(814, 15);
+            btnFilter.Location = new Point(820, 15);
             btnFilter.Name = "btnFilter";
             btnFilter.Size = new Size(66, 23);
             btnFilter.TabIndex = 4;
-            btnFilter.Text = "Filtrele";
+            btnFilter.Text = "Filter";
             btnFilter.UseVisualStyleBackColor = true;
             btnFilter.Click += btnFilter_Click;
             // 
@@ -88,36 +88,36 @@ namespace TekstilScada.UIViews
             label1.AutoSize = true;
             label1.Location = new Point(18, 19);
             label1.Name = "label1";
-            label1.Size = new Size(60, 15);
+            label1.Size = new Size(31, 15);
             label1.TabIndex = 6;
-            label1.Text = "Başlangıç:";
+            label1.Text = "Start";
             // 
             // label2
             // 
             label2.AutoSize = true;
             label2.Location = new Point(200, 19);
             label2.Name = "label2";
-            label2.Size = new Size(32, 15);
+            label2.Size = new Size(41, 15);
             label2.TabIndex = 7;
-            label2.Text = "Bitiş:";
+            label2.Text = "Finish:";
             // 
             // label3
             // 
             label3.AutoSize = true;
             label3.Location = new Point(368, 19);
             label3.Name = "label3";
-            label3.Size = new Size(55, 15);
+            label3.Size = new Size(33, 15);
             label3.TabIndex = 8;
-            label3.Text = "Kullanıcı:";
+            label3.Text = "User:";
             // 
             // label4
             // 
             label4.AutoSize = true;
             label4.Location = new Point(569, 19);
             label4.Name = "label4";
-            label4.Size = new Size(59, 15);
+            label4.Size = new Size(72, 15);
             label4.TabIndex = 9;
-            label4.Text = "Açıklama:";
+            label4.Text = "Explanation:";
             // 
             // ActionLogReport_Control
             // 

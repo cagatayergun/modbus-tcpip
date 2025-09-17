@@ -43,9 +43,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             label1.AutoSize = true;
             label1.Location = new Point(12, 87);
             label1.Name = "label1";
-            label1.Size = new Size(72, 15);
+            label1.Size = new Size(99, 15);
             label1.TabIndex = 0;
-            label1.Text = "Sıkma Devri:";
+            label1.Text = "Squeezing Speed:";
             // 
             // numSikmaDevri
             // 
@@ -61,9 +61,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             label2.AutoSize = true;
             label2.Location = new Point(12, 117);
             label2.Name = "label2";
-            label2.Size = new Size(94, 15);
+            label2.Size = new Size(127, 15);
             label2.TabIndex = 2;
-            label2.Text = "Sıkma Süre (DK):";
+            label2.Text = "Squeezing Time (MIN):";
             // 
             // numSikmaSure
             // 
@@ -79,9 +79,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             sikmabasliktext.AutoSize = true;
             sikmabasliktext.Location = new Point(132, 11);
             sikmabasliktext.Name = "sikmabasliktext";
-            sikmabasliktext.Size = new Size(42, 15);
+            sikmabasliktext.Size = new Size(69, 15);
             sikmabasliktext.TabIndex = 9;
-            sikmabasliktext.Text = "SIKMA";
+            sikmabasliktext.Text = "SQUEEZING";
             // 
             // SikmaEditor_Control
             // 

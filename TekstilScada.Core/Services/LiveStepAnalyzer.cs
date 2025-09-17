@@ -1,4 +1,4 @@
-﻿// TekstilScada.Core/Services/LiveStepAnalyzer.cs
+﻿// File: TekstilScada.Core/Services/LiveStepAnalyzer.cs
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -36,10 +36,10 @@ namespace TekstilScada.Core.Services
 
         public bool ProcessData(FullMachineStatus status)
         {
-            Debug.WriteLine($"proses data içine girdi");
+
             bool hasStepChanged = false;
 
-            // Duraklatma/Devam etme mantığı aynı kalacak
+            // The pause/resume logic will remain the same
             if (status.IsPaused && !_currentPauseStartTime.HasValue)
             {
                 _currentPauseStartTime = DateTime.Now;
@@ -50,49 +50,49 @@ namespace TekstilScada.Core.Services
                 _currentPauseStartTime = null;
             }
 
-            // Adım değişikliği tespit edildiğinde
+            // When a step change is detected
             if (status.AktifAdimNo != _pendingStepNumber)
             {
-                // Beklemedeki adımı yeni adıma taşı ve bekleme süresini başlat.
+                // Move the pending step to the new step and start the waiting period.
                 _pendingStepNumber = status.AktifAdimNo;
                 _pendingStepTimestamp = DateTime.Now;
-                Debug.WriteLine($"[LiveStepAnalyzer] Yeni adım değişikliği tespit edildi: {status.AktifAdimNo}. Onay için bekleniyor...");
+
             }
 
-            // Yeni adım, 3 saniye boyunca stabil bir şekilde devam ederse, yeni adımı başlat.
-            if (status.AktifAdimTipiWordu !=0 && _pendingStepNumber != 0 && _pendingStepNumber == status.AktifAdimNo && (DateTime.Now - _pendingStepTimestamp.Value).TotalSeconds >= StepReadDelaySeconds)
+            // If the new step continues stably for 3 seconds, start the new step.
+            if (status.AktifAdimTipiWordu != 0 && _pendingStepNumber != 0 && _pendingStepNumber == status.AktifAdimNo && (DateTime.Now - _pendingStepTimestamp.Value).TotalSeconds >= StepReadDelaySeconds)
             {
-                Debug.WriteLine($"[LiveStepAnalyzer] Adım değişikliği onaylandı. Adım: {status.AktifAdimNo}");
 
-                // Sadece yeni bir adım başladığında FinalizeStep ve StartNewStep'i çağır
+
+                // Only call FinalizeStep and StartNewStep when a new step begins
                 if (_currentStepNumber != status.AktifAdimNo)
                 {
-                    // Önceki adımı hemen sonlandır ve kaydet.
+                    // Immediately finalize and save the previous step.
                     if (_currentStepNumber > 0)
                     {
-                        Debug.WriteLine($"[LiveStepAnalyzer] Önceki adım ({_currentStepNumber}) sonlandırılıyor.");
+
                         FinalizeStep(_currentStepNumber, status.BatchNumarasi, status.MachineId);
                     }
 
-                    // Atlanan adımları işle
+                    // Handle skipped steps
                     HandleSkippedSteps(status, _currentStepNumber + 1, status.AktifAdimNo);
 
-                    // Yeni adımı başlat
+                    // Start the new step
                     StartNewStep(status);
 
-                    // _currentStepNumber'ı en son başlatılan adıma atayarak bir sonraki döngüde FinalizeStep'in doğru çalışmasını sağla.
+                    // Assign _currentStepNumber to the last started step to ensure FinalizeStep works correctly in the next loop.
                     _currentStepNumber = status.AktifAdimNo;
 
                     hasStepChanged = true;
                 }
 
-                // Bekleme durumunu sıfırla.
+                // Reset the waiting state.
                 _pendingStepNumber = 0;
                 _pendingStepTimestamp = null;
             }
             else if (_pendingStepNumber != status.AktifAdimNo)
             {
-                // Eğer PLC okuma döngüleri arasında adım değiştiyse, bekleme durumunu sıfırla.
+                // If the step changed between PLC reading cycles, reset the waiting state.
                 _pendingStepNumber = 0;
                 _pendingStepTimestamp = null;
             }
@@ -102,12 +102,12 @@ namespace TekstilScada.Core.Services
 
         public void FinalizeStep(int stepNumber, string batchId, int machineId)
         {
-            Debug.WriteLine($"[FinalizeStep] Metot çağrıldı. Adım: {stepNumber}, Batch: {batchId}");
 
-            var stepToFinalize = AnalyzedSteps.LastOrDefault(s => s.StepNumber == stepNumber && s.WorkingTime == "İşleniyor...");
+
+            var stepToFinalize = AnalyzedSteps.LastOrDefault(s => s.StepNumber == stepNumber && s.WorkingTime == "Processing...");
             if (stepToFinalize == null)
             {
-                Debug.WriteLine($"[FinalizeStep] Hata: Sonlandırılacak adım bulunamadı. Adım: {stepNumber}");
+
                 return;
             }
 
@@ -130,14 +130,14 @@ namespace TekstilScada.Core.Services
             string sign = deflection.TotalSeconds >= 0 ? "+" : "";
             stepToFinalize.DeflectionTime = $"{sign}{deflection:hh\\:mm\\:ss}";
 
-            Debug.WriteLine($"[FinalizeStep] Kaydedilecek veri: Adım={stepToFinalize.StepNumber}, Çalışma={stepToFinalize.WorkingTime}, Sapma={stepToFinalize.DeflectionTime}");
+
 
             //_productionRepository.LogSingleStepDetail(stepToFinalize, machineId, batchId);
         }
 
         public void StartNewStep(FullMachineStatus status)
         {
-            Debug.WriteLine($"[StartNewStep] Yeni adım başlatıldı: {status.AktifAdimNo}");
+
             CurrentStepStartTime = DateTime.Now;
             _currentPauseStartTime = null;
             _currentStepPauseSeconds = 0;
@@ -149,7 +149,7 @@ namespace TekstilScada.Core.Services
                 StepNumber = status.AktifAdimNo,
                 StepName = GetStepTypeName(status.AktifAdimTipiWordu),
                 TheoreticalTime = CalculateTheoreticalTime(status.AktifAdimDataWords),
-                WorkingTime = "İşleniyor...",
+                WorkingTime = "Processing...",
                 StopTime = "00:00:00",
                 DeflectionTime = ""
             });
@@ -171,12 +171,12 @@ namespace TekstilScada.Core.Services
                             }
                         };
                         _productionRepository.LogChemicalConsumption(status.MachineId, status.BatchNumarasi, consumptionData);
-                        Debug.WriteLine($"[StartNewStep] Kimyasal tüketimi kaydedildi: {dozajParams.Kimyasal}, {dozajParams.DozajLitre} Litre");
+
                     }
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"[StartNewStep] Kimyasal tüketimi kaydedilirken hata oluştu: {ex.Message}");
+
                 }
             }
         }
@@ -188,7 +188,7 @@ namespace TekstilScada.Core.Services
                 var recipeStep = _recipe.Steps.FirstOrDefault(s => s.StepNumber == i);
                 if (recipeStep != null && recipeStep.StepDataWords[24] != 0)
                 {
-                    string skippedStepName = GetStepTypeName(recipeStep.StepDataWords[24]) + " (Atlandı)";
+                    string skippedStepName = GetStepTypeName(recipeStep.StepDataWords[24]) + " (Skipped)";
 
                     AnalyzedSteps.Add(new ProductionStepDetail
                     {
@@ -205,7 +205,7 @@ namespace TekstilScada.Core.Services
 
         public ProductionStepDetail GetLastCompletedStep()
         {
-            return AnalyzedSteps.LastOrDefault(s => s.WorkingTime != "İşleniyor...");
+            return AnalyzedSteps.LastOrDefault(s => s.WorkingTime != "Processing...");
         }
 
         private const double SECONDS_PER_LITER = 0.5;
@@ -233,16 +233,16 @@ namespace TekstilScada.Core.Services
 
         private string GetStepTypeName(short controlWord)
         {
-            if (controlWord == 0) return "Tanımsız Adım";
+            if (controlWord == 0) return "Undefined Step";
 
             var stepTypes = new List<string>();
-            if ((controlWord & 1) != 0) stepTypes.Add("Su Alma");
-            if ((controlWord & 2) != 0) stepTypes.Add("Isıtma");
-            if ((controlWord & 4) != 0) stepTypes.Add("Çalışma");
-            if ((controlWord & 8) != 0) stepTypes.Add("Dozaj");
-            if ((controlWord & 16) != 0) stepTypes.Add("Boşaltma");
-            if ((controlWord & 32) != 0) stepTypes.Add("Sıkma");
-            return stepTypes.Any() ? string.Join(" + ", stepTypes) : "Bekliyor...";
+            if ((controlWord & 1) != 0) stepTypes.Add("Water Intake");
+            if ((controlWord & 2) != 0) stepTypes.Add("Heating");
+            if ((controlWord & 4) != 0) stepTypes.Add("Working");
+            if ((controlWord & 8) != 0) stepTypes.Add("Dosing");
+            if ((controlWord & 16) != 0) stepTypes.Add("Discharge");
+            if ((controlWord & 32) != 0) stepTypes.Add("Squeezing");
+            return stepTypes.Any() ? string.Join(" + ", stepTypes) : "Waiting...";
         }
 
         private string CalculateTheoreticalTime(short[] stepDataWords)

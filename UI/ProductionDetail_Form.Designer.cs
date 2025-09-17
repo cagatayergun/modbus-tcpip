@@ -103,7 +103,7 @@
             btnExportToExcel.Name = "btnExportToExcel";
             btnExportToExcel.Size = new Size(105, 22);
             btnExportToExcel.TabIndex = 1;
-            btnExportToExcel.Text = "Excel'e Aktar";
+            btnExportToExcel.Text = "Export to Excel";
             btnExportToExcel.UseVisualStyleBackColor = true;
             btnExportToExcel.Click += btnExportToExcel_Click;
             // 
@@ -116,7 +116,7 @@
             btnClose.Name = "btnClose";
             btnClose.Size = new Size(105, 22);
             btnClose.TabIndex = 0;
-            btnClose.Text = "Kapat";
+            btnClose.Text = "Close";
             btnClose.UseVisualStyleBackColor = true;
             btnClose.Click += btnClose_Click;
             // 
@@ -148,7 +148,7 @@
             gbProductionInfo.Size = new Size(306, 517);
             gbProductionInfo.TabIndex = 1;
             gbProductionInfo.TabStop = false;
-            gbProductionInfo.Text = "Üretim Özeti";
+            gbProductionInfo.Text = "Production Summary";
             // 
             // txtTotalDuration
             // 
@@ -168,7 +168,7 @@
             label6.Name = "label6";
             label6.Size = new Size(75, 15);
             label6.TabIndex = 14;
-            label6.Text = "Toplam Süre:";
+            label6.Text = "Total Duration:";
             // 
             // txtStopTime
             // 
@@ -188,7 +188,7 @@
             label5.Name = "label5";
             label5.Size = new Size(63, 15);
             label5.TabIndex = 12;
-            label5.Text = "Bitiş Tarihi:";
+            label5.Text = "End Date:";
             // 
             // txtStartTime
             // 
@@ -208,7 +208,7 @@
             label4.Name = "label4";
             label4.Size = new Size(91, 15);
             label4.TabIndex = 10;
-            label4.Text = "Başlangıç Tarihi:";
+            label4.Text = "Start Date:";
             // 
             // txtCustomerNo
             // 
@@ -228,7 +228,7 @@
             label8.Name = "label8";
             label8.Size = new Size(69, 15);
             label8.TabIndex = 8;
-            label8.Text = "Müşteri No:";
+            label8.Text = "Customer Number:";
             // 
             // txtOrderNo
             // 
@@ -248,7 +248,7 @@
             label7.Name = "label7";
             label7.Size = new Size(63, 15);
             label7.TabIndex = 6;
-            label7.Text = "Sipariş No:";
+            label7.Text = "Order No:";
             // 
             // txtOperator
             // 
@@ -268,7 +268,7 @@
             label3.Name = "label3";
             label3.Size = new Size(57, 15);
             label3.TabIndex = 4;
-            label3.Text = "Operatör:";
+            label3.Text = "Operator:";
             // 
             // txtRecipeName
             // 
@@ -288,7 +288,7 @@
             label2.Name = "label2";
             label2.Size = new Size(66, 15);
             label2.TabIndex = 2;
-            label2.Text = "Reçete Adı:";
+            label2.Text = "Prescription Name:";
             // 
             // txtMachineName
             // 
@@ -308,7 +308,7 @@
             label1.Name = "label1";
             label1.Size = new Size(70, 15);
             label1.TabIndex = 0;
-            label1.Text = "Makine Adı:";
+            label1.Text = "Machine Name:";
             // 
             // pnlMainContent
             // 
@@ -361,7 +361,7 @@
             tabPageSteps.Padding = new Padding(3, 2, 3, 2);
             tabPageSteps.Size = new Size(774, 314);
             tabPageSteps.TabIndex = 0;
-            tabPageSteps.Text = "Adım Detayları";
+            tabPageSteps.Text = "Step Details";
             tabPageSteps.UseVisualStyleBackColor = true;
             // 
             // dgvStepDetails
@@ -389,7 +389,7 @@
             tabPageGraph.Padding = new Padding(3, 2, 3, 2);
             tabPageGraph.Size = new Size(774, 314);
             tabPageGraph.TabIndex = 1;
-            tabPageGraph.Text = "Proses Grafiği";
+            tabPageGraph.Text = "Process Chart";
             tabPageGraph.UseVisualStyleBackColor = true;
             // 
             // formsPlot1
@@ -423,7 +423,7 @@
             tabPageAlarms.Padding = new Padding(3, 2, 3, 2);
             tabPageAlarms.Size = new Size(774, 144);
             tabPageAlarms.TabIndex = 0;
-            tabPageAlarms.Text = "Proses Alarmları";
+            tabPageAlarms.Text = "Process Alarms";
             tabPageAlarms.UseVisualStyleBackColor = true;
             // 
             // dgvAlarms
@@ -451,7 +451,7 @@
             tabPageChemicals.Padding = new Padding(3, 2, 3, 2);
             tabPageChemicals.Size = new Size(774, 144);
             tabPageChemicals.TabIndex = 1;
-            tabPageChemicals.Text = "Kimyasal Tüketimi";
+            tabPageChemicals.Text = "Chemical Consumption";
             tabPageChemicals.UseVisualStyleBackColor = true;
             // 
             // dgvChemicals
@@ -499,7 +499,7 @@
             Name = "ProductionDetail_Form";
             Padding = new Padding(9, 8, 9, 8);
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "Üretim Raporu Detayı";
+            Text = "Production Report Detail";
             Load += ProductionDetail_Form_Load;
             pnlBottom.ResumeLayout(false);
             gbProductionInfo.ResumeLayout(false);

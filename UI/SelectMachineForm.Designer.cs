@@ -15,72 +15,74 @@ namespace TekstilScada.UI
         #region Windows Form Designer generated code
         private void InitializeComponent()
         {
-            this.label1 = new System.Windows.Forms.Label();
-            this.lstMachines = new System.Windows.Forms.ListBox();
-            this.btnOk = new System.Windows.Forms.Button();
-            this.btnCancel = new System.Windows.Forms.Button();
-            this.SuspendLayout();
+            label1 = new Label();
+            lstMachines = new ListBox();
+            btnOk = new Button();
+            btnCancel = new Button();
+            SuspendLayout();
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(12, 9);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(248, 23);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Lütfen işlem yapılacak makineyi seçin:";
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 10.2F);
+            label1.Location = new Point(10, 7);
+            label1.Name = "label1";
+            label1.Size = new Size(268, 19);
+            label1.TabIndex = 0;
+            label1.Text = "Please select the machine to be processed:";
             // 
             // lstMachines
             // 
-            this.lstMachines.FormattingEnabled = true;
-            this.lstMachines.ItemHeight = 20;
-            this.lstMachines.Location = new System.Drawing.Point(12, 40);
-            this.lstMachines.Name = "lstMachines";
-            this.lstMachines.Size = new System.Drawing.Size(360, 204);
-            this.lstMachines.TabIndex = 1;
+            lstMachines.FormattingEnabled = true;
+            lstMachines.ItemHeight = 15;
+            lstMachines.Location = new Point(10, 30);
+            lstMachines.Margin = new Padding(3, 2, 3, 2);
+            lstMachines.Name = "lstMachines";
+            lstMachines.Size = new Size(316, 154);
+            lstMachines.TabIndex = 1;
             // 
             // btnOk
             // 
-            // DÜZELTME: Bu satır kaldırıldı veya yorum satırı yapıldı.
-            // this.btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOk.Location = new System.Drawing.Point(170, 260);
-            this.btnOk.Name = "btnOk";
-            this.btnOk.Size = new System.Drawing.Size(94, 29);
-            this.btnOk.TabIndex = 2;
-            this.btnOk.Text = "Tamam";
-            this.btnOk.UseVisualStyleBackColor = true;
-            this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
+            btnOk.Location = new Point(149, 195);
+            btnOk.Margin = new Padding(3, 2, 3, 2);
+            btnOk.Name = "btnOk";
+            btnOk.Size = new Size(82, 22);
+            btnOk.TabIndex = 2;
+            btnOk.Text = "Ok";
+            btnOk.UseVisualStyleBackColor = true;
+            btnOk.Click += btnOk_Click;
             // 
             // btnCancel
             // 
-            this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(278, 260);
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(94, 29);
-            this.btnCancel.TabIndex = 3;
-            this.btnCancel.Text = "İptal";
-            this.btnCancel.UseVisualStyleBackColor = true;
+            btnCancel.DialogResult = DialogResult.Cancel;
+            btnCancel.Location = new Point(243, 195);
+            btnCancel.Margin = new Padding(3, 2, 3, 2);
+            btnCancel.Name = "btnCancel";
+            btnCancel.Size = new Size(82, 22);
+            btnCancel.TabIndex = 3;
+            btnCancel.Text = "Cancel";
+            btnCancel.UseVisualStyleBackColor = true;
             // 
             // SelectMachineForm
             // 
-            this.AcceptButton = this.btnOk;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(384, 301);
-            this.Controls.Add(this.btnCancel);
-            this.Controls.Add(this.btnOk);
-            this.Controls.Add(this.lstMachines);
-            this.Controls.Add(this.label1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "SelectMachineForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Makine Seç";
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AcceptButton = btnOk;
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            CancelButton = btnCancel;
+            ClientSize = new Size(336, 226);
+            Controls.Add(btnCancel);
+            Controls.Add(btnOk);
+            Controls.Add(lstMachines);
+            Controls.Add(label1);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            Margin = new Padding(3, 2, 3, 2);
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "SelectMachineForm";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "Select Machine";
+            ResumeLayout(false);
+            PerformLayout();
         }
         #endregion
         private System.Windows.Forms.Label label1;

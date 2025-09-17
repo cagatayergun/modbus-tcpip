@@ -46,15 +46,15 @@ namespace TekstilScada.UI.Views
                 if (dgvCostParameters.Columns["Id"] != null) dgvCostParameters.Columns["Id"].Visible = false;
 
                 // YENİ: Kolon başlıklarını ve formatlarını düzenle
-                if (dgvCostParameters.Columns["ParameterName"] != null) dgvCostParameters.Columns["ParameterName"].HeaderText = "Parametre";
-                if (dgvCostParameters.Columns["CostValue"] != null) dgvCostParameters.Columns["CostValue"].HeaderText = "Birim Maliyet";
-                if (dgvCostParameters.Columns["Unit"] != null) dgvCostParameters.Columns["Unit"].HeaderText = "Birim";
-                if (dgvCostParameters.Columns["Multiplier"] != null) dgvCostParameters.Columns["Multiplier"].HeaderText = "Çarpan";
-                if (dgvCostParameters.Columns["CurrencySymbol"] != null) dgvCostParameters.Columns["CurrencySymbol"].HeaderText = "Para Birimi";
+                if (dgvCostParameters.Columns["ParameterName"] != null) dgvCostParameters.Columns["ParameterName"].HeaderText = "Parameter";
+                if (dgvCostParameters.Columns["CostValue"] != null) dgvCostParameters.Columns["CostValue"].HeaderText = "Unit Cost";
+                if (dgvCostParameters.Columns["Unit"] != null) dgvCostParameters.Columns["Unit"].HeaderText = "Unit";
+                if (dgvCostParameters.Columns["Multiplier"] != null) dgvCostParameters.Columns["Multiplier"].HeaderText = "Multiplier";
+                if (dgvCostParameters.Columns["CurrencySymbol"] != null) dgvCostParameters.Columns["CurrencySymbol"].HeaderText = "Currency";
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Maliyet parametreleri yüklenirken hata oluştu: {ex.Message}", "Veritabanı Hatası");
+                MessageBox.Show($"Error loading cost parameters: {ex.Message}", "Database Error");
             }
         }
 
@@ -65,11 +65,11 @@ namespace TekstilScada.UI.Views
                 // Değişiklikleri DataGridView'den al
                 var updatedParameters = (List<CostParameter>)dgvCostParameters.DataSource;
                 _repository.UpdateParameters(updatedParameters);
-                MessageBox.Show("Maliyet parametreleri başarıyla güncellendi.", "Başarılı");
+                MessageBox.Show("Cost parameters updated successfully.", "Successful");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Parametreler kaydedilirken hata oluştu: {ex.Message}", "Hata");
+                MessageBox.Show($"Error while saving parameters: {ex.Message}", "Error");
             }
         }
     }

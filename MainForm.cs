@@ -118,7 +118,7 @@ namespace TekstilScada
             ApplyLocalization();
             UpdateUserInfoAndPermissions();
             ReloadSystem(_genelBakisView);
-          
+            LanguageManager.SetLanguage("en-US");
         }
         private void ApplyPermissions()
         {

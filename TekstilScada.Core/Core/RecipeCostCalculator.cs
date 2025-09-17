@@ -9,12 +9,12 @@ namespace TekstilScada.Core
         private const decimal MOTOR_POWER_KW = 15.0m;
         private const decimal STEAM_KG_PER_MINUTE_AT_HIGH_TEMP = 5.0m;
 
-        // GÜNCELLENDİ: Metot artık para birimi sembolünü de döndürüyor
+        // UPDATED: The method now also returns the currency symbol
         public static (decimal TotalCost, string CurrencySymbol, string Breakdown) Calculate(ScadaRecipe recipe, List<CostParameter> costParams)
         {
             if (recipe == null || !recipe.Steps.Any() || !costParams.Any())
             {
-                return (0, "TL", "Veri yok.");
+                return (0, "TRY", "No data.");
             }
 
             var waterParam = costParams.FirstOrDefault(p => p.ParameterName == "Water");
@@ -23,7 +23,7 @@ namespace TekstilScada.Core
 
             if (waterParam == null || electricityParam == null || steamParam == null)
             {
-                return (0, "TL", "Maliyet parametreleri eksik.");
+                return (0, "TRY", "Missing cost parameters.");
             }
 
             decimal totalWaterLiters = 0;
@@ -39,16 +39,16 @@ namespace TekstilScada.Core
                 if ((controlWord & 2) != 0) totalHeatingMinutes += step.StepDataWords[4];
             }
 
-            // GÜNCELLENDİ: Maliyetler artık ÇARPAN kullanılarak hesaplanıyor
+            // UPDATED: Costs are now calculated using a MULTIPLIER
             decimal waterCost = totalWaterLiters * waterParam.CostValue * waterParam.Multiplier;
             decimal electricityCost = (totalOperatingMinutes / 60.0m) * MOTOR_POWER_KW * electricityParam.CostValue * electricityParam.Multiplier;
             decimal steamCost = totalHeatingMinutes * STEAM_KG_PER_MINUTE_AT_HIGH_TEMP * steamParam.CostValue * steamParam.Multiplier;
 
             decimal totalCost = waterCost + electricityCost + steamCost;
-            string currencySymbol = waterParam.CurrencySymbol ?? "TL";
+            string currencySymbol = waterParam.CurrencySymbol ?? "TRY";
 
-            // Detaylı döküm metni oluştur
-            string breakdown = $"Su: {waterCost:F2} {currencySymbol}\nElektrik: {electricityCost:F2} {currencySymbol}\nBuhar: {steamCost:F2} {currencySymbol}";
+            // Create a detailed breakdown text
+            string breakdown = $"Water: {waterCost:F2} {currencySymbol}\nElectricity: {electricityCost:F2} {currencySymbol}\nSteam: {steamCost:F2} {currencySymbol}";
 
             return (totalCost, currencySymbol, breakdown);
         }

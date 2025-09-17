@@ -447,10 +447,10 @@ namespace TekstilScada.UI.Views
             foreach (DataGridViewRow row in dgvAdimlar.Rows)
             {
                 // Önce hücrenin ve değerinin null olup olmadığını kontrol et
-                if (row.Cells["Adım"] != null && row.Cells["Adım"].Value != null)
+                if (row.Cells["Step"] != null && row.Cells["Step"].Value != null)
                 {
                     // Güvenli çevirme için int.TryParse kullan
-                    if (int.TryParse(row.Cells["Adım"].Value.ToString(), out int stepValue))
+                    if (int.TryParse(row.Cells["Step"].Value.ToString(), out int stepValue))
                     {
                         // Eğer çevirme başarılı olursa, mevcut adımla karşılaştır
                         if (stepValue == currentStepNumber)

@@ -40,13 +40,13 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             label1.AutoSize = true;
             label1.Location = new Point(12, 47);
             label1.Name = "label1";
-            label1.Size = new Size(57, 15);
+            label1.Size = new Size(60, 15);
             label1.TabIndex = 0;
-            label1.Text = "Kimyasal:";
+            label1.Text = "Chemical:";
             // 
             // txtKimyasal
             // 
-            txtKimyasal.Location = new Point(158, 43);
+            txtKimyasal.Location = new Point(174, 43);
             txtKimyasal.Margin = new Padding(3, 2, 3, 2);
             txtKimyasal.MaxLength = 6;
             txtKimyasal.Name = "txtKimyasal";
@@ -58,13 +58,13 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             label2.AutoSize = true;
             label2.Location = new Point(12, 77);
             label2.Name = "label2";
-            label2.Size = new Size(87, 15);
+            label2.Size = new Size(122, 15);
             label2.TabIndex = 2;
-            label2.Text = "Tank Alınan Su:";
+            label2.Text = "Tank Water Receiving:";
             // 
             // numTankSu
             // 
-            numTankSu.Location = new Point(158, 73);
+            numTankSu.Location = new Point(174, 73);
             numTankSu.Margin = new Padding(3, 2, 3, 2);
             numTankSu.Maximum = new decimal(new int[] { 10000, 0, 0, 0 });
             numTankSu.Name = "numTankSu";
@@ -76,13 +76,13 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             label3.AutoSize = true;
             label3.Location = new Point(12, 107);
             label3.Name = "label3";
-            label3.Size = new Size(131, 15);
+            label3.Size = new Size(151, 15);
             label3.TabIndex = 4;
-            label3.Text = "Kimyasal Çözme Süresi:";
+            label3.Text = "Chemical Dissolution Time:";
             // 
             // numCozmeSure
             // 
-            numCozmeSure.Location = new Point(158, 103);
+            numCozmeSure.Location = new Point(174, 103);
             numCozmeSure.Margin = new Padding(3, 2, 3, 2);
             numCozmeSure.Maximum = new decimal(new int[] { 10000, 0, 0, 0 });
             numCozmeSure.Name = "numCozmeSure";
@@ -94,13 +94,13 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             label4.AutoSize = true;
             label4.Location = new Point(12, 137);
             label4.Name = "label4";
-            label4.Size = new Size(123, 15);
+            label4.Size = new Size(131, 15);
             label4.TabIndex = 6;
-            label4.Text = "Kimyasal Dozaj Süresi:";
+            label4.Text = "Chemical Dosage Time:";
             // 
             // numDozajSure
             // 
-            numDozajSure.Location = new Point(158, 133);
+            numDozajSure.Location = new Point(174, 133);
             numDozajSure.Margin = new Padding(3, 2, 3, 2);
             numDozajSure.Maximum = new decimal(new int[] { 10000, 0, 0, 0 });
             numDozajSure.Name = "numDozajSure";
@@ -112,13 +112,13 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             label5.AutoSize = true;
             label5.Location = new Point(12, 167);
             label5.Name = "label5";
-            label5.Size = new Size(78, 15);
+            label5.Size = new Size(93, 15);
             label5.TabIndex = 8;
-            label5.Text = "Dozajda Litre:";
+            label5.Text = "Dosage in Liters:";
             // 
             // numDozajLitre
             // 
-            numDozajLitre.Location = new Point(158, 163);
+            numDozajLitre.Location = new Point(174, 163);
             numDozajLitre.Margin = new Padding(3, 2, 3, 2);
             numDozajLitre.Maximum = new decimal(new int[] { 10000, 0, 0, 0 });
             numDozajLitre.Name = "numDozajLitre";
@@ -131,9 +131,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkAnaTankMakSu.Location = new Point(12, 199);
             chkAnaTankMakSu.Margin = new Padding(3, 2, 3, 2);
             chkAnaTankMakSu.Name = "chkAnaTankMakSu";
-            chkAnaTankMakSu.Size = new Size(133, 19);
+            chkAnaTankMakSu.Size = new Size(198, 19);
             chkAnaTankMakSu.TabIndex = 10;
-            chkAnaTankMakSu.Text = "Ana Tank Mak. Su Al";
+            chkAnaTankMakSu.Text = "Main Tank Machine Water Intake";
             chkAnaTankMakSu.UseVisualStyleBackColor = true;
             // 
             // chkAnaTankTemizSu
@@ -142,9 +142,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkAnaTankTemizSu.Location = new Point(12, 222);
             chkAnaTankTemizSu.Margin = new Padding(3, 2, 3, 2);
             chkAnaTankTemizSu.Name = "chkAnaTankTemizSu";
-            chkAnaTankTemizSu.Size = new Size(137, 19);
+            chkAnaTankTemizSu.Size = new Size(198, 19);
             chkAnaTankTemizSu.TabIndex = 11;
-            chkAnaTankTemizSu.Text = "Ana Tank Temiz Su Al";
+            chkAnaTankTemizSu.Text = "Main Tank Machine Water Intake";
             chkAnaTankTemizSu.UseVisualStyleBackColor = true;
             // 
             // chkTank1Su
@@ -153,9 +153,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkTank1Su.Location = new Point(12, 244);
             chkTank1Su.Margin = new Padding(3, 2, 3, 2);
             chkTank1Su.Name = "chkTank1Su";
-            chkTank1Su.Size = new Size(92, 19);
+            chkTank1Su.Size = new Size(122, 19);
             chkTank1Su.TabIndex = 12;
-            chkTank1Su.Text = "1. Tank Su Al";
+            chkTank1Su.Text = "1. Take Tank Water";
             chkTank1Su.UseVisualStyleBackColor = true;
             // 
             // chkTank1Dozaj
@@ -164,9 +164,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkTank1Dozaj.Location = new Point(12, 266);
             chkTank1Dozaj.Margin = new Padding(3, 2, 3, 2);
             chkTank1Dozaj.Name = "chkTank1Dozaj";
-            chkTank1Dozaj.Size = new Size(94, 19);
+            chkTank1Dozaj.Size = new Size(102, 19);
             chkTank1Dozaj.TabIndex = 13;
-            chkTank1Dozaj.Text = "1. Tank Dozaj";
+            chkTank1Dozaj.Text = "1. Tank Dosing";
             chkTank1Dozaj.UseVisualStyleBackColor = true;
             // 
             // chkTamburDur
@@ -175,9 +175,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkTamburDur.Location = new Point(12, 289);
             chkTamburDur.Margin = new Padding(3, 2, 3, 2);
             chkTamburDur.Name = "chkTamburDur";
-            chkTamburDur.Size = new Size(88, 19);
+            chkTamburDur.Size = new Size(83, 19);
             chkTamburDur.TabIndex = 14;
-            chkTamburDur.Text = "Tambur Dur";
+            chkTamburDur.Text = "Drum Stop";
             chkTamburDur.UseVisualStyleBackColor = true;
             // 
             // chkAlarm
@@ -196,11 +196,11 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             dozajbasliktext.AutoSize = true;
             dozajbasliktext.Location = new Point(129, 11);
             dozajbasliktext.Name = "dozajbasliktext";
-            dozajbasliktext.Size = new Size(44, 15);
+            dozajbasliktext.Size = new Size(52, 15);
             dozajbasliktext.TabIndex = 16;
-            dozajbasliktext.Text = "DOZAJ";
+            dozajbasliktext.Text = "DOSAGE";
             // 
-            // DozajEditor_Control
+            // DozajEditor_Boyama_Control
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -223,8 +223,8 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             Controls.Add(txtKimyasal);
             Controls.Add(label1);
             Margin = new Padding(3, 2, 3, 2);
-            Name = "DozajEditor_Control";
-            Size = new Size(302, 341);
+            Name = "DozajEditor_Boyama_Control";
+            Size = new Size(393, 341);
             ((System.ComponentModel.ISupportInitialize)numTankSu).EndInit();
             ((System.ComponentModel.ISupportInitialize)numCozmeSure).EndInit();
             ((System.ComponentModel.ISupportInitialize)numDozajSure).EndInit();

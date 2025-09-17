@@ -51,7 +51,7 @@
             this.tabPageAlarmReport.Padding = new System.Windows.Forms.Padding(3);
             this.tabPageAlarmReport.Size = new System.Drawing.Size(792, 567);
             this.tabPageAlarmReport.TabIndex = 0;
-            this.tabPageAlarmReport.Text = "Geçmiş Alarmlar";
+            this.tabPageAlarmReport.Text = "Past Alarms";
             this.tabPageAlarmReport.UseVisualStyleBackColor = true;
             // 
             // tabPageProductionReport
@@ -61,20 +61,20 @@
             this.tabPageProductionReport.Padding = new System.Windows.Forms.Padding(3);
             this.tabPageProductionReport.Size = new System.Drawing.Size(792, 567);
             this.tabPageProductionReport.TabIndex = 1;
-            this.tabPageProductionReport.Text = "Üretim Raporu";
+            this.tabPageProductionReport.Text = "Production Report";
             this.tabPageProductionReport.UseVisualStyleBackColor = true;
             //
             // tabPageOeeReport
             //
             this.tabPageOeeReport.Name = "tabPageOeeReport";
             this.tabPageOeeReport.TabIndex = 2;
-            this.tabPageOeeReport.Text = "OEE Raporu";
+            this.tabPageOeeReport.Text = "OEE Report";
             //
             // tabPageTrendAnalysis
             //
             this.tabPageTrendAnalysis.Name = "tabPageTrendAnalysis";
             this.tabPageTrendAnalysis.TabIndex = 3;
-            this.tabPageTrendAnalysis.Text = "Trend Analizi";
+            this.tabPageTrendAnalysis.Text = "Trend Analysis";
             // 
             // tabPageRecipeOptimization
             // 
@@ -82,7 +82,7 @@
             this.tabPageRecipeOptimization.Name = "tabPageRecipeOptimization";
             this.tabPageRecipeOptimization.Size = new System.Drawing.Size(792, 567);
             this.tabPageRecipeOptimization.TabIndex = 4;
-            this.tabPageRecipeOptimization.Text = "Reçete Tüketim Analizi"; // GÜNCELLENDİ
+            this.tabPageRecipeOptimization.Text = "Prescription Consumption Analysis"; // GÜNCELLENDİ
             this.tabPageRecipeOptimization.UseVisualStyleBackColor = true;
             // 
             // tabPageManualReport
@@ -92,7 +92,7 @@
             this.tabPageManualReport.Padding = new System.Windows.Forms.Padding(3);
             this.tabPageManualReport.Size = new System.Drawing.Size(792, 567);
             this.tabPageManualReport.TabIndex = 5; // Sıradaki index
-            this.tabPageManualReport.Text = "Manuel Tüketim";
+            this.tabPageManualReport.Text = "Manual Consumption";
             this.tabPageManualReport.UseVisualStyleBackColor = true;
             // 
             // tabPageProductionReport
@@ -102,7 +102,7 @@
             this.tabPageGenelUretim.Padding = new System.Windows.Forms.Padding(3);
             this.tabPageGenelUretim.Size = new System.Drawing.Size(792, 567);
             this.tabPageGenelUretim.TabIndex = 6;
-            this.tabPageGenelUretim.Text = "Genel Tüketim Raporu";
+            this.tabPageGenelUretim.Text = "General Consumption Report";
             this.tabPageGenelUretim.UseVisualStyleBackColor = true;
             // Yeni tabPage'in ayarlarını yapın
            // this.tabPageActionLog.Controls.Add(this.actionLogReport_Control1);
@@ -111,7 +111,7 @@
             this.tabPageActionLog.Padding = new System.Windows.Forms.Padding(3);
             this.tabPageActionLog.Size = new System.Drawing.Size(992, 608);
             this.tabPageActionLog.TabIndex = 4;
-            this.tabPageActionLog.Text = "Eylem Kayıtları";
+            this.tabPageActionLog.Text = "Action Records";
             this.tabPageActionLog.UseVisualStyleBackColor = true;
             // 
             // Raporlar_Control

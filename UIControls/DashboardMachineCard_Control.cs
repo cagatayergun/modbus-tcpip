@@ -42,8 +42,8 @@ namespace TekstilScada.UI.Controls
                 return;
             }
 
-            lblRecipeName.Text = $"Reçete: {status.RecipeName ?? "-"}";
-            lblBatchId.Text = $"Parti: {status.BatchNumarasi ?? "-"}";
+            lblRecipeName.Text = $"Recipe: {status.RecipeName ?? "-"}";
+            lblBatchId.Text = $"Party: {status.BatchNumarasi ?? "-"}";
             lblTemperature.Text = $"{status.AnlikSicaklik / 10.0m}°C";
             gaugeRpm.Value = status.AnlikDevirRpm;
             gaugeRpm.Text = status.AnlikDevirRpm.ToString();
@@ -58,13 +58,13 @@ namespace TekstilScada.UI.Controls
             else if (status.IsInRecipeMode)
             {
                 pnlStatusIndicator.BackColor = _colorRunning;
-                lblStatus.Text = $"ÇALIŞIYOR - Adım {status.AktifAdimNo}";
+                lblStatus.Text = $"Working - Step {status.AktifAdimNo}";
                 lblStatus.ForeColor = _colorRunning;
             }
             else
             {
                 pnlStatusIndicator.BackColor = _colorStopped;
-                lblStatus.Text = "DURUYOR";
+                lblStatus.Text = "Stops";
                 lblStatus.ForeColor = _colorStopped;
             }
 
@@ -86,15 +86,15 @@ namespace TekstilScada.UI.Controls
             var timeRange = (maxTime - minTime).TotalSeconds;
             if (timeRange == 0) timeRange = 1;
 
-            var minTemp = trendData.Min(p => p.Temperature);
-            var maxTemp = trendData.Max(p => p.Temperature);
+            var minTemp = trendData.Min(p => p.Temperature / 10.0m);
+            var maxTemp = trendData.Max(p => p.Temperature / 10.0m);
             var tempRange = maxTemp - minTemp;
             if (tempRange == 0) tempRange = 1;
 
             foreach (var p in trendData)
             {
                 float x = (float)(((p.Timestamp - minTime).TotalSeconds / timeRange) * pnlSparkline.Width);
-                float y = (float)(pnlSparkline.Height - ((p.Temperature - minTemp) / tempRange) * pnlSparkline.Height);
+                float y = (float)(pnlSparkline.Height - ((p.Temperature / 10.0m - minTemp) / tempRange) * pnlSparkline.Height);
                 _sparklinePoints.Add(new PointF(x, y));
             }
             pnlSparkline.Invalidate(); // Paneli yeniden çizdir

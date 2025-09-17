@@ -305,9 +305,9 @@
             label6.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             label6.Location = new Point(10, 135);
             label6.Name = "label6";
-            label6.Size = new Size(65, 15);
+            label6.Size = new Size(62, 15);
             label6.TabIndex = 20;
-            label6.Text = "Sipariş No:";
+            label6.Text = "Order No:";
             // 
             // lblBatchNo
             // 
@@ -349,9 +349,9 @@
             label4.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             label4.Location = new Point(10, 88);
             label4.Name = "label4";
-            label4.Size = new Size(72, 15);
+            label4.Size = new Size(113, 15);
             label4.TabIndex = 16;
-            label4.Text = "Müşteri No:";
+            label4.Text = "Customer Number:";
             // 
             // lblOperator
             // 
@@ -373,7 +373,7 @@
             label3.Name = "label3";
             label3.Size = new Size(61, 15);
             label3.TabIndex = 14;
-            label3.Text = "Operatör:";
+            label3.Text = "Operator:";
             // 
             // lblReceteAdi
             // 
@@ -393,9 +393,9 @@
             label2.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             label2.Location = new Point(10, 42);
             label2.Name = "label2";
-            label2.Size = new Size(71, 15);
+            label2.Size = new Size(84, 15);
             label2.TabIndex = 12;
-            label2.Text = "Reçete Adı:";
+            label2.Text = "Recipe Name:";
             // 
             // label1
             // 
@@ -403,9 +403,9 @@
             label1.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             label1.Location = new Point(7, 5);
             label1.Name = "label1";
-            label1.Size = new Size(106, 21);
+            label1.Size = new Size(172, 21);
             label1.TabIndex = 0;
-            label1.Text = "Makina Bilgi";
+            label1.Text = "Machine Information";
             // 
             // pnlTimeline
             // 
@@ -470,9 +470,9 @@
             label10.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold);
             label10.Location = new Point(136, 69);
             label10.Name = "label10";
-            label10.Size = new Size(116, 19);
+            label10.Size = new Size(94, 19);
             label10.TabIndex = 4;
-            label10.Text = "Reçete Adımları";
+            label10.Text = "Recipe Steps";
             // 
             // lblCalisanAdim
             // 
@@ -495,9 +495,9 @@
             label8.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold);
             label8.Location = new Point(146, 13);
             label8.Name = "label8";
-            label8.Size = new Size(96, 19);
+            label8.Size = new Size(97, 19);
             label8.TabIndex = 2;
-            label8.Text = "Çalışan Adım";
+            label8.Text = "Running Step";
             // 
             // lstAlarmlar
             // 
@@ -520,9 +520,9 @@
             label7.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold);
             label7.Location = new Point(133, 407);
             label7.Name = "label7";
-            label7.Size = new Size(123, 19);
+            label7.Size = new Size(133, 19);
             label7.TabIndex = 0;
-            label7.Text = "Parti İçi Alarmlar";
+            label7.Text = "Intra-Party Alarms";
             // 
             // MakineDetay_Control
             // 

@@ -28,172 +28,185 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.pnlFilters = new System.Windows.Forms.Panel();
-            this.btnGenerateChart = new System.Windows.Forms.Button();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.chkRpm = new System.Windows.Forms.CheckBox();
-            this.chkWaterLevel = new System.Windows.Forms.CheckBox();
-            this.chkTemperature = new System.Windows.Forms.CheckBox();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.clbMachines = new System.Windows.Forms.CheckedListBox();
-            this.dtpEndTime = new System.Windows.Forms.DateTimePicker();
-            this.label2 = new System.Windows.Forms.Label();
-            this.dtpStartTime = new System.Windows.Forms.DateTimePicker();
-            this.label1 = new System.Windows.Forms.Label();
-            this.formsPlot1 = new ScottPlot.WinForms.FormsPlot();
-            this.pnlFilters.SuspendLayout();
-            this.groupBox2.SuspendLayout();
-            this.groupBox1.SuspendLayout();
-            this.SuspendLayout();
+            pnlFilters = new Panel();
+            btnGenerateChart = new Button();
+            groupBox2 = new GroupBox();
+            chkRpm = new CheckBox();
+            chkWaterLevel = new CheckBox();
+            chkTemperature = new CheckBox();
+            groupBox1 = new GroupBox();
+            clbMachines = new CheckedListBox();
+            dtpEndTime = new DateTimePicker();
+            label2 = new Label();
+            dtpStartTime = new DateTimePicker();
+            label1 = new Label();
+            formsPlot1 = new ScottPlot.WinForms.FormsPlot();
+            pnlFilters.SuspendLayout();
+            groupBox2.SuspendLayout();
+            groupBox1.SuspendLayout();
+            SuspendLayout();
             // 
             // pnlFilters
             // 
-            this.pnlFilters.Controls.Add(this.btnGenerateChart);
-            this.pnlFilters.Controls.Add(this.groupBox2);
-            this.pnlFilters.Controls.Add(this.groupBox1);
-            this.pnlFilters.Controls.Add(this.dtpEndTime);
-            this.pnlFilters.Controls.Add(this.label2);
-            this.pnlFilters.Controls.Add(this.dtpStartTime);
-            this.pnlFilters.Controls.Add(this.label1);
-            this.pnlFilters.Dock = System.Windows.Forms.DockStyle.Left;
-            this.pnlFilters.Location = new System.Drawing.Point(0, 0);
-            this.pnlFilters.Name = "pnlFilters";
-            this.pnlFilters.Padding = new System.Windows.Forms.Padding(10);
-            this.pnlFilters.Size = new System.Drawing.Size(250, 600);
-            this.pnlFilters.TabIndex = 0;
+            pnlFilters.Controls.Add(btnGenerateChart);
+            pnlFilters.Controls.Add(groupBox2);
+            pnlFilters.Controls.Add(groupBox1);
+            pnlFilters.Controls.Add(dtpEndTime);
+            pnlFilters.Controls.Add(label2);
+            pnlFilters.Controls.Add(dtpStartTime);
+            pnlFilters.Controls.Add(label1);
+            pnlFilters.Dock = DockStyle.Left;
+            pnlFilters.Location = new Point(0, 0);
+            pnlFilters.Margin = new Padding(3, 2, 3, 2);
+            pnlFilters.Name = "pnlFilters";
+            pnlFilters.Padding = new Padding(9, 8, 9, 8);
+            pnlFilters.Size = new Size(219, 450);
+            pnlFilters.TabIndex = 0;
             // 
             // btnGenerateChart
             // 
-            this.btnGenerateChart.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold);
-            this.btnGenerateChart.Location = new System.Drawing.Point(13, 450);
-            this.btnGenerateChart.Name = "btnGenerateChart";
-            this.btnGenerateChart.Size = new System.Drawing.Size(224, 40);
-            this.btnGenerateChart.TabIndex = 6;
-            this.btnGenerateChart.Text = "Grafiği Oluştur";
-            this.btnGenerateChart.UseVisualStyleBackColor = true;
+            btnGenerateChart.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold);
+            btnGenerateChart.Location = new Point(11, 338);
+            btnGenerateChart.Margin = new Padding(3, 2, 3, 2);
+            btnGenerateChart.Name = "btnGenerateChart";
+            btnGenerateChart.Size = new Size(196, 30);
+            btnGenerateChart.TabIndex = 6;
+            btnGenerateChart.Text = "Create Chart";
+            btnGenerateChart.UseVisualStyleBackColor = true;
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.chkRpm);
-            this.groupBox2.Controls.Add(this.chkWaterLevel);
-            this.groupBox2.Controls.Add(this.chkTemperature);
-            this.groupBox2.Location = new System.Drawing.Point(13, 320);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(224, 115);
-            this.groupBox2.TabIndex = 5;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Görüntülenecek Veriler";
+            groupBox2.Controls.Add(chkRpm);
+            groupBox2.Controls.Add(chkWaterLevel);
+            groupBox2.Controls.Add(chkTemperature);
+            groupBox2.Location = new Point(11, 240);
+            groupBox2.Margin = new Padding(3, 2, 3, 2);
+            groupBox2.Name = "groupBox2";
+            groupBox2.Padding = new Padding(3, 2, 3, 2);
+            groupBox2.Size = new Size(196, 86);
+            groupBox2.TabIndex = 5;
+            groupBox2.TabStop = false;
+            groupBox2.Text = "Data to Display";
             // 
             // chkRpm
             // 
-            this.chkRpm.AutoSize = true;
-            this.chkRpm.Location = new System.Drawing.Point(15, 80);
-            this.chkRpm.Name = "chkRpm";
-            this.chkRpm.Size = new System.Drawing.Size(66, 24);
-            this.chkRpm.TabIndex = 2;
-            this.chkRpm.Text = "Devir";
-            this.chkRpm.UseVisualStyleBackColor = true;
+            chkRpm.AutoSize = true;
+            chkRpm.Location = new Point(13, 60);
+            chkRpm.Margin = new Padding(3, 2, 3, 2);
+            chkRpm.Name = "chkRpm";
+            chkRpm.Size = new Size(51, 19);
+            chkRpm.TabIndex = 2;
+            chkRpm.Text = "RPM";
+            chkRpm.UseVisualStyleBackColor = true;
             // 
             // chkWaterLevel
             // 
-            this.chkWaterLevel.AutoSize = true;
-            this.chkWaterLevel.Location = new System.Drawing.Point(15, 53);
-            this.chkWaterLevel.Name = "chkWaterLevel";
-            this.chkWaterLevel.Size = new System.Drawing.Size(102, 24);
-            this.chkWaterLevel.TabIndex = 1;
-            this.chkWaterLevel.Text = "Su Seviyesi";
-            this.chkWaterLevel.UseVisualStyleBackColor = true;
+            chkWaterLevel.AutoSize = true;
+            chkWaterLevel.Location = new Point(13, 42);
+            chkWaterLevel.Margin = new Padding(3, 2, 3, 2);
+            chkWaterLevel.Name = "chkWaterLevel";
+            chkWaterLevel.Size = new Size(84, 19);
+            chkWaterLevel.TabIndex = 1;
+            chkWaterLevel.Text = "Water level";
+            chkWaterLevel.UseVisualStyleBackColor = true;
             // 
             // chkTemperature
             // 
-            this.chkTemperature.AutoSize = true;
-            this.chkTemperature.Checked = true;
-            this.chkTemperature.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkTemperature.Location = new System.Drawing.Point(15, 26);
-            this.chkTemperature.Name = "chkTemperature";
-            this.chkTemperature.Size = new System.Drawing.Size(80, 24);
-            this.chkTemperature.TabIndex = 0;
-            this.chkTemperature.Text = "Sıcaklık";
-            this.chkTemperature.UseVisualStyleBackColor = true;
+            chkTemperature.Checked = true;
+            chkTemperature.CheckState = CheckState.Checked;
+            chkTemperature.Location = new Point(13, 20);
+            chkTemperature.Margin = new Padding(3, 2, 3, 2);
+            chkTemperature.Name = "chkTemperature";
+            chkTemperature.Size = new Size(158, 24);
+            chkTemperature.TabIndex = 0;
+            chkTemperature.Text = "Temparature";
+            chkTemperature.UseVisualStyleBackColor = true;
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.clbMachines);
-            this.groupBox1.Location = new System.Drawing.Point(13, 110);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(224, 200);
-            this.groupBox1.TabIndex = 4;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Makineler";
+            groupBox1.Controls.Add(clbMachines);
+            groupBox1.Location = new Point(11, 87);
+            groupBox1.Margin = new Padding(3, 2, 3, 2);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Padding = new Padding(3, 2, 3, 2);
+            groupBox1.Size = new Size(196, 150);
+            groupBox1.TabIndex = 4;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "Machines";
             // 
             // clbMachines
             // 
-            this.clbMachines.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.clbMachines.FormattingEnabled = true;
-            this.clbMachines.Location = new System.Drawing.Point(3, 23);
-            this.clbMachines.Name = "clbMachines";
-            this.clbMachines.Size = new System.Drawing.Size(218, 174);
-            this.clbMachines.TabIndex = 0;
+            clbMachines.Dock = DockStyle.Fill;
+            clbMachines.FormattingEnabled = true;
+            clbMachines.Location = new Point(3, 18);
+            clbMachines.Margin = new Padding(3, 2, 3, 2);
+            clbMachines.Name = "clbMachines";
+            clbMachines.Size = new Size(190, 130);
+            clbMachines.TabIndex = 0;
             // 
             // dtpEndTime
             // 
-            this.dtpEndTime.CustomFormat = "dd.MM.yyyy HH:mm";
-            this.dtpEndTime.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dtpEndTime.Location = new System.Drawing.Point(13, 77);
-            this.dtpEndTime.Name = "dtpEndTime";
-            this.dtpEndTime.Size = new System.Drawing.Size(224, 27);
-            this.dtpEndTime.TabIndex = 3;
+            dtpEndTime.CustomFormat = "dd.MM.yyyy HH:mm";
+            dtpEndTime.Format = DateTimePickerFormat.Custom;
+            dtpEndTime.Location = new Point(11, 61);
+            dtpEndTime.Margin = new Padding(3, 2, 3, 2);
+            dtpEndTime.Name = "dtpEndTime";
+            dtpEndTime.Size = new Size(196, 23);
+            dtpEndTime.TabIndex = 3;
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(13, 54);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(78, 20);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "Bitiş Tarihi:";
+            label2.AutoSize = true;
+            label2.Location = new Point(11, 44);
+            label2.Name = "label2";
+            label2.Size = new Size(57, 15);
+            label2.TabIndex = 2;
+            label2.Text = "End Date:";
             // 
             // dtpStartTime
             // 
-            this.dtpStartTime.CustomFormat = "dd.MM.yyyy HH:mm";
-            this.dtpStartTime.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dtpStartTime.Location = new System.Drawing.Point(13, 24);
-            this.dtpStartTime.Name = "dtpStartTime";
-            this.dtpStartTime.Size = new System.Drawing.Size(224, 27);
-            this.dtpStartTime.TabIndex = 1;
+            dtpStartTime.CustomFormat = "dd.MM.yyyy HH:mm";
+            dtpStartTime.Format = DateTimePickerFormat.Custom;
+            dtpStartTime.Location = new Point(11, 18);
+            dtpStartTime.Margin = new Padding(3, 2, 3, 2);
+            dtpStartTime.Name = "dtpStartTime";
+            dtpStartTime.Size = new Size(196, 23);
+            dtpStartTime.TabIndex = 1;
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 1);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(115, 20);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Başlangıç Tarihi:";
+            label1.AutoSize = true;
+            label1.Location = new Point(11, 1);
+            label1.Name = "label1";
+            label1.Size = new Size(61, 15);
+            label1.TabIndex = 0;
+            label1.Text = "Start Date:";
             // 
             // formsPlot1
             // 
-            this.formsPlot1.DisplayScale = 1F;
-            this.formsPlot1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.formsPlot1.Location = new System.Drawing.Point(250, 0);
-            this.formsPlot1.Name = "formsPlot1";
-            this.formsPlot1.Size = new System.Drawing.Size(550, 600);
-            this.formsPlot1.TabIndex = 1;
+            formsPlot1.DisplayScale = 1F;
+            formsPlot1.Dock = DockStyle.Fill;
+            formsPlot1.Location = new Point(219, 0);
+            formsPlot1.Margin = new Padding(3, 2, 3, 2);
+            formsPlot1.Name = "formsPlot1";
+            formsPlot1.Size = new Size(481, 450);
+            formsPlot1.TabIndex = 1;
             // 
             // TrendAnaliz_Control
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.formsPlot1);
-            this.Controls.Add(this.pnlFilters);
-            this.Name = "TrendAnaliz_Control";
-            this.Size = new System.Drawing.Size(800, 600);
-            this.pnlFilters.ResumeLayout(false);
-            this.pnlFilters.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
-            this.groupBox1.ResumeLayout(false);
-            this.ResumeLayout(false);
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(formsPlot1);
+            Controls.Add(pnlFilters);
+            Margin = new Padding(3, 2, 3, 2);
+            Name = "TrendAnaliz_Control";
+            Size = new Size(700, 450);
+            pnlFilters.ResumeLayout(false);
+            pnlFilters.PerformLayout();
+            groupBox2.ResumeLayout(false);
+            groupBox2.PerformLayout();
+            groupBox1.ResumeLayout(false);
+            ResumeLayout(false);
         }
 
         #endregion

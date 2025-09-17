@@ -79,9 +79,9 @@
             label1.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             label1.Location = new Point(84, 10);
             label1.Name = "label1";
-            label1.Size = new Size(86, 15);
+            label1.Size = new Size(98, 15);
             label1.TabIndex = 0;
-            label1.Text = "Hedef Makine";
+            label1.Text = "Target Machines";
             // 
             // splitContainer1
             // 
@@ -113,7 +113,7 @@
             groupBox1.Size = new Size(387, 280);
             groupBox1.TabIndex = 0;
             groupBox1.TabStop = false;
-            groupBox1.Text = "SCADA Reçeteleri (Çoklu Seçim)";
+            groupBox1.Text = "LOCAL RECIPE";
             // 
             // lstLocalRecipes
             // 
@@ -141,24 +141,24 @@
             // btnReceive
             // 
             btnReceive.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            btnReceive.Location = new Point(20, 98);
+            btnReceive.Location = new Point(14, 98);
             btnReceive.Margin = new Padding(3, 2, 3, 2);
             btnReceive.Name = "btnReceive";
-            btnReceive.Size = new Size(88, 38);
+            btnReceive.Size = new Size(102, 38);
             btnReceive.TabIndex = 1;
-            btnReceive.Text = "<< Al";
+            btnReceive.Text = "<<Recive";
             btnReceive.UseVisualStyleBackColor = true;
             btnReceive.Click += btnReceive_Click;
             // 
             // btnSend
             // 
             btnSend.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            btnSend.Location = new Point(20, 45);
+            btnSend.Location = new Point(14, 45);
             btnSend.Margin = new Padding(3, 2, 3, 2);
             btnSend.Name = "btnSend";
-            btnSend.Size = new Size(88, 38);
+            btnSend.Size = new Size(102, 38);
             btnSend.TabIndex = 0;
-            btnSend.Text = "Gönder >>";
+            btnSend.Text = "Send >>";
             btnSend.UseVisualStyleBackColor = true;
             btnSend.Click += btnSend_Click;
             // 
@@ -174,7 +174,7 @@
             groupBox2.Size = new Size(368, 280);
             groupBox2.TabIndex = 0;
             groupBox2.TabStop = false;
-            groupBox2.Text = "HMI Reçeteleri (Ön izleme için tek seçim)";
+            groupBox2.Text = "REMOTE RECIPES";
             // 
             // lstHmiRecipes
             // 
@@ -206,7 +206,7 @@
             btnRefreshHmi.Name = "btnRefreshHmi";
             btnRefreshHmi.Size = new Size(105, 22);
             btnRefreshHmi.TabIndex = 0;
-            btnRefreshHmi.Text = "Listeyi Yenile";
+            btnRefreshHmi.Text = "Refresh List";
             btnRefreshHmi.UseVisualStyleBackColor = true;
             btnRefreshHmi.Click += btnRefreshHmi_Click;
             // 
@@ -247,7 +247,7 @@
             tabPageTransfers.Padding = new Padding(3, 2, 3, 2);
             tabPageTransfers.Size = new Size(879, 262);
             tabPageTransfers.TabIndex = 0;
-            tabPageTransfers.Text = "Transfer Listesi";
+            tabPageTransfers.Text = "Transfer List";
             tabPageTransfers.UseVisualStyleBackColor = true;
             // 
             // tabPagePreview
@@ -257,9 +257,9 @@
             tabPagePreview.Margin = new Padding(3, 2, 3, 2);
             tabPagePreview.Name = "tabPagePreview";
             tabPagePreview.Padding = new Padding(3, 2, 3, 2);
-            tabPagePreview.Size = new Size(834, 143);
+            tabPagePreview.Size = new Size(879, 262);
             tabPagePreview.TabIndex = 1;
-            tabPagePreview.Text = "Reçete Ön İzleme";
+            tabPagePreview.Text = "Recipe Preview";
             tabPagePreview.UseVisualStyleBackColor = true;
             // 
             // pnlPreviewArea
@@ -269,7 +269,7 @@
             pnlPreviewArea.Location = new Point(3, 2);
             pnlPreviewArea.Margin = new Padding(3, 2, 3, 2);
             pnlPreviewArea.Name = "pnlPreviewArea";
-            pnlPreviewArea.Size = new Size(828, 139);
+            pnlPreviewArea.Size = new Size(873, 258);
             pnlPreviewArea.TabIndex = 0;
             // 
             // lblPreviewStatus
@@ -279,7 +279,7 @@
             lblPreviewStatus.ForeColor = SystemColors.ControlDarkDark;
             lblPreviewStatus.Location = new Point(0, 0);
             lblPreviewStatus.Name = "lblPreviewStatus";
-            lblPreviewStatus.Size = new Size(828, 139);
+            lblPreviewStatus.Size = new Size(873, 258);
             lblPreviewStatus.TabIndex = 0;
             lblPreviewStatus.Text = "Ön izleme için HMI listesinden bir reçete seçin.";
             lblPreviewStatus.TextAlign = ContentAlignment.MiddleCenter;
@@ -296,7 +296,7 @@
             Name = "FtpSync_Form";
             Padding = new Padding(9, 8, 9, 8);
             StartPosition = FormStartPosition.CenterParent;
-            Text = "Toplu FTP Reçete Senkronizasyonu";
+            Text = "RECIPE SYNCHRONIZATION";
             Load += FtpSync_Form_Load;
             pnlTop.ResumeLayout(false);
             pnlTop.PerformLayout();

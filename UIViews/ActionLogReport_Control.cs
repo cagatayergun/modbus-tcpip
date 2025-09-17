@@ -28,7 +28,7 @@ namespace TekstilScada.UIViews
         {
             var users = _userRepository.GetAllUsers();
             cmbUser.Items.Clear();
-            cmbUser.Items.Add("Tüm Kullanıcılar");
+            cmbUser.Items.Add("All Users");
             foreach (var user in users)
             {
                 cmbUser.Items.Add(user.Username);

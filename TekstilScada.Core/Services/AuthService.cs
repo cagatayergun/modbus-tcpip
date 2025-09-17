@@ -18,7 +18,7 @@ namespace TekstilScada.Services
             {
                 _user = value;
                 // Hata ayıklama için bu satırı ekleyin
-                System.Diagnostics.Debug.WriteLine($"[CurrentUser] User nesnesi değişti. Yeni değer null mı? {value == null}");
+               
             }
         }
         public static bool IsLoggedIn => User != null;

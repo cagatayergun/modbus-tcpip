@@ -1,8 +1,9 @@
 ﻿// UIViews/Raporlar_Control.cs
-using TekstilScada.Repositories;
 using System.Windows.Forms;
-using TekstilScada.Properties;
+using TekstilScada.Core;
 using TekstilScada.Localization;
+using TekstilScada.Properties;
+using TekstilScada.Repositories;
 using TekstilScada.UIViews;
 
 namespace TekstilScada.UI.Views
@@ -22,7 +23,7 @@ namespace TekstilScada.UI.Views
         {
             InitializeComponent();
             ApplyLocalization();
-
+            LanguageManager.LanguageChanged += LanguageManager_LanguageChanged;
             _alarmReport = new AlarmReport_Control();
             _productionReport = new ProductionReport_Control();
             _oeeReport = new OeeReport_Control();
@@ -57,7 +58,11 @@ namespace TekstilScada.UI.Views
             _actionLogReport_Control.Dock = DockStyle.Fill;
             tabPageActionLog.Controls.Add(_actionLogReport_Control);
         }
+        private void LanguageManager_LanguageChanged(object sender, EventArgs e)
+        {
+            ApplyLocalization();
 
+        }
         private void ApplyLocalization()
         {
             tabPageProductionReport.Text = Resources.üretimraporu;

@@ -136,7 +136,7 @@
     <value>Alarm Metni:</value>
   </data>
   <data name="AllMachines" xml:space="preserve">
-    <value>TÜM MAKİNELER</value>
+    <value>Tüm Makineler</value>
   </data>
   <data name="BatchNo" xml:space="preserve">
     <value>Batch No:</value>
@@ -451,7 +451,7 @@
     <value>Giriş Yapan</value>
   </data>
   <data name="Logout" xml:space="preserve">
-    <value>Oturum</value>
+    <value>Giriş/Çıkış</value>
   </data>
   <data name="namesurname" xml:space="preserve">
     <value>Ad Soyad</value>
@@ -601,7 +601,7 @@
     <value>Boşta Bekleyen</value>
   </data>
   <data name="Saatlikelektrik" xml:space="preserve">
-    <value>Saatlik Elektrik Tüketimi (kW)</value>
+    <value>Ortalama Elektrik Tüketimi</value>
   </data>
   <data name="ensikalarm" xml:space="preserve">
     <value>En Sık 5 Alarm (Son 24 Saat)</value>

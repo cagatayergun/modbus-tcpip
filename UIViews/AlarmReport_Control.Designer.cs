@@ -53,7 +53,7 @@ namespace TekstilScada.UI.Views
             btnGenerateReport.Name = "btnGenerateReport";
             btnGenerateReport.Size = new Size(88, 22);
             btnGenerateReport.TabIndex = 6;
-            btnGenerateReport.Text = "Raporla";
+            btnGenerateReport.Text = "Report";
             btnGenerateReport.UseVisualStyleBackColor = true;
             btnGenerateReport.Click += btnGenerateReport_Click;
             // 
@@ -72,9 +72,9 @@ namespace TekstilScada.UI.Views
             label3.AutoSize = true;
             label3.Location = new Point(384, 15);
             label3.Name = "label3";
-            label3.Size = new Size(49, 15);
+            label3.Size = new Size(56, 15);
             label3.TabIndex = 4;
-            label3.Text = "Makine:";
+            label3.Text = "Machine:";
             // 
             // dtpEndTime
             // 
@@ -110,9 +110,9 @@ namespace TekstilScada.UI.Views
             label1.AutoSize = true;
             label1.Location = new Point(4, 15);
             label1.Name = "label1";
-            label1.Size = new Size(72, 15);
+            label1.Size = new Size(70, 15);
             label1.TabIndex = 0;
-            label1.Text = "Tarih Aralığı:";
+            label1.Text = "Date Range:";
             // 
             // btnExportToExcel
             // 
@@ -121,7 +121,7 @@ namespace TekstilScada.UI.Views
             btnExportToExcel.Name = "btnExportToExcel";
             btnExportToExcel.Size = new Size(105, 22);
             btnExportToExcel.TabIndex = 7;
-            btnExportToExcel.Text = "Excel'e Aktar";
+            btnExportToExcel.Text = "Export to Excel";
             btnExportToExcel.UseVisualStyleBackColor = true;
             btnExportToExcel.Click += btnExportToExcel_Click;
             // 

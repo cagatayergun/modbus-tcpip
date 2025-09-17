@@ -1,6 +1,6 @@
 ﻿// ======================================================
 // FILE: TekstilScada.Core/Services/FtpTransferService.cs
-// TransferJob sınıfına yeni özellik eklendi ve kuyruk işleme mantığı güncellendi.
+// New property added to the TransferJob class and queue processing logic updated.
 // ======================================================
 
 using System;
@@ -18,79 +18,79 @@ using TekstilScada.Repositories;
 
 namespace TekstilScada.Services
 {
-    public enum TransferType { Gonder, Al }
-    public enum TransferStatus { Beklemede, Aktarılıyor, Başarılı, Hatalı }
+    public enum TransferType { Send, Receive }
+    public enum TransferStatus { Pending, Transferring, Successful, Failed }
 
     public class TransferJob : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public string HedefDosyaAdi { get; set; }
+        public string TargetFileName { get; set; }
 
-        // YENİ EKLENEN ÖZELLİK
+        // NEWLY ADDED PROPERTY
         public int RecipeNumber { get; set; }
 
-        public string ReceteAdi => IslemTipi == TransferType.Gonder
-                                   ? (!string.IsNullOrEmpty(HedefDosyaAdi) ? $"{YerelRecete?.RecipeName} -> {HedefDosyaAdi}" : YerelRecete?.RecipeName)
-                                   : UzakDosyaAdi;
+        public string RecipeName => OperationType == TransferType.Send
+                                    ? (!string.IsNullOrEmpty(TargetFileName) ? $"{LocalRecipe?.RecipeName} -> {TargetFileName}" : LocalRecipe?.RecipeName)
+                                    : RemoteFileName;
         protected void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private TransferStatus _durum = TransferStatus.Beklemede;
-        private int _ilerleme = 0;
-        private string _hataMesaji = string.Empty;
+        private TransferStatus _status = TransferStatus.Pending;
+        private int _progress = 0;
+        private string _errorMessage = string.Empty;
 
         public Guid Id { get; } = Guid.NewGuid();
-        public Machine Makine { get; set; }
-        public ScadaRecipe? YerelRecete { get; set; }
-        public string? UzakDosyaAdi { get; set; }
-        public TransferType IslemTipi { get; set; }
+        public Machine Machine { get; set; }
+        public ScadaRecipe? LocalRecipe { get; set; }
+        public string? RemoteFileName { get; set; }
+        public TransferType OperationType { get; set; }
 
-        public TransferStatus Durum
+        public TransferStatus Status
         {
-            get => _durum;
+            get => _status;
             set
             {
-                if (_durum != value)
+                if (_status != value)
                 {
-                    _durum = value;
-                    OnPropertyChanged(nameof(Durum));
+                    _status = value;
+                    OnPropertyChanged(nameof(Status));
                 }
             }
         }
-        public int Ilerleme
+        public int Progress
         {
-            get => _ilerleme;
+            get => _progress;
             set
             {
-                if (_ilerleme != value)
+                if (_progress != value)
                 {
-                    _ilerleme = value;
-                    OnPropertyChanged(nameof(Ilerleme));
+                    _progress = value;
+                    OnPropertyChanged(nameof(Progress));
                 }
             }
         }
-        public string HataMesaji
+        public string ErrorMessage
         {
-            get => _hataMesaji;
+            get => _errorMessage;
             set
             {
-                if (_hataMesaji != value)
+                if (_errorMessage != value)
                 {
-                    _hataMesaji = value;
-                    OnPropertyChanged(nameof(HataMesaji));
+                    _errorMessage = value;
+                    OnPropertyChanged(nameof(ErrorMessage));
                 }
             }
         }
 
-        public string MakineAdi => Makine.MachineName;
+        public string MachineName => Machine.MachineName;
     }
 
     public class FtpTransferService
     {
-        // YENİ: Sadece bir `private static` örnek alanı bırakıldı.
+        // NEW: Only one 'private static' instance field is left.
         private static readonly FtpTransferService _instance = new FtpTransferService();
         public static FtpTransferService Instance => _instance;
         public event EventHandler RecipeListChanged;
@@ -99,16 +99,16 @@ namespace TekstilScada.Services
         private SynchronizationContext _syncContext;
         private PlcPollingService _plcPollingService;
 
-        // YENİ: Yapıcı metot, PlcPollingService'i parametre olarak alıyor.
+        // NEW: The constructor method takes PlcPollingService as a parameter.
         public FtpTransferService(PlcPollingService plcPollingService)
         {
             _plcPollingService = plcPollingService;
         }
 
-        // YENİ: Parametresiz yapıcı, sadece singleton başlatma için.
+        // NEW: Parameterless constructor, only for singleton initialization.
         private FtpTransferService()
         {
-            // Diğer bağımlılıklar burada yoksa, boş bırakın
+            // If there are no other dependencies here, leave it empty
         }
 
         public void SetSyncContext(SynchronizationContext context)
@@ -116,36 +116,36 @@ namespace TekstilScada.Services
             _syncContext = context;
         }
 
-        public void QueueSendJobs(List<ScadaRecipe> receteler, Machine makine)
+        public void QueueSendJobs(List<ScadaRecipe> recipes, Machine machine)
         {
-            foreach (var recete in receteler)
+            foreach (var recipe in recipes)
             {
-                if (!Jobs.Any(j => j.Makine.Id == makine.Id && j.YerelRecete?.Id == recete.Id && j.IslemTipi == TransferType.Gonder))
+                if (!Jobs.Any(j => j.Machine.Id == machine.Id && j.LocalRecipe?.Id == recipe.Id && j.OperationType == TransferType.Send))
                 {
-                    Jobs.Add(new TransferJob { Makine = makine, YerelRecete = recete, IslemTipi = TransferType.Gonder });
+                    Jobs.Add(new TransferJob { Machine = machine, LocalRecipe = recipe, OperationType = TransferType.Send });
                 }
             }
             StartProcessingIfNotRunning();
         }
-        public void QueueSendJobs(List<ScadaRecipe> receteler, List<Machine> makineler)
+        public void QueueSendJobs(List<ScadaRecipe> recipes, List<Machine> machines)
         {
-            foreach (var makine in makineler)
+            foreach (var machine in machines)
             {
-                foreach (var recete in receteler)
+                foreach (var recipe in recipes)
                 {
-                    if (!Jobs.Any(j => j.Makine.Id == makine.Id && j.YerelRecete?.Id == recete.Id && j.IslemTipi == TransferType.Gonder))
+                    if (!Jobs.Any(j => j.Machine.Id == machine.Id && j.LocalRecipe?.Id == recipe.Id && j.OperationType == TransferType.Send))
                     {
-                        Jobs.Add(new TransferJob { Makine = makine, YerelRecete = recete, IslemTipi = TransferType.Gonder });
+                        Jobs.Add(new TransferJob { Machine = machine, LocalRecipe = recipe, OperationType = TransferType.Send });
                     }
                 }
             }
             StartProcessingIfNotRunning();
         }
-        public void QueueReceiveJobs(List<string> dosyaAdlari, Machine makine)
+        public void QueueReceiveJobs(List<string> fileNames, Machine machine)
         {
-            foreach (var dosya in dosyaAdlari)
+            foreach (var file in fileNames)
             {
-                Jobs.Add(new TransferJob { Makine = makine, UzakDosyaAdi = dosya, IslemTipi = TransferType.Al });
+                Jobs.Add(new TransferJob { Machine = machine, RemoteFileName = file, OperationType = TransferType.Receive });
             }
             StartProcessingIfNotRunning();
         }
@@ -159,11 +159,11 @@ namespace TekstilScada.Services
         }
         private string GenerateNewRecipeName(TransferJob job, ScadaRecipe recipe, RecipeRepository recipeRepo)
         {
-            string machineName = job.Makine.MachineName;
+            string machineName = job.Machine.MachineName;
             string recipeNumberPart = "0";
             try
             {
-                string fileName = Path.GetFileNameWithoutExtension(job.UzakDosyaAdi);
+                string fileName = Path.GetFileNameWithoutExtension(job.RemoteFileName);
                 Match match = Regex.Match(fileName, @"\d+$");
                 if (match.Success)
                 {
@@ -172,9 +172,9 @@ namespace TekstilScada.Services
             }
             catch
             {
-                recipeNumberPart = "NO_HATA";
+                recipeNumberPart = "NO_ERROR";
             }
-            string asciiPart = "BILGI_YOK";
+            string asciiPart = "NO_INFO";
             try
             {
                 var step99 = recipe.Steps.FirstOrDefault(s => s.StepNumber == 99);
@@ -192,17 +192,17 @@ namespace TekstilScada.Services
                     asciiPart = Encoding.ASCII.GetString(asciiBytes).Replace("\0", "").Trim();
                     if (string.IsNullOrEmpty(asciiPart))
                     {
-                        asciiPart = "BOS";
+                        asciiPart = "EMPTY";
                     }
                 }
                 else
                 {
-                    asciiPart = "ADIM99_YOK";
+                    asciiPart = "STEP99_MISSING";
                 }
             }
             catch
             {
-                asciiPart = "HATA";
+                asciiPart = "ERROR";
             }
 
             string baseName = $"{machineName}-{recipeNumberPart}-{asciiPart}";
@@ -212,7 +212,7 @@ namespace TekstilScada.Services
 
             while (existingNames.Contains(finalName))
             {
-                finalName = $"{baseName}_Kopya{copyCounter}";
+                finalName = $"{baseName}_Copy{copyCounter}";
                 copyCounter++;
             }
 
@@ -222,49 +222,49 @@ namespace TekstilScada.Services
         private async Task ProcessQueue(RecipeRepository recipeRepo)
         {
             _isProcessing = true;
-            while (Jobs.Any(j => j.Durum == TransferStatus.Beklemede))
+            while (Jobs.Any(j => j.Status == TransferStatus.Pending))
             {
-                var job = Jobs.FirstOrDefault(j => j.Durum == TransferStatus.Beklemede);
+                var job = Jobs.FirstOrDefault(j => j.Status == TransferStatus.Pending);
                 if (job == null) continue;
 
                 try
                 {
-                    job.Durum = TransferStatus.Aktarılıyor;
-                    var ftpService = new FtpService(job.Makine.VncAddress, job.Makine.FtpUsername, job.Makine.FtpPassword);
-                    job.Ilerleme = 20;
+                    job.Status = TransferStatus.Transferring;
+                    var ftpService = new FtpService(job.Machine.VncAddress, job.Machine.FtpUsername, job.Machine.FtpPassword);
+                    job.Progress = 20;
 
-                    if (job.IslemTipi == TransferType.Gonder)
+                    if (job.OperationType == TransferType.Send)
                     {
-                        var fullRecipe = recipeRepo.GetRecipeById(job.YerelRecete.Id);
+                        var fullRecipe = recipeRepo.GetRecipeById(job.LocalRecipe.Id);
                         if (fullRecipe == null || !fullRecipe.Steps.Any())
                         {
-                            throw new Exception("Reçete veritabanında bulunamadı veya adımları boş.");
+                            throw new Exception("Recipe not found in database or steps are empty.");
                         }
 
-                        // Reçete adını PLC'ye yaz
-                        if (_plcPollingService.GetPlcManagers().TryGetValue(job.Makine.Id, out var plcManager))
+                        // Write the recipe name to the PLC
+                        if (_plcPollingService.GetPlcManagers().TryGetValue(job.Machine.Id, out var plcManager))
                         {
-                            // Hedef dosya adından reçete numarasını çıkar
-                            var recipeNumberMatch = Regex.Match(job.HedefDosyaAdi, @"XPR(\d+)\.csv");
+                            // Extract the recipe number from the target filename
+                            var recipeNumberMatch = Regex.Match(job.TargetFileName, @"XPR(\d+)\.csv");
                             if (!recipeNumberMatch.Success || !int.TryParse(recipeNumberMatch.Groups[1].Value, out int recipeNumber))
                             {
-                                throw new Exception("Geçersiz hedef dosya adı formatı. Reçete numarası çıkarılamadı.");
+                                throw new Exception("Invalid target filename format. Recipe number could not be extracted.");
                             }
 
-                            // PLC'ye yazma işlemi için metodu çağır
+                            // Call the method to write to the PLC
                             var writeResult = await plcManager.WriteRecipeNameAsync(recipeNumber, fullRecipe.RecipeName);
                             if (!writeResult.IsSuccess)
                             {
-                                throw new Exception($"Reçete adı PLC'ye yazılamadı: {writeResult.Message}");
+                                throw new Exception($"Recipe name could not be written to PLC: {writeResult.Message}");
                             }
                         }
                         else
                         {
-                            throw new Exception("PLC bağlantısı aktif değil, reçete adı PLC'ye yazılamadı.");
+                            throw new Exception("PLC connection is not active, recipe name could not be written to PLC.");
                         }
 
-                        // Reçete adını PLC'ye gömmek için 99. adımı güncelle
-                        string nameToEmbed = job.YerelRecete.RecipeName;
+                        // Update step 99 to embed the recipe name in the PLC
+                        string nameToEmbed = job.LocalRecipe.RecipeName;
                         if (nameToEmbed.Length > 10)
                         {
                             nameToEmbed = nameToEmbed.Substring(0, 10);
@@ -284,31 +284,31 @@ namespace TekstilScada.Services
                             step99.StepDataWords[i] = BitConverter.ToInt16(asciiBytes, i * 2);
                         }
 
-                        job.Ilerleme = 50;
+                        job.Progress = 50;
 
                         string csvContent = RecipeCsvConverter.ToCsv(fullRecipe);
-                        await ftpService.UploadFileAsync(job.HedefDosyaAdi, csvContent);
+                        await ftpService.UploadFileAsync(job.TargetFileName, csvContent);
                     }
                     else
                     {
-                        var csvContent = await ftpService.DownloadFileAsync(job.UzakDosyaAdi);
-                        job.Ilerleme = 50;
-                        var tempRecipe = RecipeCsvConverter.ToRecipe(csvContent, job.UzakDosyaAdi);
+                        var csvContent = await ftpService.DownloadFileAsync(job.RemoteFileName);
+                        job.Progress = 50;
+                        var tempRecipe = RecipeCsvConverter.ToRecipe(csvContent, job.RemoteFileName);
                         string newFormattedName = this.GenerateNewRecipeName(job, tempRecipe, recipeRepo);
                         tempRecipe.RecipeName = newFormattedName;
-                        tempRecipe.TargetMachineType = !string.IsNullOrEmpty(job.Makine.MachineSubType) ? job.Makine.MachineSubType : job.Makine.MachineType;
+                        tempRecipe.TargetMachineType = !string.IsNullOrEmpty(job.Machine.MachineSubType) ? job.Machine.MachineSubType : job.Machine.MachineType;
                         recipeRepo.AddOrUpdateRecipe(tempRecipe);
                         RecipeListChanged?.Invoke(this, EventArgs.Empty);
                     }
 
-                    job.Ilerleme = 100;
-                    job.Durum = TransferStatus.Başarılı;
+                    job.Progress = 100;
+                    job.Status = TransferStatus.Successful;
 
                 }
                 catch (Exception ex)
                 {
-                    job.Durum = TransferStatus.Hatalı;
-                    job.HataMesaji = ex.Message;
+                    job.Status = TransferStatus.Failed;
+                    job.ErrorMessage = ex.Message;
                 }
                 finally
                 {
@@ -318,24 +318,24 @@ namespace TekstilScada.Services
             _isProcessing = false;
         }
 
-        public void QueueSequentiallyNamedSendJobs(List<ScadaRecipe> receteler, List<Machine> makineler, int startNumber)
+        public void QueueSequentiallyNamedSendJobs(List<ScadaRecipe> recipes, List<Machine> machines, int startNumber)
         {
             int currentRecipeNumber = startNumber;
-            foreach (var recete in receteler)
+            foreach (var recipe in recipes)
             {
-                string hedefDosyaAdi = $"XPR{currentRecipeNumber:D5}.csv";
-                foreach (var makine in makineler)
+                string targetFileName = $"XPR{currentRecipeNumber:D5}.csv";
+                foreach (var machine in machines)
                 {
-                    // DÜZELTME: Sadece beklemede olan işler için kontrol yap.
-                    // Eğer aynı makine ve reçete için beklemede bir iş yoksa yenisini ekle.
-                    if (!Jobs.Any(j => j.Makine.Id == makine.Id && j.YerelRecete?.Id == recete.Id && j.HedefDosyaAdi == hedefDosyaAdi && j.Durum == TransferStatus.Beklemede))
+                    // CORRECTION: Check only for pending jobs.
+                    // If there is no pending job for the same machine and recipe, add a new one.
+                    if (!Jobs.Any(j => j.Machine.Id == machine.Id && j.LocalRecipe?.Id == recipe.Id && j.TargetFileName == targetFileName && j.Status == TransferStatus.Pending))
                     {
                         Jobs.Add(new TransferJob
                         {
-                            Makine = makine,
-                            YerelRecete = recete,
-                            IslemTipi = TransferType.Gonder,
-                            HedefDosyaAdi = hedefDosyaAdi,
+                            Machine = machine,
+                            LocalRecipe = recipe,
+                            OperationType = TransferType.Send,
+                            TargetFileName = targetFileName,
                             RecipeNumber = currentRecipeNumber
                         });
                     }

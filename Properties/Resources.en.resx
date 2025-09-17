@@ -136,7 +136,7 @@
     <value>Alarm Text:</value>
   </data>
   <data name="AllMachines" xml:space="preserve">
-    <value>ALL MACHINES</value>
+    <value>All Machines</value>
   </data>
   <data name="BatchNo" xml:space="preserve">
     <value>Batch No:</value>
@@ -604,7 +604,7 @@
     <value>Idle Waiting</value>
   </data>
   <data name="Saatlikelektrik" xml:space="preserve">
-    <value>Hourly Electricity Consumption (kW)
+    <value>Average Electricity Consumption
 </value>
   </data>
   <data name="ensikalarm" xml:space="preserve">

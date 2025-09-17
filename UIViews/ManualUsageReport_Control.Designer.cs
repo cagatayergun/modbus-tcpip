@@ -18,7 +18,6 @@
         private void InitializeComponent()
         {
             pnlFilters = new Panel();
-            btnExportToExcel = new Button();
             btnGenerateReport = new Button();
             cmbMachines = new ComboBox();
             label3 = new Label();
@@ -26,6 +25,7 @@
             label2 = new Label();
             dtpStartTime = new DateTimePicker();
             label1 = new Label();
+            btnExportToExcel = new Button();
             dgvManualUsage = new DataGridView();
             pnlFilters.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvManualUsage).BeginInit();
@@ -48,25 +48,14 @@
             pnlFilters.Size = new Size(788, 48);
             pnlFilters.TabIndex = 1;
             // 
-            // btnExportToExcel
-            // 
-            btnExportToExcel.Location = new Point(689, 19);
-            btnExportToExcel.Margin = new Padding(3, 2, 3, 2);
-            btnExportToExcel.Name = "btnExportToExcel";
-            btnExportToExcel.Size = new Size(88, 22);
-            btnExportToExcel.TabIndex = 7;
-            btnExportToExcel.Text = "Excel'e Aktar";
-            btnExportToExcel.UseVisualStyleBackColor = true;
-            btnExportToExcel.Click += btnExportToExcel_Click;
-            // 
             // btnGenerateReport
             // 
-            btnGenerateReport.Location = new Point(578, 19);
+            btnGenerateReport.Location = new Point(570, 19);
             btnGenerateReport.Margin = new Padding(3, 2, 3, 2);
             btnGenerateReport.Name = "btnGenerateReport";
             btnGenerateReport.Size = new Size(105, 22);
             btnGenerateReport.TabIndex = 6;
-            btnGenerateReport.Text = "Raporla";
+            btnGenerateReport.Text = "Report";
             btnGenerateReport.UseVisualStyleBackColor = true;
             btnGenerateReport.Click += btnGenerateReport_Click;
             // 
@@ -85,9 +74,9 @@
             label3.AutoSize = true;
             label3.Location = new Point(312, 23);
             label3.Name = "label3";
-            label3.Size = new Size(49, 15);
+            label3.Size = new Size(56, 15);
             label3.TabIndex = 4;
-            label3.Text = "Makine:";
+            label3.Text = "Machine:";
             // 
             // dtpEndTime
             // 
@@ -123,9 +112,20 @@
             label1.AutoSize = true;
             label1.Location = new Point(12, 2);
             label1.Name = "label1";
-            label1.Size = new Size(72, 15);
+            label1.Size = new Size(70, 15);
             label1.TabIndex = 0;
-            label1.Text = "Tarih Aralığı:";
+            label1.Text = "Date Range:";
+            // 
+            // btnExportToExcel
+            // 
+            btnExportToExcel.Location = new Point(678, 19);
+            btnExportToExcel.Margin = new Padding(3, 2, 3, 2);
+            btnExportToExcel.Name = "btnExportToExcel";
+            btnExportToExcel.Size = new Size(106, 22);
+            btnExportToExcel.TabIndex = 7;
+            btnExportToExcel.Text = "Export to Excel";
+            btnExportToExcel.UseVisualStyleBackColor = true;
+            btnExportToExcel.Click += btnExportToExcel_Click;
             // 
             // dgvManualUsage
             // 

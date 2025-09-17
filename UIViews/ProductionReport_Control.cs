@@ -36,7 +36,7 @@ namespace TekstilScada.UI.Views
             dtpEndTime.Value = DateTime.Now;
 
             var machines = _machineRepository.GetAllMachines();
-            machines.Insert(0, new Machine { Id = -1, MachineName = "TÜM MAKİNELER", MachineUserDefinedId = "" });
+            machines.Insert(0, new Machine { Id = -1, MachineName = "All Machines", MachineUserDefinedId = "" });
             cmbMachines.DataSource = machines;
             cmbMachines.DisplayMember = "DisplayInfo";
             cmbMachines.ValueMember = "Id";
@@ -93,14 +93,14 @@ namespace TekstilScada.UI.Views
                 catch (Exception ex)
                 {
                     // Kolon gizleme sırasında hata olursa kullanıcıyı bilgilendir
-                    MessageBox.Show($"Rapor kolonları ayarlanırken bir hata oluştu: {ex.Message}", "Uyarı");
+                    MessageBox.Show($"An error occurred while setting up report columns: {ex.Message}", "Warning");
                 }
                 // --- YENİ EKLENECEK KOD BİTİŞİ ---
             }
 
             catch (Exception ex)
             {
-                MessageBox.Show($"Rapor oluşturulurken bir hata oluştu: {ex.Message}", "Hata");
+                MessageBox.Show($"An error occurred while generating the report: {ex.Message}", "Error");
             }
             finally
             {

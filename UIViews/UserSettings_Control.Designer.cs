@@ -29,183 +29,195 @@ namespace TekstilScada.UI.Views
         /// </summary>
         private void InitializeComponent()
         {
-            this.dgvUsers = new System.Windows.Forms.DataGridView();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.clbRoles = new System.Windows.Forms.CheckedListBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.chkIsActive = new System.Windows.Forms.CheckBox();
-            this.txtPassword = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.txtFullName = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.txtUsername = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.btnDelete = new System.Windows.Forms.Button();
-            this.btnSave = new System.Windows.Forms.Button();
-            this.btnNew = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvUsers)).BeginInit();
-            this.groupBox1.SuspendLayout();
-            this.SuspendLayout();
+            dgvUsers = new DataGridView();
+            groupBox1 = new GroupBox();
+            btnNew = new Button();
+            btnSave = new Button();
+            btnDelete = new Button();
+            clbRoles = new CheckedListBox();
+            label5 = new Label();
+            chkIsActive = new CheckBox();
+            txtPassword = new TextBox();
+            label4 = new Label();
+            txtFullName = new TextBox();
+            label3 = new Label();
+            txtUsername = new TextBox();
+            label1 = new Label();
+            ((System.ComponentModel.ISupportInitialize)dgvUsers).BeginInit();
+            groupBox1.SuspendLayout();
+            SuspendLayout();
             // 
             // dgvUsers
             // 
-            this.dgvUsers.AllowUserToAddRows = false;
-            this.dgvUsers.AllowUserToDeleteRows = false;
-            this.dgvUsers.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvUsers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvUsers.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvUsers.Location = new System.Drawing.Point(0, 0);
-            this.dgvUsers.MultiSelect = false;
-            this.dgvUsers.Name = "dgvUsers";
-            this.dgvUsers.ReadOnly = true;
-            this.dgvUsers.RowHeadersWidth = 51;
-            this.dgvUsers.RowTemplate.Height = 29;
-            this.dgvUsers.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvUsers.Size = new System.Drawing.Size(800, 350);
-            this.dgvUsers.TabIndex = 0;
-            this.dgvUsers.SelectionChanged += new System.EventHandler(this.dgvUsers_SelectionChanged);
+            dgvUsers.AllowUserToAddRows = false;
+            dgvUsers.AllowUserToDeleteRows = false;
+            dgvUsers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvUsers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvUsers.Dock = DockStyle.Fill;
+            dgvUsers.Location = new Point(0, 0);
+            dgvUsers.Margin = new Padding(3, 2, 3, 2);
+            dgvUsers.MultiSelect = false;
+            dgvUsers.Name = "dgvUsers";
+            dgvUsers.ReadOnly = true;
+            dgvUsers.RowHeadersWidth = 51;
+            dgvUsers.RowTemplate.Height = 29;
+            dgvUsers.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvUsers.Size = new Size(700, 450);
+            dgvUsers.TabIndex = 0;
+            dgvUsers.SelectionChanged += dgvUsers_SelectionChanged;
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.btnNew);
-            this.groupBox1.Controls.Add(this.btnSave);
-            this.groupBox1.Controls.Add(this.btnDelete);
-            this.groupBox1.Controls.Add(this.clbRoles);
-            this.groupBox1.Controls.Add(this.label5);
-            this.groupBox1.Controls.Add(this.chkIsActive);
-            this.groupBox1.Controls.Add(this.txtPassword);
-            this.groupBox1.Controls.Add(this.label4);
-            this.groupBox1.Controls.Add(this.txtFullName);
-            this.groupBox1.Controls.Add(this.label3);
-            this.groupBox1.Controls.Add(this.txtUsername);
-            this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.groupBox1.Location = new System.Drawing.Point(0, 350);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(800, 250);
-            this.groupBox1.TabIndex = 1;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Kullanıcı Detayları";
-            // 
-            // clbRoles
-            // 
-            this.clbRoles.FormattingEnabled = true;
-            this.clbRoles.Location = new System.Drawing.Point(450, 50);
-            this.clbRoles.Name = "clbRoles";
-            this.clbRoles.Size = new System.Drawing.Size(200, 114);
-            this.clbRoles.TabIndex = 9;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(450, 25);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(55, 20);
-            this.label5.TabIndex = 8;
-            this.label5.Text = "Roller:";
-            // 
-            // chkIsActive
-            // 
-            this.chkIsActive.AutoSize = true;
-            this.chkIsActive.Location = new System.Drawing.Point(130, 190);
-            this.chkIsActive.Name = "chkIsActive";
-            this.chkIsActive.Size = new System.Drawing.Size(121, 24);
-            this.chkIsActive.TabIndex = 7;
-            this.chkIsActive.Text = "Kullanıcı Aktif";
-            this.chkIsActive.UseVisualStyleBackColor = true;
-            // 
-            // txtPassword
-            // 
-            this.txtPassword.Location = new System.Drawing.Point(130, 130);
-            this.txtPassword.Name = "txtPassword";
-            this.txtPassword.PasswordChar = '*';
-            this.txtPassword.Size = new System.Drawing.Size(250, 27);
-            this.txtPassword.TabIndex = 6;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(20, 133);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(87, 20);
-            this.label4.TabIndex = 5;
-            this.label4.Text = "Şifre (Yeni):";
-            // 
-            // txtFullName
-            // 
-            this.txtFullName.Location = new System.Drawing.Point(130, 90);
-            this.txtFullName.Name = "txtFullName";
-            this.txtFullName.Size = new System.Drawing.Size(250, 27);
-            this.txtFullName.TabIndex = 4;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(20, 93);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(76, 20);
-            this.label3.TabIndex = 3;
-            this.label3.Text = "Ad Soyad:";
-            // 
-            // txtUsername
-            // 
-            this.txtUsername.Location = new System.Drawing.Point(130, 50);
-            this.txtUsername.Name = "txtUsername";
-            this.txtUsername.Size = new System.Drawing.Size(250, 27);
-            this.txtUsername.TabIndex = 1;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(20, 53);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(95, 20);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Kullanıcı Adı:";
-            // 
-            // btnDelete
-            // 
-            this.btnDelete.Location = new System.Drawing.Point(680, 190);
-            this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(94, 29);
-            this.btnDelete.TabIndex = 12;
-            this.btnDelete.Text = "Sil";
-            this.btnDelete.UseVisualStyleBackColor = true;
-            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
-            // 
-            // btnSave
-            // 
-            this.btnSave.Location = new System.Drawing.Point(580, 190);
-            this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(94, 29);
-            this.btnSave.TabIndex = 11;
-            this.btnSave.Text = "Kaydet";
-            this.btnSave.UseVisualStyleBackColor = true;
-            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            groupBox1.Controls.Add(btnNew);
+            groupBox1.Controls.Add(btnSave);
+            groupBox1.Controls.Add(btnDelete);
+            groupBox1.Controls.Add(clbRoles);
+            groupBox1.Controls.Add(label5);
+            groupBox1.Controls.Add(chkIsActive);
+            groupBox1.Controls.Add(txtPassword);
+            groupBox1.Controls.Add(label4);
+            groupBox1.Controls.Add(txtFullName);
+            groupBox1.Controls.Add(label3);
+            groupBox1.Controls.Add(txtUsername);
+            groupBox1.Controls.Add(label1);
+            groupBox1.Dock = DockStyle.Bottom;
+            groupBox1.Location = new Point(0, 262);
+            groupBox1.Margin = new Padding(3, 2, 3, 2);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Padding = new Padding(3, 2, 3, 2);
+            groupBox1.Size = new Size(700, 188);
+            groupBox1.TabIndex = 1;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "User Details";
             // 
             // btnNew
             // 
-            this.btnNew.Location = new System.Drawing.Point(480, 190);
-            this.btnNew.Name = "btnNew";
-            this.btnNew.Size = new System.Drawing.Size(94, 29);
-            this.btnNew.TabIndex = 10;
-            this.btnNew.Text = "Yeni";
-            this.btnNew.UseVisualStyleBackColor = true;
-            this.btnNew.Click += new System.EventHandler(this.btnNew_Click);
+            btnNew.Location = new Point(420, 142);
+            btnNew.Margin = new Padding(3, 2, 3, 2);
+            btnNew.Name = "btnNew";
+            btnNew.Size = new Size(82, 22);
+            btnNew.TabIndex = 10;
+            btnNew.Text = "New";
+            btnNew.UseVisualStyleBackColor = true;
+            btnNew.Click += btnNew_Click;
+            // 
+            // btnSave
+            // 
+            btnSave.Location = new Point(508, 142);
+            btnSave.Margin = new Padding(3, 2, 3, 2);
+            btnSave.Name = "btnSave";
+            btnSave.Size = new Size(82, 22);
+            btnSave.TabIndex = 11;
+            btnSave.Text = "Save";
+            btnSave.UseVisualStyleBackColor = true;
+            btnSave.Click += btnSave_Click;
+            // 
+            // btnDelete
+            // 
+            btnDelete.Location = new Point(595, 142);
+            btnDelete.Margin = new Padding(3, 2, 3, 2);
+            btnDelete.Name = "btnDelete";
+            btnDelete.Size = new Size(82, 22);
+            btnDelete.TabIndex = 12;
+            btnDelete.Text = "Delete";
+            btnDelete.UseVisualStyleBackColor = true;
+            btnDelete.Click += btnDelete_Click;
+            // 
+            // clbRoles
+            // 
+            clbRoles.FormattingEnabled = true;
+            clbRoles.Location = new Point(394, 38);
+            clbRoles.Margin = new Padding(3, 2, 3, 2);
+            clbRoles.Name = "clbRoles";
+            clbRoles.Size = new Size(176, 76);
+            clbRoles.TabIndex = 9;
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(394, 19);
+            label5.Name = "label5";
+            label5.Size = new Size(38, 15);
+            label5.TabIndex = 8;
+            label5.Text = "Roles:";
+            // 
+            // chkIsActive
+            // 
+            chkIsActive.AutoSize = true;
+            chkIsActive.Location = new Point(114, 142);
+            chkIsActive.Margin = new Padding(3, 2, 3, 2);
+            chkIsActive.Name = "chkIsActive";
+            chkIsActive.Size = new Size(85, 19);
+            chkIsActive.TabIndex = 7;
+            chkIsActive.Text = "User Active";
+            chkIsActive.UseVisualStyleBackColor = true;
+            // 
+            // txtPassword
+            // 
+            txtPassword.Location = new Point(114, 98);
+            txtPassword.Margin = new Padding(3, 2, 3, 2);
+            txtPassword.Name = "txtPassword";
+            txtPassword.PasswordChar = '*';
+            txtPassword.Size = new Size(219, 23);
+            txtPassword.TabIndex = 6;
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(18, 100);
+            label4.Name = "label4";
+            label4.Size = new Size(95, 15);
+            label4.TabIndex = 5;
+            label4.Text = "Password (New):";
+            // 
+            // txtFullName
+            // 
+            txtFullName.Location = new Point(114, 68);
+            txtFullName.Margin = new Padding(3, 2, 3, 2);
+            txtFullName.Name = "txtFullName";
+            txtFullName.Size = new Size(219, 23);
+            txtFullName.TabIndex = 4;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(18, 70);
+            label3.Name = "label3";
+            label3.Size = new Size(92, 15);
+            label3.TabIndex = 3;
+            label3.Text = "Name Surname:";
+            // 
+            // txtUsername
+            // 
+            txtUsername.Location = new Point(114, 38);
+            txtUsername.Margin = new Padding(3, 2, 3, 2);
+            txtUsername.Name = "txtUsername";
+            txtUsername.Size = new Size(219, 23);
+            txtUsername.TabIndex = 1;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(18, 40);
+            label1.Name = "label1";
+            label1.Size = new Size(66, 15);
+            label1.TabIndex = 0;
+            label1.Text = "User name:";
             // 
             // UserSettings_Control
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.dgvUsers);
-            this.Name = "UserSettings_Control";
-            this.Size = new System.Drawing.Size(800, 600);
-            this.Load += new System.EventHandler(this.UserSettings_Control_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvUsers)).EndInit();
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.ResumeLayout(false);
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(groupBox1);
+            Controls.Add(dgvUsers);
+            Margin = new Padding(3, 2, 3, 2);
+            Name = "UserSettings_Control";
+            Size = new Size(700, 450);
+            Load += UserSettings_Control_Load;
+            ((System.ComponentModel.ISupportInitialize)dgvUsers).EndInit();
+            groupBox1.ResumeLayout(false);
+            groupBox1.PerformLayout();
+            ResumeLayout(false);
         }
         #endregion
         private System.Windows.Forms.DataGridView dgvUsers;

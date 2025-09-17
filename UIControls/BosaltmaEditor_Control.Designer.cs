@@ -45,15 +45,15 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(24, 51);
+            label1.Location = new Point(5, 51);
             label1.Name = "label1";
-            label1.Size = new Size(125, 15);
+            label1.Size = new Size(189, 15);
             label1.TabIndex = 0;
-            label1.Text = "Sağ-Sol Yön Süre (SN):";
+            label1.Text = "Right-Left Direction Duration (SN):";
             // 
             // numSagSolSure
             // 
-            numSagSolSure.Location = new Point(151, 47);
+            numSagSolSure.Location = new Point(196, 47);
             numSagSolSure.Margin = new Padding(3, 2, 3, 2);
             numSagSolSure.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
             numSagSolSure.Name = "numSagSolSure";
@@ -63,15 +63,15 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(24, 81);
+            label2.Location = new Point(5, 81);
             label2.Name = "label2";
-            label2.Size = new Size(124, 15);
+            label2.Size = new Size(106, 15);
             label2.TabIndex = 2;
-            label2.Text = "Bekleme Zamanı (SN):";
+            label2.Text = "Waiting Time (SN):";
             // 
             // numBeklemeZamani
             // 
-            numBeklemeZamani.Location = new Point(151, 77);
+            numBeklemeZamani.Location = new Point(196, 77);
             numBeklemeZamani.Margin = new Padding(3, 2, 3, 2);
             numBeklemeZamani.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
             numBeklemeZamani.Name = "numBeklemeZamani";
@@ -81,15 +81,15 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(24, 111);
+            label3.Location = new Point(5, 111);
             label3.Name = "label3";
-            label3.Size = new Size(82, 15);
+            label3.Size = new Size(83, 15);
             label3.TabIndex = 4;
-            label3.Text = "Çalışma Devri:";
+            label3.Text = "Working RPM:";
             // 
             // numCalismaDevri
             // 
-            numCalismaDevri.Location = new Point(151, 107);
+            numCalismaDevri.Location = new Point(196, 107);
             numCalismaDevri.Margin = new Padding(3, 2, 3, 2);
             numCalismaDevri.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
             numCalismaDevri.Name = "numCalismaDevri";
@@ -99,18 +99,18 @@
             // chkTamburDur
             // 
             chkTamburDur.AutoSize = true;
-            chkTamburDur.Location = new Point(29, 145);
+            chkTamburDur.Location = new Point(10, 145);
             chkTamburDur.Margin = new Padding(3, 2, 3, 2);
             chkTamburDur.Name = "chkTamburDur";
-            chkTamburDur.Size = new Size(88, 19);
+            chkTamburDur.Size = new Size(83, 19);
             chkTamburDur.TabIndex = 6;
-            chkTamburDur.Text = "Tambur Dur";
+            chkTamburDur.Text = "Drum Stop";
             chkTamburDur.UseVisualStyleBackColor = true;
             // 
             // chkAlarm
             // 
             chkAlarm.AutoSize = true;
-            chkAlarm.Location = new Point(29, 168);
+            chkAlarm.Location = new Point(10, 168);
             chkAlarm.Margin = new Padding(3, 2, 3, 2);
             chkAlarm.Name = "chkAlarm";
             chkAlarm.Size = new Size(58, 19);
@@ -123,9 +123,9 @@
             bosaltmabasliktext.AutoSize = true;
             bosaltmabasliktext.Location = new Point(118, 11);
             bosaltmabasliktext.Name = "bosaltmabasliktext";
-            bosaltmabasliktext.Size = new Size(67, 15);
+            bosaltmabasliktext.Size = new Size(75, 15);
             bosaltmabasliktext.TabIndex = 8;
-            bosaltmabasliktext.Text = "BOŞALTMA";
+            bosaltmabasliktext.Text = "UNLOADING";
             // 
             // BosaltmaEditor_Control
             // 
@@ -144,7 +144,7 @@
             Controls.Add(label1);
             Margin = new Padding(3, 2, 3, 2);
             Name = "BosaltmaEditor_Control";
-            Size = new Size(302, 221);
+            Size = new Size(339, 221);
             ((System.ComponentModel.ISupportInitialize)numSagSolSure).EndInit();
             ((System.ComponentModel.ISupportInitialize)numBeklemeZamani).EndInit();
             ((System.ComponentModel.ISupportInitialize)numCalismaDevri).EndInit();

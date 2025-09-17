@@ -126,7 +126,7 @@ namespace TekstilScada.UI.Views
 
             if (waterCostParam == null || electricityCostParam == null || steamCostParam == null)
             {
-                MessageBox.Show("Maliyet parametreleri eksik. Lütfen Ayarlar -> Maliyet Parametreleri ekranını kontrol edin.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Cost parameters are missing. Please check the Settings -> Cost Parameters screen.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 

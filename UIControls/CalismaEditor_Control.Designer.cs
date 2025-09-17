@@ -51,13 +51,13 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             label1.AutoSize = true;
             label1.Location = new Point(12, 57);
             label1.Name = "label1";
-            label1.Size = new Size(125, 15);
+            label1.Size = new Size(189, 15);
             label1.TabIndex = 0;
-            label1.Text = "Sağ-Sol Yön Süre (SN):";
+            label1.Text = "Right-Left Direction Duration (SN):";
             // 
             // numSagSolSure
             // 
-            numSagSolSure.Location = new Point(158, 53);
+            numSagSolSure.Location = new Point(206, 53);
             numSagSolSure.Margin = new Padding(3, 2, 3, 2);
             numSagSolSure.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
             numSagSolSure.Name = "numSagSolSure";
@@ -69,13 +69,13 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             label2.AutoSize = true;
             label2.Location = new Point(12, 83);
             label2.Name = "label2";
-            label2.Size = new Size(115, 15);
+            label2.Size = new Size(111, 15);
             label2.TabIndex = 2;
-            label2.Text = "Bekleme Süresi (SN):";
+            label2.Text = "Waiting Time (SEC):";
             // 
             // numBeklemeSuresi
             // 
-            numBeklemeSuresi.Location = new Point(158, 79);
+            numBeklemeSuresi.Location = new Point(206, 79);
             numBeklemeSuresi.Margin = new Padding(3, 2, 3, 2);
             numBeklemeSuresi.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
             numBeklemeSuresi.Name = "numBeklemeSuresi";
@@ -87,13 +87,13 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             label3.AutoSize = true;
             label3.Location = new Point(12, 109);
             label3.Name = "label3";
-            label3.Size = new Size(82, 15);
+            label3.Size = new Size(83, 15);
             label3.TabIndex = 4;
-            label3.Text = "Çalışma Devri:";
+            label3.Text = "Working RPM:";
             // 
             // numCalismaDevri
             // 
-            numCalismaDevri.Location = new Point(158, 105);
+            numCalismaDevri.Location = new Point(206, 105);
             numCalismaDevri.Margin = new Padding(3, 2, 3, 2);
             numCalismaDevri.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
             numCalismaDevri.Name = "numCalismaDevri";
@@ -105,13 +105,13 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             label4.AutoSize = true;
             label4.Location = new Point(12, 135);
             label4.Name = "label4";
-            label4.Size = new Size(112, 15);
+            label4.Size = new Size(118, 15);
             label4.TabIndex = 6;
-            label4.Text = "Çalışma Süresi (DK):";
+            label4.Text = "Working Time (MIN):";
             // 
             // numCalismaSuresi
             // 
-            numCalismaSuresi.Location = new Point(158, 131);
+            numCalismaSuresi.Location = new Point(206, 131);
             numCalismaSuresi.Margin = new Padding(3, 2, 3, 2);
             numCalismaSuresi.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
             numCalismaSuresi.Name = "numCalismaSuresi";
@@ -124,9 +124,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkIsiKontrol.Location = new Point(12, 161);
             chkIsiKontrol.Margin = new Padding(3, 2, 3, 2);
             chkIsiKontrol.Name = "chkIsiKontrol";
-            chkIsiKontrol.Size = new Size(79, 19);
+            chkIsiKontrol.Size = new Size(94, 19);
             chkIsiKontrol.TabIndex = 8;
-            chkIsiKontrol.Text = "Isı Kontrol";
+            chkIsiKontrol.Text = "Heat Control";
             chkIsiKontrol.UseVisualStyleBackColor = true;
             // 
             // chkAlarm
@@ -145,9 +145,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             calismabasliktext.AutoSize = true;
             calismabasliktext.Location = new Point(123, 11);
             calismabasliktext.Name = "calismabasliktext";
-            calismabasliktext.Size = new Size(57, 15);
+            calismabasliktext.Size = new Size(61, 15);
             calismabasliktext.TabIndex = 10;
-            calismabasliktext.Text = "ÇALIŞMA";
+            calismabasliktext.Text = "WORKING";
             // 
             // CalismaEditor_Control
             // 
@@ -167,7 +167,7 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             Controls.Add(label1);
             Margin = new Padding(3, 2, 3, 2);
             Name = "CalismaEditor_Control";
-            Size = new Size(302, 221);
+            Size = new Size(355, 221);
             ((System.ComponentModel.ISupportInitialize)numSagSolSure).EndInit();
             ((System.ComponentModel.ISupportInitialize)numBeklemeSuresi).EndInit();
             ((System.ComponentModel.ISupportInitialize)numCalismaDevri).EndInit();

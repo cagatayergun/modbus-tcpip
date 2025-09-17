@@ -222,7 +222,7 @@ namespace TekstilScada.Repositories
                         }
                         else
                         {
-                            item.Duration = "Aktif";
+                            item.Duration = "Active";
                         }
                         reportItems.Add(item);
                     }

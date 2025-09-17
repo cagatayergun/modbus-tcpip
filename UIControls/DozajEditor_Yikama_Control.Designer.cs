@@ -177,9 +177,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkTank1Dozaj.Location = new Point(12, 47);
             chkTank1Dozaj.Margin = new Padding(3, 2, 3, 2);
             chkTank1Dozaj.Name = "chkTank1Dozaj";
-            chkTank1Dozaj.Size = new Size(94, 19);
+            chkTank1Dozaj.Size = new Size(102, 19);
             chkTank1Dozaj.TabIndex = 13;
-            chkTank1Dozaj.Text = "1. Tank Dozaj";
+            chkTank1Dozaj.Text = "1. Tank Dosing";
             chkTank1Dozaj.UseVisualStyleBackColor = true;
             // 
             // chkTamburDur
@@ -188,9 +188,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkTamburDur.Location = new Point(12, 70);
             chkTamburDur.Margin = new Padding(3, 2, 3, 2);
             chkTamburDur.Name = "chkTamburDur";
-            chkTamburDur.Size = new Size(88, 19);
+            chkTamburDur.Size = new Size(83, 19);
             chkTamburDur.TabIndex = 14;
-            chkTamburDur.Text = "Tambur Dur";
+            chkTamburDur.Text = "Drum Stop";
             chkTamburDur.UseVisualStyleBackColor = true;
             // 
             // chkAlarm
@@ -209,9 +209,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             dozajbasliktext.AutoSize = true;
             dozajbasliktext.Location = new Point(129, 11);
             dozajbasliktext.Name = "dozajbasliktext";
-            dozajbasliktext.Size = new Size(44, 15);
+            dozajbasliktext.Size = new Size(52, 15);
             dozajbasliktext.TabIndex = 16;
-            dozajbasliktext.Text = "DOZAJ";
+            dozajbasliktext.Text = "DOSAGE";
             // 
             // DozajEditor_Yikama_Control
             // 

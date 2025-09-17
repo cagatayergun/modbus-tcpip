@@ -146,7 +146,7 @@ namespace TekstilScada.UI.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Reçeteler yüklenirken hata oluştu: {ex.Message}", "Veritabanı Hatası");
+                MessageBox.Show($"Error loading recipes: {ex.Message}", "Database Error");
             }
         }
 
@@ -160,7 +160,7 @@ namespace TekstilScada.UI.Views
 
             if (!machineTypes.Any())
             {
-                MessageBox.Show("Sistemde reçete oluşturulabilecek aktif makine tipi bulunamadı.", "Uyarı");
+                MessageBox.Show("No active machine type was found in the system for which a recipe could be created.", "Warning");
                 return;
             }
 
@@ -174,7 +174,7 @@ namespace TekstilScada.UI.Views
 
                     _currentRecipe = new ScadaRecipe
                     {
-                        RecipeName = "YENİ REÇETE",
+                        RecipeName = "NEW RECIPE",
                         TargetMachineType = selectedType // Seçilen tipi yeni reçeteye ata
                     };
 
@@ -205,7 +205,7 @@ namespace TekstilScada.UI.Views
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Reçete detayları yüklenirken hata oluştu: {ex.Message}", "Veritabanı Hatası");
+                    MessageBox.Show($"Error loading prescription details: {ex.Message}", "Database Error");
                 }
             }
         }
@@ -244,12 +244,12 @@ namespace TekstilScada.UI.Views
                 Width = 400,
                 Height = 180,
                 FormBorderStyle = FormBorderStyle.FixedDialog,
-                Text = "HMI Reçete Numarası",
+                Text = "HMI Prescription Number",
                 StartPosition = FormStartPosition.CenterScreen
             };
-            Label textLabel = new Label() { Left = 50, Top = 20, Text = "HMI'a kaydedilecek reçete numarasını girin (1-99):", Width = 300 };
+            Label textLabel = new Label() { Left = 50, Top = 20, Text = "Enter the recipe number to be saved in the HMI (1-99):", Width = 300 };
             NumericUpDown inputBox = new NumericUpDown() { Left = 50, Top = 50, Width = 300, Minimum = 1, Maximum = 99 };
-            Button confirmation = new Button() { Text = "Tamam", Left = 250, Width = 100, Top = 90, DialogResult = DialogResult.OK };
+            Button confirmation = new Button() { Text = "Ok", Left = 250, Width = 100, Top = 90, DialogResult = DialogResult.OK };
             confirmation.Click += (sender, e) => { prompt.Close(); };
             prompt.Controls.Add(inputBox);
             prompt.Controls.Add(confirmation);
@@ -322,7 +322,7 @@ namespace TekstilScada.UI.Views
             lblStepDetailsTitle.Dock = DockStyle.Top;
             lblStepDetailsTitle.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold);
             lblStepDetailsTitle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            lblStepDetailsTitle.Text = "Adım Detayları";
+            lblStepDetailsTitle.Text = "Step Details";
 
             SetupStepsGridView();
         }
@@ -335,8 +335,8 @@ namespace TekstilScada.UI.Views
             dgvRecipeSteps.Columns.Clear();
             dgvRecipeSteps.AutoGenerateColumns = false;
 
-            dgvRecipeSteps.Columns.Add(new DataGridViewTextBoxColumn { Name = "StepNumber", HeaderText = "Adım No", DataPropertyName = "StepNumber", Width = 40 });
-            dgvRecipeSteps.Columns.Add(new DataGridViewTextBoxColumn { Name = "StepType", HeaderText = "Adım Tipi", Width = 300 });
+            dgvRecipeSteps.Columns.Add(new DataGridViewTextBoxColumn { Name = "StepNumber", HeaderText = "Step No", DataPropertyName = "StepNumber", Width = 40 });
+            dgvRecipeSteps.Columns.Add(new DataGridViewTextBoxColumn { Name = "StepType", HeaderText = "Step Type", Width = 300 });
         }
 
         private void PopulateStepsGridView()
@@ -354,12 +354,12 @@ namespace TekstilScada.UI.Views
         {
             var stepTypes = new List<string>();
             short controlWord = step.StepDataWords[24];
-            if ((controlWord & 1) != 0) stepTypes.Add("Su Alma");
-            if ((controlWord & 2) != 0) stepTypes.Add("Isıtma");
-            if ((controlWord & 4) != 0) stepTypes.Add("Çalışma");
-            if ((controlWord & 8) != 0) stepTypes.Add("Dozaj");
-            if ((controlWord & 16) != 0) stepTypes.Add("Boşaltma");
-            if ((controlWord & 32) != 0) stepTypes.Add("Sıkma");
+            if ((controlWord & 1) != 0) stepTypes.Add("Water Intake");
+            if ((controlWord & 2) != 0) stepTypes.Add("Heating");
+            if ((controlWord & 4) != 0) stepTypes.Add("Working");
+            if ((controlWord & 8) != 0) stepTypes.Add("Dozage");
+            if ((controlWord & 16) != 0) stepTypes.Add("Unloading");
+            if ((controlWord & 32) != 0) stepTypes.Add("Squeezing");
             return string.Join(" + ", stepTypes);
         }
 
@@ -395,7 +395,7 @@ namespace TekstilScada.UI.Views
                 pnlStepDetails.Controls.Add(lblStepDetailsTitle);
 
                 var selectedMachine = cmbTargetMachine.SelectedItem as Machine;
-                lblStepDetailsTitle.Text = $"Adım Detayları - Adım No: {selectedStep.StepNumber}";
+                lblStepDetailsTitle.Text = $"Step Details - Step No: {selectedStep.StepNumber}";
 
                 var mainEditor = new StepEditor_Control();
                 mainEditor.LoadStep(selectedStep, selectedMachine);
@@ -414,7 +414,7 @@ namespace TekstilScada.UI.Views
             catch (Exception ex)
             {
                 // Olası bir "kolon adı bulunamadı" veya "tip dönüşümü" hatasını yakalamak için.
-                MessageBox.Show($"Adım detayları yüklenirken bir hata oluştu: {ex.Message}", "Hata");
+                MessageBox.Show($"An error occurred while loading step details: {ex.Message}", "Error");
             }
         }
 
@@ -429,7 +429,7 @@ namespace TekstilScada.UI.Views
 
             if (!ftpMachineTypes.Any())
             {
-                MessageBox.Show("Sistemde FTP transferi için uygun makine tipi bulunamadı.", "Uyarı");
+                MessageBox.Show("No suitable machine type was found in the system for FTP transfer.", "Warning");
                 return;
             }
 
@@ -462,7 +462,7 @@ namespace TekstilScada.UI.Views
         {
             if (_currentRecipe == null || cmbTargetMachine.SelectedItem is not Machine selectedMachine)
             {
-                MessageBox.Show("Lütfen bir reçete ve hedef makine seçin.", "Uyarı");
+                MessageBox.Show("Please select a recipe and target machine.", "Warning");
                 return;
             }
             // Butonları ve imleci işlem süresince yönet
@@ -476,7 +476,7 @@ namespace TekstilScada.UI.Views
                 // 1. FTP bilgileri kontrolü
                 if (string.IsNullOrEmpty(selectedMachine.FtpUsername) || string.IsNullOrEmpty(selectedMachine.IpAddress))
                 {
-                    MessageBox.Show("Bu makine için FTP bilgileri (IP Adresi, Kullanıcı Adı) eksik. Lütfen Ayarlar > Makine Yönetimi ekranından bilgileri girin.", "Eksik Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("FTP information (IP Address, Username) is missing for this machine. Please enter the information from the Settings > Machine Management screen.", "Missing Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
@@ -489,7 +489,7 @@ namespace TekstilScada.UI.Views
 
                 if (!int.TryParse(recipeNumberStr, out int recipeNumber) || recipeNumber < 1 || recipeNumber > 99)
                 {
-                    MessageBox.Show("Geçersiz reçete numarası. Lütfen 1-99 arasında bir sayı girin.", "Hata");
+                    MessageBox.Show("Invalid prescription number. Please enter a number between 1-99.", "Error");
                     return;
                 }
 
@@ -507,11 +507,11 @@ namespace TekstilScada.UI.Views
                     var ftpService = new FtpService(selectedMachine.IpAddress, selectedMachine.FtpUsername, selectedMachine.FtpPassword);
                     await ftpService.UploadFileAsync($"/{remoteFileName}", csvContent);
 
-                    MessageBox.Show($"'{_currentRecipe.RecipeName}' reçetesi, '{selectedMachine.MachineName}' makinesine '{remoteFileName}' adıyla başarıyla gönderildi.", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show($"'Recipe '{_currentRecipe.RecipeName}' was successfully sent to machine '{selectedMachine.MachineName}' with name '{remoteFileName}'.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"FTP ile reçete gönderilirken hata oluştu: {ex.Message}", "FTP Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Error sending recipe via FTP: {ex.Message}", "FTP Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 finally
                 {
@@ -523,7 +523,7 @@ namespace TekstilScada.UI.Views
             {
                 if (_plcManagers == null || !_plcManagers.TryGetValue(selectedMachine.Id, out var plcManager))
                 {
-                    MessageBox.Show($"'{selectedMachine.MachineName}' için aktif bir PLC bağlantısı bulunamadı.", "Bağlantı Hatası");
+                    MessageBox.Show($"'{selectedMachine.MachineName}' No active PLC connection found for .", "Connection Error");
                     return;
                 }
 
@@ -531,7 +531,7 @@ namespace TekstilScada.UI.Views
                 if (selectedMachine.MachineType == "Kurutma Makinesi")
                 {
                     // Güncellenmiş ShowInputDialog metodunu kullanıyoruz (isNumeric = true)
-                    string input = ShowInputDialog("Lütfen PLC'ye kaydedilecek reçete numarasını girin (1-20):", true);
+                    string input = ShowInputDialog("Please enter the recipe number to be registered in the PLC (1-20):", true);
                     if (int.TryParse(input, out int slot) && slot >= 1 && slot <= 20)
                     {
                         recipeSlot = slot;
@@ -540,7 +540,7 @@ namespace TekstilScada.UI.Views
                     {
                         if (!string.IsNullOrEmpty(input))
                         {
-                            MessageBox.Show("Geçersiz reçete numarası girdiniz.", "Hata");
+                            MessageBox.Show("You have entered an invalid prescription number.", "Error");
                         }
                         return;
                     }
@@ -554,16 +554,16 @@ namespace TekstilScada.UI.Views
 
                     if (result.IsSuccess)
                     {
-                        MessageBox.Show($"'{_currentRecipe.RecipeName}' reçetesi, '{selectedMachine.MachineName}' makinesine başarıyla gönderildi.", "Başarılı");
+                        MessageBox.Show($"'Recipe '{_currentRecipe.RecipeName}' was successfully sent to machine '{selectedMachine.MachineName}'.", "Success");
                     }
                     else
                     {
-                        MessageBox.Show($"Reçete gönderilirken hata oluştu: {result.Message}", "Hata");
+                        MessageBox.Show($"Error while sending prescription: {result.Message}", "Error");
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Beklenmedik bir hata oluştu: {ex.Message}", "Sistem Hatası");
+                    MessageBox.Show($"An unexpected error occurred: {ex.Message}", "System Error");
                 }
                 finally
                 {
@@ -575,7 +575,7 @@ namespace TekstilScada.UI.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Gönderme sırasında bir hata oluştu: {ex.Message}", "Hata");
+                MessageBox.Show($"An error occurred while sending: {ex.Message}", "Error");
             }
             finally
             {
@@ -594,7 +594,7 @@ namespace TekstilScada.UI.Views
                 Width = 500,
                 Height = 180,
                 FormBorderStyle = FormBorderStyle.FixedDialog,
-                Text = "Giriş Gerekli",
+                Text = "Login Required",
                 StartPosition = FormStartPosition.CenterScreen
             };
             Label textLabel = new Label() { Left = 50, Top = 20, Text = text, Width = 400 };
@@ -609,7 +609,7 @@ namespace TekstilScada.UI.Views
                 inputBox = new TextBox() { Left = 50, Top = 50, Width = 400 };
             }
 
-            Button confirmation = new Button() { Text = "Tamam", Left = 350, Width = 100, Top = 90, DialogResult = DialogResult.OK };
+            Button confirmation = new Button() { Text = "Ok", Left = 350, Width = 100, Top = 90, DialogResult = DialogResult.OK };
             confirmation.Click += (sender, e) => { prompt.Close(); };
             prompt.Controls.Add(inputBox);
             prompt.Controls.Add(confirmation);
@@ -622,11 +622,11 @@ namespace TekstilScada.UI.Views
         private async void BtnReadFromPlc_Click(object sender, EventArgs e)
         {
             var selectedMachine = cmbTargetMachine.SelectedItem as Machine;
-            if (selectedMachine == null) { MessageBox.Show("Lütfen bir hedef makine seçin.", "Uyarı"); return; }
+            if (selectedMachine == null) { MessageBox.Show("Please select a target machine.", "Warning"); return; }
 
             if (_plcManagers == null || !_plcManagers.TryGetValue(selectedMachine.Id, out var plcManager))
             {
-                MessageBox.Show($"'{selectedMachine.MachineName}' için aktif bir PLC bağlantısı bulunamadı.", "Bağlantı Hatası");
+                MessageBox.Show($"'{selectedMachine.MachineName}' No active PLC connection found for .", "Connection Error");
                 return;
             }
 
@@ -658,15 +658,15 @@ namespace TekstilScada.UI.Views
 
                     _currentRecipe = recipeFromPlc;
                     DisplayCurrentRecipe();
-                    MessageBox.Show($"'{selectedMachine.MachineName}' makinesindeki reçete başarıyla okundu.\nLütfen yeni bir isim verip kaydedin.", "Başarılı");
+                    MessageBox.Show($"'{selectedMachine.MachineName}' The recipe in the machine was read successfully.Please give a new name and save it.", "Successful");
                 }
-                else { MessageBox.Show($"Reçete okunurken hata oluştu: {result.Message}", "Hata"); }
+                else { MessageBox.Show($"Error reading prescription: {result.Message}", "Error"); }
             }
             catch (NotImplementedException)
             {
-                MessageBox.Show($"'{selectedMachine.MachineType}' tipi için reçete okuma özelliği henüz tamamlanmadı.", "Geliştirme Aşamasında");
+                MessageBox.Show($"'{selectedMachine.MachineType}' The recipe reading feature for the type is not yet complete.", "Under Development");
             }
-            catch (Exception ex) { MessageBox.Show($"Beklenmedik bir hata oluştu: {ex.Message}", "Sistem Hatası"); }
+            catch (Exception ex) { MessageBox.Show($"An unexpected error occurred: {ex.Message}", "System Error"); }
             finally
             {
                 this.Cursor = Cursors.Default;
@@ -676,8 +676,8 @@ namespace TekstilScada.UI.Views
 
         private void BtnSaveRecipe_Click(object sender, EventArgs e)
         {
-            if (_currentRecipe == null) { MessageBox.Show("Kaydedilecek bir reçete yok.", "Uyarı"); return; }
-            if (string.IsNullOrWhiteSpace(txtRecipeName.Text)) { MessageBox.Show("Reçete adı boş olamaz.", "Uyarı"); return; }
+            if (_currentRecipe == null) { MessageBox.Show("There is no prescription to save.", "Warning"); return; }
+            if (string.IsNullOrWhiteSpace(txtRecipeName.Text)) { MessageBox.Show("Prescription name cannot be empty.", "Warning"); return; }
             _currentRecipe.RecipeName = txtRecipeName.Text;
             try
             {
@@ -685,7 +685,7 @@ namespace TekstilScada.UI.Views
                 MessageBox.Show("Reçete başarıyla kaydedildi.", "Başarılı");
                 LoadRecipeList();
             }
-            catch (Exception ex) { MessageBox.Show($"Reçete kaydedilirken bir hata oluştu: {ex.Message}", "Hata"); }
+            catch (Exception ex) { MessageBox.Show($"An error occurred while saving the recipe: {ex.Message}", "Error"); }
         }
 
         private void BtnDeleteRecipe_Click(object sender, EventArgs e)
@@ -696,14 +696,13 @@ namespace TekstilScada.UI.Views
             // 2. Hiçbir reçete seçilmediyse uyarı ver ve metottan çık.
             if (!selectedRecipes.Any())
             {
-                MessageBox.Show("Lütfen silmek için listeden en az bir reçete seçin.", "Uyarı");
+                MessageBox.Show("Please select at least one recipe from the list to delete.", "Warning");
                 return;
             }
 
             // 3. Kullanıcıdan toplu silme için onay al.
             var result = MessageBox.Show(
-                $"{selectedRecipes.Count} adet reçeteyi kalıcı olarak silmek istediğinizden emin misiniz?\nBu işlem geri alınamaz.",
-                "Toplu Silme Onayı",
+                $"{selectedRecipes.Count} Are you sure you want to permanently delete the prescription?\nThis action cannot be undone.", "Bulk Deletion Confirmation",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning);
 
@@ -718,7 +717,7 @@ namespace TekstilScada.UI.Views
                         _recipeRepository.DeleteRecipe(recipeToDelete.Id);
                     }
 
-                    MessageBox.Show($"{selectedRecipes.Count} adet reçete başarıyla silindi.", "İşlem Tamamlandı");
+                    MessageBox.Show($"{selectedRecipes.Count} The prescription was deleted successfully.", "Process Completed");
 
                     // 5. Mevcut reçete ekranını temizle ve listeyi yenile.
                     _currentRecipe = null;
@@ -727,7 +726,7 @@ namespace TekstilScada.UI.Views
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Reçeteler silinirken bir hata oluştu: {ex.Message}", "Hata");
+                    MessageBox.Show($"An error occurred while deleting prescriptions: {ex.Message}", "Error");
                 }
             }
         }
@@ -735,7 +734,7 @@ namespace TekstilScada.UI.Views
         {
             if (_currentRecipe == null)
             {
-                MessageBox.Show("Lütfen maliyetini hesaplamak için bir reçete seçin veya oluşturun.", "Uyarı");
+                MessageBox.Show("Please select or create a prescription to calculate its cost.", "Warning");
                 return;
             }
 
@@ -758,7 +757,7 @@ namespace TekstilScada.UI.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Maliyet hesaplanırken bir hata oluştu: {ex.Message}", "Hata");
+                MessageBox.Show($"An error occurred while calculating the cost: {ex.Message}", "Error");
             }
         }
         private void FilterRecipeList()

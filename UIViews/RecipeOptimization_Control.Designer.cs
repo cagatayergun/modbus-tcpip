@@ -75,7 +75,7 @@
             btnAnalyze.Name = "btnAnalyze";
             btnAnalyze.Size = new Size(105, 22);
             btnAnalyze.TabIndex = 2;
-            btnAnalyze.Text = "Analiz Et";
+            btnAnalyze.Text = "Analyze";
             btnAnalyze.UseVisualStyleBackColor = true;
             btnAnalyze.Click += btnAnalyze_Click;
             // 
@@ -95,9 +95,9 @@
             label7.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             label7.Location = new Point(371, 22);
             label7.Name = "label7";
-            label7.Size = new Size(95, 15);
+            label7.Size = new Size(75, 15);
             label7.TabIndex = 4;
-            label7.Text = "Karşılaştırılacak:";
+            label7.Text = "To compare:";
             // 
             // cmbRecipes
             // 
@@ -114,9 +114,9 @@
             label1.AutoSize = true;
             label1.Location = new Point(13, 22);
             label1.Name = "label1";
-            label1.Size = new Size(69, 15);
+            label1.Size = new Size(75, 15);
             label1.TabIndex = 0;
-            label1.Text = "Ana Reçete:";
+            label1.Text = "Main Recipe:";
             // 
             // pnlContent
             // 
@@ -202,7 +202,7 @@
             label8.Name = "label8";
             label8.Size = new Size(175, 19);
             label8.TabIndex = 14;
-            label8.Text = "Ortalama Buhar Tüketimi";
+            label8.Text = "Average Steam Consumption";
             label8.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // lblAvgElectricity2
@@ -222,7 +222,7 @@
             label10.Name = "label10";
             label10.Size = new Size(175, 19);
             label10.TabIndex = 12;
-            label10.Text = "Ortalama Elektrik Tüketimi";
+            label10.Text = "Average Electricity Consumption";
             label10.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // lblAvgCycleTime2
@@ -242,7 +242,7 @@
             label12.Name = "label12";
             label12.Size = new Size(175, 19);
             label12.TabIndex = 10;
-            label12.Text = "Ortalama Çevrim Süresi";
+            label12.Text = "Average Cycle Time";
             label12.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // lblAvgWater2
@@ -262,7 +262,7 @@
             label14.Name = "label14";
             label14.Size = new Size(175, 19);
             label14.TabIndex = 8;
-            label14.Text = "Ortalama Su Tüketimi";
+            label14.Text = "Average Water Consumption";
             label14.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // pnlOriginal
@@ -299,7 +299,7 @@
             label6.Name = "label6";
             label6.Size = new Size(175, 19);
             label6.TabIndex = 6;
-            label6.Text = "Ortalama Buhar Tüketimi";
+            label6.Text = "Average Steam Consumption";
             label6.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // lblAvgElectricity
@@ -319,7 +319,7 @@
             label5.Name = "label5";
             label5.Size = new Size(175, 19);
             label5.TabIndex = 4;
-            label5.Text = "Ortalama Elektrik Tüketimi";
+            label5.Text = "Average Electricity Consumption";
             label5.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // lblAvgCycleTime
@@ -339,7 +339,7 @@
             label4.Name = "label4";
             label4.Size = new Size(175, 19);
             label4.TabIndex = 2;
-            label4.Text = "Ortalama Çevrim Süresi";
+            label4.Text = "Average Cycle Time";
             label4.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // lblAvgWater
@@ -359,7 +359,7 @@
             label3.Name = "label3";
             label3.Size = new Size(175, 19);
             label3.TabIndex = 0;
-            label3.Text = "Ortalama Su Tüketimi";
+            label3.Text = "Average Water Consumption";
             label3.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // RecipeOptimization_Control

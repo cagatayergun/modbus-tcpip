@@ -104,14 +104,14 @@ namespace TekstilScada.UI
             btnReceive.Enabled = true;
 
             btnRefreshHmi.Enabled = false;
-            lstHmiRecipes.DataSource = new List<string> { "Reçete isimleri PLC'den okunuyor..." };
+            lstHmiRecipes.DataSource = new List<string> { "Prescription names are read from the PLC..." };
             ClearPreview();
 
             try
             {
                 if (!_plcPollingService.GetPlcManagers().TryGetValue(selectedMachine.Id, out var plcManager))
                 {
-                    throw new Exception("Makine için PLC yöneticisi bulunamadı.");
+                    throw new Exception("PLC manager for the machine could not be found.");
                 }
 
                 var readResult = await plcManager.ReadRecipeNamesFromPlcAsync();
@@ -126,7 +126,7 @@ namespace TekstilScada.UI
 
                     if (!displayList.Any())
                     {
-                        displayList.Add("PLC'de kayıtlı reçete ismi bulunamadı.");
+                        displayList.Add("No prescription name registered in PLC found.");
                     }
 
                     lstHmiRecipes.DataSource = displayList;
@@ -139,8 +139,8 @@ namespace TekstilScada.UI
             }
             catch (Exception ex)
             {
-                string errorMessage = $"Beklenmedik bir hata oluştu: {ex.Message}";
-                MessageBox.Show(errorMessage, "Genel Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                string errorMessage = $"An unexpected error occurred: {ex.Message}";
+                MessageBox.Show(errorMessage, "General Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 lstHmiRecipes.DataSource = null;
             }
             finally
@@ -153,12 +153,12 @@ namespace TekstilScada.UI
         {
             dgvTransfers.AutoGenerateColumns = false;
             dgvTransfers.Columns.Clear();
-            dgvTransfers.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "MakineAdi", HeaderText = "Makine", FillWeight = 150 });
-            dgvTransfers.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "ReceteAdi", HeaderText = "Reçete/Dosya", FillWeight = 200 });
-            dgvTransfers.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "IslemTipi", HeaderText = "İşlem" });
-            dgvTransfers.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Durum", HeaderText = "Durum" });
-            dgvTransfers.Columns.Add(new DataGridViewProgressBarColumn { DataPropertyName = "Ilerleme", HeaderText = "İlerleme" });
-            dgvTransfers.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "HataMesaji", HeaderText = "Hata", FillWeight = 250 });
+            dgvTransfers.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "MachineName", HeaderText = "Machine", FillWeight = 150 });
+            dgvTransfers.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "RecipeName", HeaderText = "Recipe/File", FillWeight = 200 });
+            dgvTransfers.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "OperationType", HeaderText = "Operation" });
+            dgvTransfers.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Status", HeaderText = "Status" });
+            dgvTransfers.Columns.Add(new DataGridViewProgressBarColumn { DataPropertyName = "Progress", HeaderText = "Progress" });
+            dgvTransfers.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "ErrorMessage", HeaderText = "Error", FillWeight = 250 });
         }
 
         private void btnSend_Click(object sender, EventArgs e)
@@ -168,12 +168,12 @@ namespace TekstilScada.UI
 
             if (!selectedRecipes.Any() || !selectedMachines.Any())
             {
-                MessageBox.Show("Lütfen en az bir reçete ve bir hedef makine seçin.", "Uyarı");
+                MessageBox.Show("Please select at least one recipe and one target machine.", "Warning");
                 return;
             }
 
             // Kullanıcıdan başlangıç numarasını al
-            string startNumberStr = ProsesKontrol_Control.ShowInputDialog("Gönderilecek ilk reçete numarasını girin (1-98):", true);
+            string startNumberStr = ProsesKontrol_Control.ShowInputDialog("Enter the first prescription number to be sent (1-98):", true);
             if (string.IsNullOrEmpty(startNumberStr) || !int.TryParse(startNumberStr, out int startNumber))
             {
                 return; // Kullanıcı iptal etti veya geçersiz giriş yaptı
@@ -182,7 +182,7 @@ namespace TekstilScada.UI
             // Seçilen reçete sayısı, kalan numaralara sığıyor mu kontrol et
             if (startNumber + selectedRecipes.Count - 1 > 98)
             {
-                MessageBox.Show($"Seçtiğiniz {selectedRecipes.Count} adet reçete, {startNumber} başlangıç numarasıyla 98 limitini aşıyor. Lütfen daha düşük bir başlangıç numarası seçin.", "Hata");
+                MessageBox.Show($"The {selectedRecipes.Count} number of recipes you selected exceeds the limit of 98 with a starting number of {startNumber}. Please select a lower starting number.", "Error");
                 return;
             }
 
@@ -196,7 +196,7 @@ namespace TekstilScada.UI
 
             if (!selectedMachines.Any() || selectedMachines.Count > 1)
             {
-                MessageBox.Show("Lütfen listeden SADECE BİR tane kaynak makine seçin.", "Uyarı");
+                MessageBox.Show("Please select ONLY ONE source machine from the list.", "Warning");
                 return;
             }
 
@@ -205,7 +205,7 @@ namespace TekstilScada.UI
 
             if (selectedIndices.Count == 0)
             {
-                MessageBox.Show("Lütfen indirmek için en az bir HMI reçetesi seçin.", "Uyarı");
+                MessageBox.Show("Please select at least one HMI recipe to download.", "Warning");
                 return;
             }
 
@@ -238,7 +238,7 @@ namespace TekstilScada.UI
             if (e.ListChangedType == ListChangedType.ItemChanged)
             {
                 var job = _transferService.Jobs[e.NewIndex] as TransferJob;
-                if (job != null && job.IslemTipi == TransferType.Al && job.Durum == TransferStatus.Başarılı)
+                if (job != null && job.OperationType == TransferType.Send && job.Status == TransferStatus.Successful)
                 {
                     LoadLocalRecipes();
                 }

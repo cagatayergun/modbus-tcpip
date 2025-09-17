@@ -91,7 +91,7 @@ namespace TekstilScada.UI.Views
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Tasarım yüklenirken hata: {ex.Message}");
+                    MessageBox.Show($"Error loading design: {ex.Message}");
                 }
             }
         }
@@ -101,7 +101,7 @@ namespace TekstilScada.UI.Views
         {
             if (cmbMachineSubType.SelectedItem == null || cmbStepType.SelectedValue == null)
             {
-                MessageBox.Show("Lütfen bir makine alt tipi ve adım tipi seçin.", "Eksik Bilgi");
+                MessageBox.Show("Please select a machine subtype and step type.", "Missing Information");
                 return;
             }
 
@@ -144,16 +144,16 @@ namespace TekstilScada.UI.Views
             try
             {
                 await Task.Run(() => _configRepo.SaveLayout(layoutName, machineSubType, stepTypeId, jsonLayout));
-                MessageBox.Show("Arayüz tasarımı başarıyla kaydedildi!", "Başarılı");
+                MessageBox.Show("Interface design saved successfully!", "Successful");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Tasarım kaydedilirken hata oluştu: {ex.Message}", "Hata");
+                MessageBox.Show($"Error saving design: {ex.Message}", "Error");
             }
         }
         private void BtnNewLayout_Click(object sender, EventArgs e)
         {
-            var result = MessageBox.Show("Mevcut tasarım temizlenecek. Emin misiniz?", "Yeni Tasarım", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var result = MessageBox.Show("The current design will be cleared. Are you sure?", "New Design", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (result == DialogResult.Yes)
             {
                 pnlDesignSurface.Controls.Clear();

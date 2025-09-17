@@ -25,8 +25,8 @@ namespace TekstilScada.UI
                 // Port ayrıştırma başarılı olmazsa _port varsayılan değeri (5900) korur
                 if (parts.Length > 1 && !int.TryParse(parts[1], out _port))
                 {
-                    System.Diagnostics.Debug.WriteLine($"Uyarı: Geçersiz port numarası algılandı: '{parts[1]}'. Varsayılan port (5900) kullanılacak.");
-                    MessageBox.Show("Geçersiz port numarası. Varsayılan port (5900) kullanılacak.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    System.Diagnostics.Debug.WriteLine($"Warning: Invalid port number detected: '{parts[1]}'. The default port (5900) will be used.");
+                    MessageBox.Show("Invalid port number. The default port (5900) will be used.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     _port = 5900;
                 }
             }
@@ -45,7 +45,7 @@ namespace TekstilScada.UI
 
         private async void VncViewer_Form_Load(object sender, EventArgs e)
         {
-            this.Text = $"{_address}:{_port} - Bağlanılıyor...";
+            this.Text = $"{_address}:{_port} - Connecting...";
             try
             {
                 // Bağlantıyı arka planda başlatıyoruz.
@@ -54,8 +54,8 @@ namespace TekstilScada.UI
             catch (Exception ex)
             {
                 // Bağlantı başlatılırken bir hata oluşursa:
-                System.Diagnostics.Debug.WriteLine($"VNC bağlantı başlatma hatası: {ex.Message}");
-                MessageBox.Show($"VNC bağlantısı başlatılırken hata oluştu: {ex.Message}", "Bağlantı Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"VNC connection initialization error: {ex.Message}");
+                MessageBox.Show($"Error initializing VNC connection: {ex.Message}", "Connection Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 // Hata durumunda formu kapatma işlemine başla
                 _isClosingInitiated = true; // Kapanma işleminin bu hata nedeniyle başladığını işaretle
@@ -70,7 +70,7 @@ namespace TekstilScada.UI
                 Invoke(new Action(() => VncControl_ConnectComplete(sender, e)));
                 return;
             }
-            this.Text = $"{_address}:{_port} - Bağlandı: {e.DesktopName}";
+            this.Text = $"{_address}:{_port} - Connected: {e.DesktopName}";
         }
 
         private void VncControl_ConnectionLost(object sender, EventArgs e)
@@ -81,8 +81,8 @@ namespace TekstilScada.UI
                 return;
             }
 
-            System.Diagnostics.Debug.WriteLine("VNC bağlantısı kesildi veya kaybedildi.");
-            MessageBox.Show("VNC bağlantısı kesildi veya kaybedildi.", "Bağlantı Kesildi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            System.Diagnostics.Debug.WriteLine("VNC connection was interrupted or lost.");
+            MessageBox.Show("VNC connection was interrupted or lost.", "Disconnected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
             if (!_isClosingInitiated)
             {
@@ -104,22 +104,22 @@ namespace TekstilScada.UI
             {
                 try
                 {
-                    System.Diagnostics.Debug.WriteLine("VncViewer_Form_FormClosing: Bağlantı kesiliyor...");
+                    System.Diagnostics.Debug.WriteLine("VncViewer_Form_FormClosing: Disconnecting...");
                     remoteDesktop1.Disconnect();
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"VncViewer_Form_FormClosing: Bağlantı kesilirken hata: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"VncViewer_Form_FormClosing: Error while disconnecting: {ex.Message}");
                 }
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine("VncViewer_Form_FormClosing: Bağlantı zaten kesik.");
+                System.Diagnostics.Debug.WriteLine("VncViewer_Form_FormClosing: The connection is already disconnected.");
             }
 
             remoteDesktop1.ConnectComplete -= VncControl_ConnectComplete;
             remoteDesktop1.ConnectionLost -= VncControl_ConnectionLost;
-            System.Diagnostics.Debug.WriteLine("VncViewer_Form_FormClosing: Event abonelikleri kaldırıldı.");
+            System.Diagnostics.Debug.WriteLine("VncViewer_Form_FormClosing: The connection is already disconnected.");
         }
     }
 }

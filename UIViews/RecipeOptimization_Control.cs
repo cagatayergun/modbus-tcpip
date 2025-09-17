@@ -3,10 +3,11 @@ using System.Collections.Generic; // List için eklendi
 using System.Drawing; // Color için eklendi
 using System.Linq;
 using System.Windows.Forms;
-using TekstilScada.Models;
-using TekstilScada.Repositories;
+using TekstilScada.Core;
 using TekstilScada.Localization;
+using TekstilScada.Models;
 using TekstilScada.Properties;
+using TekstilScada.Repositories;
 namespace TekstilScada.UI.Views
 {
     public partial class RecipeOptimization_Control : UserControl
@@ -17,11 +18,17 @@ namespace TekstilScada.UI.Views
         {
             InitializeComponent();
             ApplyLocalization();
+            LanguageManager.LanguageChanged += LanguageManager_LanguageChanged;
         }
 
         public void InitializeControl(RecipeRepository recipeRepo)
         {
             _recipeRepository = recipeRepo;
+        }
+        private void LanguageManager_LanguageChanged(object sender, EventArgs e)
+        {
+            ApplyLocalization();
+
         }
         private void ApplyLocalization()
         {
@@ -62,7 +69,7 @@ namespace TekstilScada.UI.Views
         {
             if (cmbRecipes.SelectedValue == null || cmbRecipe2.SelectedValue == null)
             {
-                MessageBox.Show("Lütfen analiz etmek için her iki reçeteyi de seçin.", "Uyarı");
+                MessageBox.Show("Please select both recipes to analyze.", "Warning");
                 return;
             }
 

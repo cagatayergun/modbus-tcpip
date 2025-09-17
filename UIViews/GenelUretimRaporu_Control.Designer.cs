@@ -69,7 +69,7 @@
             groupBox1.Size = new Size(283, 49);
             groupBox1.TabIndex = 3;
             groupBox1.TabStop = false;
-            groupBox1.Text = "Tüketim Tipi";
+            groupBox1.Text = "Consumption Type";
             // 
             // radioBuhar
             // 
@@ -77,9 +77,9 @@
             radioBuhar.Location = new Point(205, 19);
             radioBuhar.Margin = new Padding(3, 2, 3, 2);
             radioBuhar.Name = "radioBuhar";
-            radioBuhar.Size = new Size(58, 19);
+            radioBuhar.Size = new Size(61, 19);
             radioBuhar.TabIndex = 2;
-            radioBuhar.Text = "Buhar";
+            radioBuhar.Text = "Steam";
             radioBuhar.UseVisualStyleBackColor = true;
             radioBuhar.CheckedChanged += radioConsumption_CheckedChanged;
             // 
@@ -89,9 +89,9 @@
             radioSu.Location = new Point(127, 19);
             radioSu.Margin = new Padding(3, 2, 3, 2);
             radioSu.Name = "radioSu";
-            radioSu.Size = new Size(39, 19);
+            radioSu.Size = new Size(67, 19);
             radioSu.TabIndex = 1;
-            radioSu.Text = "Su";
+            radioSu.Text = "Wather";
             radioSu.UseVisualStyleBackColor = true;
             radioSu.CheckedChanged += radioConsumption_CheckedChanged;
             // 
@@ -102,10 +102,10 @@
             radioElektrik.Location = new Point(20, 19);
             radioElektrik.Margin = new Padding(3, 2, 3, 2);
             radioElektrik.Name = "radioElektrik";
-            radioElektrik.Size = new Size(68, 19);
+            radioElektrik.Size = new Size(66, 19);
             radioElektrik.TabIndex = 0;
             radioElektrik.TabStop = true;
-            radioElektrik.Text = "Elektrik";
+            radioElektrik.Text = "Electric";
             radioElektrik.UseVisualStyleBackColor = true;
             radioElektrik.CheckedChanged += radioConsumption_CheckedChanged;
             // 
@@ -117,7 +117,7 @@
             btnRaporOlustur.Name = "btnRaporOlustur";
             btnRaporOlustur.Size = new Size(131, 30);
             btnRaporOlustur.TabIndex = 2;
-            btnRaporOlustur.Text = "Raporla";
+            btnRaporOlustur.Text = "Report";
             btnRaporOlustur.UseVisualStyleBackColor = true;
             btnRaporOlustur.Click += btnRaporOlustur_Click;
             // 
@@ -184,7 +184,7 @@
             flpMachineGroups.Location = new Point(0, 0);
             flpMachineGroups.Margin = new Padding(3, 2, 3, 2);
             flpMachineGroups.Name = "flpMachineGroups";
-            flpMachineGroups.Padding = new Padding(4, 4, 4, 4);
+            flpMachineGroups.Padding = new Padding(4);
             flpMachineGroups.Size = new Size(726, 188);
             flpMachineGroups.TabIndex = 2;
             // 

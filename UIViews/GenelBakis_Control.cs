@@ -361,7 +361,7 @@ namespace TekstilScada.UI.Views
             gbTopAlarms.Text = Resources.ensikalarm;
             gbHourlyConsumptionWater.Text = Resources.ortalamasutuketimi;
             gbHourlyConsumptionSteam.Text = Resources.ortalamabuhartuketimi;
-            gbHourlyOee.Text = "24 Saatlik OEE";
+            gbHourlyOee.Text = "24 Hourly OEE";
             //btnSave.Text = Resources.Save;
         }
     }

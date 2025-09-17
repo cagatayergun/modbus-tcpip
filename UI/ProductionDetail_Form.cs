@@ -33,7 +33,7 @@ namespace TekstilScada.UI
 
         private void ProductionDetail_Form_Load(object sender, EventArgs e)
         {
-            this.Text = $"Üretim Raporu Detayı - {_reportItem.BatchId}";
+            this.Text = $"Production Report Detail - {_reportItem.BatchId}";
 
             // 1. Başlık bilgilerini doldur
             txtMachineName.Text = _reportItem.MachineName;
@@ -82,7 +82,7 @@ namespace TekstilScada.UI
             pieChartControl.Legends.Clear();
 
             // 4. YENİ SERİYİ OLUŞTUR
-            System.Windows.Forms.DataVisualization.Charting.Series series = new System.Windows.Forms.DataVisualization.Charting.Series("Süre Dağılımı")
+            System.Windows.Forms.DataVisualization.Charting.Series series = new System.Windows.Forms.DataVisualization.Charting.Series("Time Distribution")
             {
                 ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Pie,
                 Font = new System.Drawing.Font("Arial", 10f, System.Drawing.FontStyle.Bold),
@@ -97,7 +97,7 @@ namespace TekstilScada.UI
                 // ✅ DÜZELTME: Tam yolu belirtildi
                 System.Windows.Forms.DataVisualization.Charting.DataPoint dp = new System.Windows.Forms.DataVisualization.Charting.DataPoint(0, activeWorkingSeconds);
                 dp.Color = System.Drawing.Color.DodgerBlue; // ✅ DÜZELTME
-                dp.LegendText = $"Aktif Çalışma ({TimeSpan.FromSeconds(activeWorkingSeconds):hh\\:mm\\:ss})";
+                dp.LegendText = $"Active Work ({TimeSpan.FromSeconds(activeWorkingSeconds):hh\\:mm\\:ss})";
                 series.Points.Add(dp);
             }
             if (totalMachineAlarmSeconds > 0)
@@ -105,7 +105,7 @@ namespace TekstilScada.UI
                 // ✅ DÜZELTME: Tam yolu belirtildi
                 System.Windows.Forms.DataVisualization.Charting.DataPoint dp = new System.Windows.Forms.DataVisualization.Charting.DataPoint(0, totalMachineAlarmSeconds);
                 dp.Color = System.Drawing.Color.Crimson; // ✅ DÜZELTME
-                dp.LegendText = $"Makine Alarmı ({TimeSpan.FromSeconds(totalMachineAlarmSeconds):hh\\:mm\\:ss})";
+                dp.LegendText = $"Machine Alarm ({TimeSpan.FromSeconds(totalMachineAlarmSeconds):hh\\:mm\\:ss})";
                 series.Points.Add(dp);
             }
             if (totalOperatorPauseSeconds > 0)
@@ -113,7 +113,7 @@ namespace TekstilScada.UI
                 // ✅ DÜZELTME: Tam yolu belirtildi
                 System.Windows.Forms.DataVisualization.Charting.DataPoint dp = new System.Windows.Forms.DataVisualization.Charting.DataPoint(0, totalOperatorPauseSeconds);
                 dp.Color = System.Drawing.Color.Orange; // ✅ DÜZELTME
-                dp.LegendText = $"Operatör Duraklatma ({TimeSpan.FromSeconds(totalOperatorPauseSeconds):hh\\:mm\\:ss})";
+                dp.LegendText = $"Operator Pause ({TimeSpan.FromSeconds(totalOperatorPauseSeconds):hh\\:mm\\:ss})";
                 series.Points.Add(dp);
             }
 
@@ -122,7 +122,7 @@ namespace TekstilScada.UI
                 // ✅ DÜZELTME: Tam yolu belirtildi
                 System.Windows.Forms.DataVisualization.Charting.DataPoint dp = new System.Windows.Forms.DataVisualization.Charting.DataPoint(0, 1);
                 dp.Color = System.Drawing.Color.Gray; // ✅ DÜZELTME
-                dp.LegendText = "Veri Yok";
+                dp.LegendText = "No Data";
                 dp.IsValueShownAsLabel = false;
                 series.Points.Add(dp);
             }
@@ -155,7 +155,7 @@ namespace TekstilScada.UI
             if (e.RowIndex >= 0 && dgvStepDetails.Columns[e.ColumnIndex].Name == "WorkingTime")
             {
                 // "İşleniyor..." yazan adımları atla
-                if (e.Value == null || e.Value.ToString() == "İşleniyor...")
+                if (e.Value == null || e.Value.ToString() == "Processing...")
                 {
                     e.CellStyle.BackColor = dgvStepDetails.DefaultCellStyle.BackColor;
                     return;
@@ -213,7 +213,7 @@ namespace TekstilScada.UI
 
                 var tempPlot = formsPlot1.Plot.Add.Scatter(timeData, tempData);
                 tempPlot.Color = ScottPlot.Colors.Red;
-                tempPlot.LegendText = "Sıcaklık";
+                tempPlot.LegendText = "Temperature";
                 // 2. YENİ: Teorik Veri Grafiğini Çiz
                 var productionRepo = new ProductionRepository();
                 var batchRecipe = productionRepo.GetBatchRecipe(_reportItem.MachineId, _reportItem.BatchId);
@@ -227,14 +227,14 @@ namespace TekstilScada.UI
                     {
                         var theoPlot = formsPlot1.Plot.Add.Scatter(theoTimestamps, theoTemperatures);
                         theoPlot.Color = ScottPlot.Colors.Blue;
-                        theoPlot.LegendText = "Teorik Sıcaklık";
+                        theoPlot.LegendText = "Theoretical Temperature";
                         theoPlot.LineStyle.Pattern = ScottPlot.LinePattern.Dashed;
                         theoPlot.LineWidth = 2;
                     }
                 }
 
                 formsPlot1.Plot.Axes.DateTimeTicksBottom();
-                formsPlot1.Plot.Title($"{_reportItem.MachineName} - Proses Grafiği");
+                formsPlot1.Plot.Title($"{_reportItem.MachineName} - Process Chart");
                 formsPlot1.Plot.ShowLegend(ScottPlot.Alignment.UpperLeft);
                 
         // --- YENİ KOD: GRAFİĞİ OTOMATİK YAKINLAŞTIRMA ---

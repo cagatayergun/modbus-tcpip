@@ -17,192 +17,184 @@ namespace TekstilScada.UI.Controls
         #region Component Designer generated code
         private void InitializeComponent()
         {
-            this.label1 = new System.Windows.Forms.Label();
-            this.numSicaklik = new System.Windows.Forms.NumericUpDown();
-            this.numNem = new System.Windows.Forms.NumericUpDown();
-            this.label2 = new System.Windows.Forms.Label();
-            this.numZaman = new System.Windows.Forms.NumericUpDown();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.numCalismaDevri = new System.Windows.Forms.NumericUpDown();
-            this.label5 = new System.Windows.Forms.Label();
-            this.numSogutmaZamani = new System.Windows.Forms.NumericUpDown();
-            this.label6 = new System.Windows.Forms.Label();
-            this.chkNemAktif = new System.Windows.Forms.CheckBox();
-            this.chkZamanAktif = new System.Windows.Forms.CheckBox();
-            ((System.ComponentModel.ISupportInitialize)(this.numSicaklik)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numNem)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numZaman)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numCalismaDevri)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numSogutmaZamani)).BeginInit();
-            this.SuspendLayout();
+            label1 = new Label();
+            numSicaklik = new NumericUpDown();
+            numNem = new NumericUpDown();
+            label2 = new Label();
+            numZaman = new NumericUpDown();
+            label3 = new Label();
+            label4 = new Label();
+            numCalismaDevri = new NumericUpDown();
+            label5 = new Label();
+            numSogutmaZamani = new NumericUpDown();
+            label6 = new Label();
+            chkNemAktif = new CheckBox();
+            chkZamanAktif = new CheckBox();
+            ((System.ComponentModel.ISupportInitialize)numSicaklik).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numNem).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numZaman).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numCalismaDevri).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numSogutmaZamani).BeginInit();
+            SuspendLayout();
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(20, 70);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(94, 20);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Sıcaklık (°C):";
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 9F);
+            label1.Location = new Point(18, 52);
+            label1.Name = "label1";
+            label1.Size = new Size(100, 15);
+            label1.TabIndex = 0;
+            label1.Text = "Temperature (°C):";
             // 
             // numSicaklik
             // 
-            this.numSicaklik.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.numSicaklik.Location = new System.Drawing.Point(170, 68);
-            this.numSicaklik.Maximum = new decimal(new int[] {
-            2000,
-            0,
-            0,
-            0});
-            this.numSicaklik.Name = "numSicaklik";
-            this.numSicaklik.Size = new System.Drawing.Size(150, 27);
-            this.numSicaklik.TabIndex = 1;
+            numSicaklik.Font = new Font("Segoe UI", 9F);
+            numSicaklik.Location = new Point(149, 51);
+            numSicaklik.Margin = new Padding(3, 2, 3, 2);
+            numSicaklik.Maximum = new decimal(new int[] { 2000, 0, 0, 0 });
+            numSicaklik.Name = "numSicaklik";
+            numSicaklik.Size = new Size(131, 23);
+            numSicaklik.TabIndex = 1;
             // 
             // numNem
             // 
-            this.numNem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.numNem.Location = new System.Drawing.Point(170, 111);
-            this.numNem.Name = "numNem";
-            this.numNem.Size = new System.Drawing.Size(150, 27);
-            this.numNem.TabIndex = 3;
+            numNem.Font = new Font("Segoe UI", 9F);
+            numNem.Location = new Point(149, 83);
+            numNem.Margin = new Padding(3, 2, 3, 2);
+            numNem.Name = "numNem";
+            numNem.Size = new Size(131, 23);
+            numNem.TabIndex = 3;
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label2.Location = new System.Drawing.Point(20, 113);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(66, 20);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "Nem (%):";
+            label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI", 9F);
+            label2.Location = new Point(18, 85);
+            label2.Name = "label2";
+            label2.Size = new Size(81, 15);
+            label2.TabIndex = 2;
+            label2.Text = "Humidity (%):";
             // 
             // numZaman
             // 
-            this.numZaman.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.numZaman.Location = new System.Drawing.Point(170, 154);
-            this.numZaman.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-            this.numZaman.Name = "numZaman";
-            this.numZaman.Size = new System.Drawing.Size(150, 27);
-            this.numZaman.TabIndex = 5;
+            numZaman.Font = new Font("Segoe UI", 9F);
+            numZaman.Location = new Point(149, 116);
+            numZaman.Margin = new Padding(3, 2, 3, 2);
+            numZaman.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
+            numZaman.Name = "numZaman";
+            numZaman.Size = new Size(131, 23);
+            numZaman.TabIndex = 5;
             // 
             // label3
             // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label3.Location = new System.Drawing.Point(20, 156);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(78, 20);
-            this.label3.TabIndex = 4;
-            this.label3.Text = "Süre (dk):";
+            label3.AutoSize = true;
+            label3.Font = new Font("Segoe UI", 9F);
+            label3.Location = new Point(18, 117);
+            label3.Name = "label3";
+            label3.Size = new Size(88, 15);
+            label3.TabIndex = 4;
+            label3.Text = "Duration (min):";
             // 
             // label4
             // 
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label4.Location = new System.Drawing.Point(20, 20);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(271, 28);
-            this.label4.TabIndex = 6;
-            this.label4.Text = "Kurutma Reçete Parametleri";
+            label4.AutoSize = true;
+            label4.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            label4.Location = new Point(18, 15);
+            label4.Name = "label4";
+            label4.Size = new Size(208, 21);
+            label4.TabIndex = 6;
+            label4.Text = "Drying Recipe Parameters";
             // 
             // numCalismaDevri
             // 
-            this.numCalismaDevri.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.numCalismaDevri.Location = new System.Drawing.Point(170, 197);
-            this.numCalismaDevri.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-            this.numCalismaDevri.Name = "numCalismaDevri";
-            this.numCalismaDevri.Size = new System.Drawing.Size(150, 27);
-            this.numCalismaDevri.TabIndex = 8;
+            numCalismaDevri.Font = new Font("Segoe UI", 9F);
+            numCalismaDevri.Location = new Point(149, 148);
+            numCalismaDevri.Margin = new Padding(3, 2, 3, 2);
+            numCalismaDevri.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
+            numCalismaDevri.Name = "numCalismaDevri";
+            numCalismaDevri.Size = new Size(131, 23);
+            numCalismaDevri.TabIndex = 8;
             // 
             // label5
             // 
-            this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label5.Location = new System.Drawing.Point(20, 199);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(135, 20);
-            this.label5.TabIndex = 7;
-            this.label5.Text = "Çalışma Devri (rpm):";
+            label5.AutoSize = true;
+            label5.Font = new Font("Segoe UI", 9F);
+            label5.Location = new Point(18, 149);
+            label5.Name = "label5";
+            label5.Size = new Size(131, 15);
+            label5.TabIndex = 7;
+            label5.Text = "Operating Speed ​​(rpm):";
             // 
             // numSogutmaZamani
             // 
-            this.numSogutmaZamani.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.numSogutmaZamani.Location = new System.Drawing.Point(170, 240);
-            this.numSogutmaZamani.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-            this.numSogutmaZamani.Name = "numSogutmaZamani";
-            this.numSogutmaZamani.Size = new System.Drawing.Size(150, 27);
-            this.numSogutmaZamani.TabIndex = 10;
+            numSogutmaZamani.Font = new Font("Segoe UI", 9F);
+            numSogutmaZamani.Location = new Point(149, 180);
+            numSogutmaZamani.Margin = new Padding(3, 2, 3, 2);
+            numSogutmaZamani.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
+            numSogutmaZamani.Name = "numSogutmaZamani";
+            numSogutmaZamani.Size = new Size(131, 23);
+            numSogutmaZamani.TabIndex = 10;
             // 
             // label6
             // 
-            this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label6.Location = new System.Drawing.Point(20, 242);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(139, 20);
-            this.label6.TabIndex = 9;
-            this.label6.Text = "Soğutma Süresi (dk):";
+            label6.AutoSize = true;
+            label6.Font = new Font("Segoe UI", 9F);
+            label6.Location = new Point(18, 182);
+            label6.Name = "label6";
+            label6.Size = new Size(113, 15);
+            label6.TabIndex = 9;
+            label6.Text = "Cooling Time (min):";
             // 
             // chkNemAktif
             // 
-            this.chkNemAktif.AutoSize = true;
-            this.chkNemAktif.Location = new System.Drawing.Point(326, 115);
-            this.chkNemAktif.Name = "chkNemAktif";
-            this.chkNemAktif.Size = new System.Drawing.Size(61, 24);
-            this.chkNemAktif.TabIndex = 11;
-            this.chkNemAktif.Text = "Aktif";
-            this.chkNemAktif.UseVisualStyleBackColor = true;
+            chkNemAktif.AutoSize = true;
+            chkNemAktif.Location = new Point(285, 86);
+            chkNemAktif.Margin = new Padding(3, 2, 3, 2);
+            chkNemAktif.Name = "chkNemAktif";
+            chkNemAktif.Size = new Size(59, 19);
+            chkNemAktif.TabIndex = 11;
+            chkNemAktif.Text = "Active";
+            chkNemAktif.UseVisualStyleBackColor = true;
             // 
             // chkZamanAktif
             // 
-            this.chkZamanAktif.AutoSize = true;
-            this.chkZamanAktif.Location = new System.Drawing.Point(326, 158);
-            this.chkZamanAktif.Name = "chkZamanAktif";
-            this.chkZamanAktif.Size = new System.Drawing.Size(61, 24);
-            this.chkZamanAktif.TabIndex = 12;
-            this.chkZamanAktif.Text = "Aktif";
-            this.chkZamanAktif.UseVisualStyleBackColor = true;
+            chkZamanAktif.AutoSize = true;
+            chkZamanAktif.Location = new Point(285, 118);
+            chkZamanAktif.Margin = new Padding(3, 2, 3, 2);
+            chkZamanAktif.Name = "chkZamanAktif";
+            chkZamanAktif.Size = new Size(59, 19);
+            chkZamanAktif.TabIndex = 12;
+            chkZamanAktif.Text = "Active";
+            chkZamanAktif.UseVisualStyleBackColor = true;
             // 
             // KurutmaReçete_Control
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.chkZamanAktif);
-            this.Controls.Add(this.chkNemAktif);
-            this.Controls.Add(this.numSogutmaZamani);
-            this.Controls.Add(this.label6);
-            this.Controls.Add(this.numCalismaDevri);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.numZaman);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.numNem);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.numSicaklik);
-            this.Controls.Add(this.label1);
-            this.Name = "KurutmaReçete_Control";
-            this.Size = new System.Drawing.Size(400, 450);
-            ((System.ComponentModel.ISupportInitialize)(this.numSicaklik)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numNem)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numZaman)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numCalismaDevri)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numSogutmaZamani)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(chkZamanAktif);
+            Controls.Add(chkNemAktif);
+            Controls.Add(numSogutmaZamani);
+            Controls.Add(label6);
+            Controls.Add(numCalismaDevri);
+            Controls.Add(label5);
+            Controls.Add(label4);
+            Controls.Add(numZaman);
+            Controls.Add(label3);
+            Controls.Add(numNem);
+            Controls.Add(label2);
+            Controls.Add(numSicaklik);
+            Controls.Add(label1);
+            Margin = new Padding(3, 2, 3, 2);
+            Name = "KurutmaReçete_Control";
+            Size = new Size(350, 338);
+            ((System.ComponentModel.ISupportInitialize)numSicaklik).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numNem).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numZaman).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numCalismaDevri).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numSogutmaZamani).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
         }
         #endregion
 

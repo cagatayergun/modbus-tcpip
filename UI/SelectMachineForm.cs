@@ -46,7 +46,7 @@ namespace TekstilScada.UI
             else
             {
                 // Eğer listede hiç makine yoksa veya bir şekilde seçim yapılamadıysa
-                MessageBox.Show("Lütfen listeden bir makine seçin.", "Seçim Yapılmadı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Please select a machine from the list.", "No Selection Made", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
     }

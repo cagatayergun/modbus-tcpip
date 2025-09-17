@@ -151,9 +151,9 @@ namespace TekstilScada.UI.Controls
             lblMachineIdTitle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblMachineIdTitle.Location = new Point(13, 152);
             lblMachineIdTitle.Name = "lblMachineIdTitle";
-            lblMachineIdTitle.Size = new Size(74, 15);
+            lblMachineIdTitle.Size = new Size(80, 15);
             lblMachineIdTitle.TabIndex = 9;
-            lblMachineIdTitle.Text = "MAKİNA ID:";
+            lblMachineIdTitle.Text = "MACHINE ID:";
             // 
             // lblMachineNameTitle
             // 
@@ -161,9 +161,9 @@ namespace TekstilScada.UI.Controls
             lblMachineNameTitle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblMachineNameTitle.Location = new Point(13, 129);
             lblMachineNameTitle.Name = "lblMachineNameTitle";
-            lblMachineNameTitle.Size = new Size(82, 15);
+            lblMachineNameTitle.Size = new Size(88, 15);
             lblMachineNameTitle.TabIndex = 8;
-            lblMachineNameTitle.Text = "MAKİNA ADI:";
+            lblMachineNameTitle.Text = "MACHINE ADI:";
             // 
             // lblStepTitle
             // 
@@ -171,9 +171,9 @@ namespace TekstilScada.UI.Controls
             lblStepTitle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblStepTitle.Location = new Point(13, 106);
             lblStepTitle.Name = "lblStepTitle";
-            lblStepTitle.Size = new Size(42, 15);
+            lblStepTitle.Size = new Size(37, 15);
             lblStepTitle.TabIndex = 7;
-            lblStepTitle.Text = "ADIM:";
+            lblStepTitle.Text = "STEP:";
             // 
             // lblOperatorTitle
             // 
@@ -191,9 +191,9 @@ namespace TekstilScada.UI.Controls
             lblRecipeNameTitle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblRecipeNameTitle.Location = new Point(13, 62);
             lblRecipeNameTitle.Name = "lblRecipeNameTitle";
-            lblRecipeNameTitle.Size = new Size(74, 15);
+            lblRecipeNameTitle.Size = new Size(85, 15);
             lblRecipeNameTitle.TabIndex = 5;
-            lblRecipeNameTitle.Text = "RECETE ADI:";
+            lblRecipeNameTitle.Text = "RECIPE NAME:";
             // 
             // lblPercentage
             // 

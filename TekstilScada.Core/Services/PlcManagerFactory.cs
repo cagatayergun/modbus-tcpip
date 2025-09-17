@@ -1,11 +1,11 @@
-﻿// Services/PlcManagerFactory.cs
+﻿// File: TekstilScada.Core/Services/PlcManagerFactory.cs
 using System;
 using TekstilScada.Models;
 
 namespace TekstilScada.Services
 {
     /// <summary>
-    /// Verilen makine tipine göre uygun IPlcManager nesnesini oluşturan fabrika sınıfı.
+    /// Factory class that creates the appropriate IPlcManager object based on the given machine type.
     /// </summary>
     public static class PlcManagerFactory
     {
@@ -20,8 +20,8 @@ namespace TekstilScada.Services
                     return new KurutmaMakinesiManager(machine.IpAddress, machine.Port);
 
                 default:
-                    // Eğer bilinmeyen bir makine tipi gelirse, programın çökmemesi için bir istisna fırlat.
-                    throw new ArgumentException($"Bilinmeyen makine tipi: '{machine.MachineType}'. Lütfen makine ayarlarını kontrol edin.");
+                    // Throw an exception for an unknown machine type to prevent the program from crashing.
+                    throw new ArgumentException($"Unknown machine type: '{machine.MachineType}'. Please check machine settings.");
             }
         }
     }

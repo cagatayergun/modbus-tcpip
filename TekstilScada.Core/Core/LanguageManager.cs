@@ -24,7 +24,7 @@ namespace TekstilScada.Core
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Dil ayarlanamadı: {ex.Message}");
+                
             }
         }
     }

@@ -187,7 +187,7 @@ namespace TekstilScada.Properties {
         }
         
         /// <summary>
-        ///   TÜM MAKİNELER benzeri yerelleştirilmiş bir dize arar.
+        ///   Tüm Makineler benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
         public static string AllMachines {
             get {
@@ -943,7 +943,7 @@ namespace TekstilScada.Properties {
         }
         
         /// <summary>
-        ///   Oturum benzeri yerelleştirilmiş bir dize arar.
+        ///   Giriş/Çıkış benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
         public static string Logout {
             get {
@@ -1483,7 +1483,7 @@ namespace TekstilScada.Properties {
         }
         
         /// <summary>
-        ///   Saatlik Elektrik Tüketimi (kW) benzeri yerelleştirilmiş bir dize arar.
+        ///   Ortalama Elektrik Tüketimi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
         public static string Saatlikelektrik {
             get {

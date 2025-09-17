@@ -119,7 +119,7 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             // Kural 1: Toplamda 2'den fazla seçim yapılamaz.
             if (checkedBoxes.Count > 2)
             {
-                MessageBox.Show("Bir adımda en fazla 2 farklı işlem türü seçebilirsiniz.", "Kural İhlali", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("You can select up to 2 different transaction types in one step.", "Rule Violation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
@@ -134,7 +134,7 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             // Kural 2: Özel Grup ve Standart Grup bir arada seçilemez.
             if (isAnySpecialChecked && isAnyStandardChecked)
             {
-                MessageBox.Show("Sıkma veya Boşaltma adımları; Su Alma, Isıtma gibi diğer adımlarla birlikte seçilemez.", "Kural İhlali", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Spinning or Draining steps cannot be selected together with other steps such as Water Intake, Heating.", "Rule Violation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 

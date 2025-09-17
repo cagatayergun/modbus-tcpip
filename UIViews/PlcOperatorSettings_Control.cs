@@ -54,7 +54,7 @@ namespace TekstilScada.UI.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Operatör şablonları yüklenirken hata: {ex.Message}", "Hata");
+                MessageBox.Show($"Error loading operator templates: {ex.Message}", "Error");
             }
         }
 
@@ -82,11 +82,11 @@ namespace TekstilScada.UI.Views
                 var opFromPlc = result.Content;
                 _plcOperatorRepository.SaveOrUpdate(opFromPlc);
                 RefreshGrid();
-                MessageBox.Show($"Makinedeki {slotIndex + 1}. sıradaki operatör bilgisi okundu ve listeye eklendi/güncellendi.", "Başarılı");
+                MessageBox.Show($"The operator information at {slotIndex + 1} on the machine was read and added/updated to the list.", "Success");
             }
             else
             {
-                MessageBox.Show($"Operatör okunurken hata: {result.Message}", "Hata");
+                MessageBox.Show($"Error reading operator: {result.Message}", "Error");
             }
         }
 
@@ -94,7 +94,7 @@ namespace TekstilScada.UI.Views
         {
             if (dgvOperators.SelectedRows.Count == 0)
             {
-                MessageBox.Show("Lütfen PLC'ye göndermek için listeden bir operatör seçin.", "Uyarı");
+                MessageBox.Show("Please select an operator from the list to send to PLC.", "Warning");
                 return;
             }
             if (cmbMachines.SelectedItem is Machine selectedMachine)
@@ -119,11 +119,11 @@ namespace TekstilScada.UI.Views
 
             if (result.IsSuccess)
             {
-                MessageBox.Show($"'{plcOperator.Name}' operatörü, seçilen makinenin {plcOperator.SlotIndex + 1}. sırasına başarıyla yazıldı.", "Başarılı");
+                MessageBox.Show($"Operator '{plcOperator.Name}' was successfully written to slot {plcOperator.SlotIndex + 1} of the selected machine.", "Success");
             }
             else
             {
-                MessageBox.Show($"Operatör gönderilirken hata: {result.Message}", "Hata");
+                MessageBox.Show($"Error sending operator: {result.Message}", "Error");
             }
         }
 
@@ -132,7 +132,7 @@ namespace TekstilScada.UI.Views
             if (dgvOperators.SelectedRows.Count > 0)
             {
                 var selectedOperator = dgvOperators.SelectedRows[0].DataBoundItem as PlcOperator;
-                var result = MessageBox.Show($"'{selectedOperator.Name}' şablonunu silmek istediğinizden emin misiniz?", "Onay", MessageBoxButtons.YesNo);
+                var result = MessageBox.Show($"'{selectedOperator.Name}' Are you sure you want to delete the template?", "Confirm", MessageBoxButtons.YesNo);
                 if (result == DialogResult.Yes)
                 {
                     _plcOperatorRepository.Delete(selectedOperator.SlotIndex);
@@ -151,11 +151,11 @@ namespace TekstilScada.UI.Views
                 // Tabloyu yenile
                 RefreshGrid();
 
-                MessageBox.Show("Yeni bir boş operatör şablonu başarıyla eklendi. Düzenlemek için üzerine tıklayın ve kaydedin.", "Başarılı");
+                MessageBox.Show("A new blank operator template has been added successfully. Click on it to edit and save.", "Success");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Yeni operatör eklenirken bir hata oluştu: {ex.Message}", "Hata");
+                MessageBox.Show($"An error occurred while adding a new operator: {ex.Message}", "Error");
             }
         }
     }

@@ -29,7 +29,7 @@ namespace TekstilScada.UIViews
                 cmbRecipeType.SelectedIndex = 0;
             }
 
-            makinetip.Text = "Makine Tipini Seçiniz";
+            makinetip.Text = "Select Machine Type";
         }
 
         private void btnOk_Click(object sender, System.EventArgs e)
@@ -42,7 +42,7 @@ namespace TekstilScada.UIViews
             }
             else
             {
-                MessageBox.Show("Lütfen bir reçete tipi seçin.", "Uyarı");
+                MessageBox.Show("Please select a prescription type.", "Warning");
             }
         }
     }

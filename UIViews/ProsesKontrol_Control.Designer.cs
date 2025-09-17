@@ -103,7 +103,7 @@ namespace TekstilScada.UI.Views
             btnDeleteRecipe.Name = "btnDeleteRecipe";
             btnDeleteRecipe.Size = new Size(82, 22);
             btnDeleteRecipe.TabIndex = 1;
-            btnDeleteRecipe.Text = "Sil";
+            btnDeleteRecipe.Text = "Delete";
             btnDeleteRecipe.UseVisualStyleBackColor = true;
             // 
             // btnNewRecipe
@@ -113,7 +113,7 @@ namespace TekstilScada.UI.Views
             btnNewRecipe.Name = "btnNewRecipe";
             btnNewRecipe.Size = new Size(82, 22);
             btnNewRecipe.TabIndex = 0;
-            btnNewRecipe.Text = "Yeni";
+            btnNewRecipe.Text = "New";
             btnNewRecipe.UseVisualStyleBackColor = true;
             // 
             // label1
@@ -124,7 +124,7 @@ namespace TekstilScada.UI.Views
             label1.Name = "label1";
             label1.Size = new Size(169, 22);
             label1.TabIndex = 0;
-            label1.Text = "Kayıtlı Reçeteler";
+            label1.Text = "Registered Recipes";
             label1.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // pnlEditorArea
@@ -165,14 +165,14 @@ namespace TekstilScada.UI.Views
             btnFtpSync.Name = "btnFtpSync";
             btnFtpSync.Size = new Size(280, 22);
             btnFtpSync.TabIndex = 7;
-            btnFtpSync.Text = "UZAK MAKİNE İŞLEMLERİ";
+            btnFtpSync.Text = "REMOTE MACHINE OPERATIONS";
             btnFtpSync.UseVisualStyleBackColor = false;
             // 
             // cmbTargetMachine
             // 
             cmbTargetMachine.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbTargetMachine.FormattingEnabled = true;
-            cmbTargetMachine.Location = new Point(105, 8);
+            cmbTargetMachine.Location = new Point(107, 8);
             cmbTargetMachine.Margin = new Padding(3, 2, 3, 2);
             cmbTargetMachine.Name = "cmbTargetMachine";
             cmbTargetMachine.Size = new Size(246, 23);
@@ -182,11 +182,11 @@ namespace TekstilScada.UI.Views
             // 
             label4.AutoSize = true;
             label4.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            label4.Location = new Point(18, 10);
+            label4.Location = new Point(10, 10);
             label4.Name = "label4";
-            label4.Size = new Size(89, 15);
+            label4.Size = new Size(96, 15);
             label4.TabIndex = 5;
-            label4.Text = "Hedef Makine:";
+            label4.Text = "Target Machine:";
             // 
             // btnReadFromPlc
             // 
@@ -195,7 +195,7 @@ namespace TekstilScada.UI.Views
             btnReadFromPlc.Name = "btnReadFromPlc";
             btnReadFromPlc.Size = new Size(88, 22);
             btnReadFromPlc.TabIndex = 4;
-            btnReadFromPlc.Text = "PLC'den Oku";
+            btnReadFromPlc.Text = "Read from PLC";
             btnReadFromPlc.UseVisualStyleBackColor = true;
             // 
             // btnSendToPlc
@@ -205,7 +205,7 @@ namespace TekstilScada.UI.Views
             btnSendToPlc.Name = "btnSendToPlc";
             btnSendToPlc.Size = new Size(88, 22);
             btnSendToPlc.TabIndex = 3;
-            btnSendToPlc.Text = "PLC'ye Gönder";
+            btnSendToPlc.Text = "Send to PLC";
             btnSendToPlc.UseVisualStyleBackColor = true;
             // 
             // btnSaveRecipe
@@ -215,12 +215,12 @@ namespace TekstilScada.UI.Views
             btnSaveRecipe.Name = "btnSaveRecipe";
             btnSaveRecipe.Size = new Size(82, 22);
             btnSaveRecipe.TabIndex = 2;
-            btnSaveRecipe.Text = "Kaydet";
+            btnSaveRecipe.Text = "Save";
             btnSaveRecipe.UseVisualStyleBackColor = true;
             // 
             // txtRecipeName
             // 
-            txtRecipeName.Location = new Point(105, 34);
+            txtRecipeName.Location = new Point(107, 34);
             txtRecipeName.Margin = new Padding(3, 2, 3, 2);
             txtRecipeName.Name = "txtRecipeName";
             txtRecipeName.Size = new Size(246, 23);
@@ -230,11 +230,11 @@ namespace TekstilScada.UI.Views
             // 
             label3.AutoSize = true;
             label3.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            label3.Location = new Point(18, 36);
+            label3.Location = new Point(10, 36);
             label3.Name = "label3";
-            label3.Size = new Size(71, 15);
+            label3.Size = new Size(84, 15);
             label3.TabIndex = 0;
-            label3.Text = "Reçete Adı:";
+            label3.Text = "Recipe Name:";
             // 
             // btnCalculateCost
             // 
@@ -245,7 +245,7 @@ namespace TekstilScada.UI.Views
             btnCalculateCost.Name = "btnCalculateCost";
             btnCalculateCost.Size = new Size(280, 30);
             btnCalculateCost.TabIndex = 8;
-            btnCalculateCost.Text = "Tahmini Maliyeti Hesapla";
+            btnCalculateCost.Text = "Calculate Estimated Cost";
             btnCalculateCost.UseVisualStyleBackColor = false;
             btnCalculateCost.Click += btnCalculateCost_Click;
             // 
@@ -268,7 +268,7 @@ namespace TekstilScada.UI.Views
             lblTotalCost.Name = "lblTotalCost";
             lblTotalCost.Size = new Size(100, 65);
             lblTotalCost.TabIndex = 1;
-            lblTotalCost.Text = "0.00 TL";
+            lblTotalCost.Text = "0.00 $";
             lblTotalCost.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // lblCostTitle
@@ -279,7 +279,7 @@ namespace TekstilScada.UI.Views
             lblCostTitle.Name = "lblCostTitle";
             lblCostTitle.Size = new Size(100, 25);
             lblCostTitle.TabIndex = 0;
-            lblCostTitle.Text = "Tahmini Maliyet";
+            lblCostTitle.Text = "Estimated Cost";
             lblCostTitle.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // ProsesKontrol_Control

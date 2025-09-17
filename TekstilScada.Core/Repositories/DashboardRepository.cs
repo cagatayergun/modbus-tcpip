@@ -213,12 +213,6 @@ namespace TekstilScada.Repositories
             return dt;
         }
         // Bu metot şimdilik kullanılmıyor, olduğu gibi bırakabiliriz.
-        public List<ProductionStepDetail> GetRecipeStepAnalysis(string recipeName)
-        {
-            var analysis = new List<ProductionStepDetail>();
-            analysis.Add(new ProductionStepDetail { StepNumber = 1, StepName = "Su Alma", WorkingTime = "00:10:05", StopTime = "00:00:30" });
-            analysis.Add(new ProductionStepDetail { StepNumber = 2, StepName = "Isıtma", WorkingTime = "00:25:15", StopTime = "00:01:00" });
-            return analysis;
-        }
+      
     }
 }

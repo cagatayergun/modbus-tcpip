@@ -1,14 +1,15 @@
-﻿using System;
+﻿// ScottPlot 5 için doğru using ifadeleri
+using ScottPlot;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using TekstilScada.Models;
-using TekstilScada.Repositories;
+using TekstilScada.Core;
 using TekstilScada.Localization;
-// ScottPlot 5 için doğru using ifadeleri
-using ScottPlot;
+using TekstilScada.Models;
 using TekstilScada.Properties;
+using TekstilScada.Repositories;
 
 namespace TekstilScada.UI.Views
 {
@@ -21,11 +22,17 @@ namespace TekstilScada.UI.Views
         {
             InitializeComponent();
             ApplyLocalization();
+            LanguageManager.LanguageChanged += LanguageManager_LanguageChanged;
             // Load event'ini manuel olarak bağlayalım
             this.Load += TrendAnaliz_Control_Load;
             btnGenerateChart.Click += btnGenerateChart_Click;
         }
-        private void ApplyLocalization()
+        private void LanguageManager_LanguageChanged(object sender, EventArgs e)
+        {
+            ApplyLocalization();
+
+        }
+        public void ApplyLocalization()
         {
 
 
@@ -62,7 +69,7 @@ namespace TekstilScada.UI.Views
             var selectedMachineIds = clbMachines.CheckedItems.OfType<Machine>().Select(m => m.Id).ToList();
             if (!selectedMachineIds.Any())
             {
-                MessageBox.Show("Lütfen en az bir makine seçin.", "Uyarı");
+                MessageBox.Show("Please select at least one machine.", "Warning");
                 return;
             }
 
@@ -80,7 +87,7 @@ namespace TekstilScada.UI.Views
 
                     if (!anyChecked)
                     {
-                        MessageBox.Show("Lütfen en az bir veri türü seçin (Sıcaklık, Su Seviyesi veya Devir).", "Uyarı");
+                        MessageBox.Show("Please select at least one data type (Temperature, Water Level or RPM).", "Warning");
                         return;
                     }
 
@@ -94,7 +101,7 @@ namespace TekstilScada.UI.Views
                         {
                             double[] tempData = group.Select(p => (double)p.Temperature/10).ToArray();
                             var scatter = formsPlot1.Plot.Add.Scatter(timeData, tempData);
-                            scatter.LegendText = $"{machineName} - Sıcaklık";
+                            scatter.LegendText = $"{machineName} - Temperature";
                             scatter.LineWidth = 2;
                         }
 
@@ -102,7 +109,7 @@ namespace TekstilScada.UI.Views
                         {
                             double[] waterData = group.Select(p => (double)p.WaterLevel).ToArray();
                             var scatter = formsPlot1.Plot.Add.Scatter(timeData, waterData);
-                            scatter.LegendText = $"{machineName} - Su Seviyesi";
+                            scatter.LegendText = $"{machineName} - Water level";
                             scatter.LineWidth = 2;
                         }
 
@@ -110,26 +117,26 @@ namespace TekstilScada.UI.Views
                         {
                             double[] rpmData = group.Select(p => (double)p.Rpm).ToArray();
                             var scatter = formsPlot1.Plot.Add.Scatter(timeData, rpmData);
-                            scatter.LegendText = $"{machineName} - Devir";
+                            scatter.LegendText = $"{machineName} - RPM";
                             scatter.LineWidth = 2;
                         }
                     }
 
                     formsPlot1.Plot.Axes.DateTimeTicksBottom();
-                    formsPlot1.Plot.Title("Proses Değişkenleri Trend Grafiği");
+                    formsPlot1.Plot.Title("Process Variables Trend Chart");
                     formsPlot1.Plot.ShowLegend();
                     formsPlot1.Plot.Axes.AutoScale();
                 }
                 else
                 {
-                    formsPlot1.Plot.Title("Seçilen aralıkta veri bulunamadı.");
+                    formsPlot1.Plot.Title("No data found in the selected range.");
                 }
 
                 formsPlot1.Refresh();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Grafik oluşturulurken bir hata oluştu: {ex.Message}", "Hata");
+                MessageBox.Show($"An error occurred while creating the chart: {ex.Message}", "Error");
             }
             finally
             {

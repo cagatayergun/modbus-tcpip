@@ -36,17 +36,17 @@ namespace TekstilScada.UI
             // 
             // colTime
             // 
-            this.colTime.Text = "Zaman";
+            this.colTime.Text = "Time";
             this.colTime.Width = 80;
             // 
             // colSource
             // 
-            this.colSource.Text = "Kaynak";
+            this.colSource.Text = "Source";
             this.colSource.Width = 120;
             // 
             // colMessage
             // 
-            this.colMessage.Text = "Mesaj";
+            this.colMessage.Text = "Message";
             this.colMessage.Width = 380;
             // 
             // LiveEventPopup_Form
@@ -57,7 +57,7 @@ namespace TekstilScada.UI
             this.Controls.Add(this.lstEvents);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Name = "LiveEventPopup_Form";
-            this.Text = "Canlı Olay Akışı";
+            this.Text = "Live Event Stream";
             this.TopMost = true; // Her zaman üstte kal
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.LiveEventPopup_Form_FormClosing);
             this.ResumeLayout(false);

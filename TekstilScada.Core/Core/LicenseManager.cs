@@ -13,40 +13,40 @@ namespace TekstilScada.Core
         public string HardwareKey { get; set; }
         public int MachineLimit { get; set; }
         public string Signature { get; set; }
-        public string EncryptedConnectionString { get; set; } // YENİ EKLENEN
-    }
+        public string EncryptedConnectionString { get; set; } // NEWLY ADDED
+    }
 
     public static class LicenseManager
     {
-        // GÜVENLİK NOTU: Buradaki açık anahtarı kendi ürettiğiniz anahtarla değiştirin.
-        private const string PublicKeyXml = "<RSAKeyValue><Modulus>yck6I5qC/8sWOzOOiJx985LZwUCX+MIcYN5ymdsfCq8SjHhZleV7ZSN6LmChihhDQNLHZjqV7rhY/n+509NYI8aWILtDAI8j2RJNJFZcSMLEsFovEj+ZXqCVqOk/djDAbHSK/Ty3hbCpG4mIAooSqr4NF2qlNwTu1hDCj/gjX8Y2xZp9J1T3VnuKrU/U32XteZLcB2FH9kU+AeM8hkFqK7SaShaxahCFFXr3DJU6OF7ULMed1Efq0vOyp1WDurfOKH0zlbSnZ4GnhfXBN9+WXVdtzBpyYv0AUuwGm6umEnIvaeBEDgPrTSTeJGVLv3G5QMc2E13YkMMTOUMXVCSwgQ==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>";
+        // SECURITY NOTE: Replace the public key here with your own generated key.
+        private const string PublicKeyXml = "<RSAKeyValue><Modulus>yck6I5qC/8sWOzOOiJx985LZwUCX+MIcYN5ymdsfCq8SjHhZleV7ZSN6LmChihhDQNLHZjqV7rhY/n+509NYI8aWILtDAI8j2RJNJFZcSMLEsFovEj+ZXqCVqOk/djDAbHSK/Ty3hbCpG4mIAooSqr4NF2qlNwTu1hDCj/gjX8Y2xZp9J1T3VnuKrU/U32XteZLcB2FH9kU+AeM8hkFqK7SaShaxahCFFXr3DJU6OF7ULMed1Efq0vOyp1WDurfOKH0zlbSnZ4GnhfXBN9+WXVdtzBpyYv0AUuwGm6umEnIvaeBEDgPrTSTeJGVLv3G5QMc2E13YkMMTOUMXVCSwgQ==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>";
 
         public static (bool IsValid, string Message, LicenseData Data) ValidateLicense()
         {
             try
             {
-                // Kendi makinemizin donanım key'ini al
-                string currentHardwareKey = GenerateHardwareKey();
+                // Get the hardware key of our own machine
+                string currentHardwareKey = GenerateHardwareKey();
                 if (string.IsNullOrEmpty(currentHardwareKey))
                 {
-                    return (false, "Donanım bilgileri alınamadı.", null);
+                    return (false, "Could not retrieve hardware information.", null);
                 }
 
-                // Lisans dosyasını oku
-                if (!File.Exists("license.lic"))
+                // Read the license file
+                if (!File.Exists("license.lic"))
                 {
-                    return (false, "Lisans dosyası bulunamadı (license.lic).", null);
+                    return (false, "License file not found (license.lic).", null);
                 }
                 string licenseJson = File.ReadAllText("license.lic");
                 var licenseData = JsonSerializer.Deserialize<LicenseData>(licenseJson);
 
                 if (licenseData == null || string.IsNullOrEmpty(licenseData.Signature))
                 {
-                    return (false, "Lisans dosyası geçersiz.", null);
+                    return (false, "The license file is invalid.", null);
                 }
 
-                // İmza doğrulama
-                string originalSignature = licenseData.Signature;
+                // Signature verification
+                string originalSignature = licenseData.Signature;
                 licenseData.Signature = null;
                 string unsignedDataJson = JsonSerializer.Serialize(licenseData);
 
@@ -58,38 +58,37 @@ namespace TekstilScada.Core
 
                     if (!rsa.VerifyData(dataBytes, new SHA256CryptoServiceProvider(), signatureBytes))
                     {
-                        return (false, "Lisans imzası geçersiz. Dosya kurcalanmış olabilir.", null);
+                        return (false, "Invalid license signature. The file may have been tampered with.", null);
                     }
                 }
 
-                // Donanım key kontrolü
-                if (licenseData.HardwareKey != currentHardwareKey)
+                // Hardware key check
+                if (licenseData.HardwareKey != currentHardwareKey)
                 {
-                    return (false, "Lisans, bu bilgisayar için geçerli değil.", null);
+                    return (false, "The license is not valid for this computer.", null);
                 }
                 string connectionString = DecryptConnectionString(licenseData.EncryptedConnectionString);
 
-                // Lisans verisini ve şifresi çözülmüş bağlantı dizesini döndür
-                licenseData.EncryptedConnectionString = connectionString;
-                //  return (true, "Lisans başarıyla doğrulandı.", licenseData);
+                // Return the license data and the decrypted connection string
+                licenseData.EncryptedConnectionString = connectionString;
 
-                return (true, "Lisans başarıyla doğrulandı.", licenseData);
+                return (true, "License successfully verified.", licenseData);
             }
             catch (Exception ex)
             {
-                return (false, $"Lisans doğrulaması sırasında beklenmedik bir hata oluştu: {ex.Message}", null);
+                return (false, $"An unexpected error occurred during license verification: {ex.Message}", null);
             }
 
         }
         private static string DecryptConnectionString(string encryptedData)
         {
-            // Anahtar (key) uzunluğu 32 byte (256 bit) olmalıdır.
-            // Lisans oluşturan programdaki anahtarla aynı olduğundan emin olun.
-            byte[] key = Encoding.UTF8.GetBytes("mysupersecretkeythatis32byteslon");
+            // The key length must be 32 bytes (256 bits).
+            // Make sure it is the same as the key in the license creation program.
+            byte[] key = Encoding.UTF8.GetBytes("mysupersecretkeythatis32byteslon");
 
-            // Başlangıç vektörü (IV) uzunluğu 16 byte (128 bit) olmalıdır.
-            // Lisans oluşturan programdaki IV ile aynı olduğundan emin olun.
-            byte[] iv = Encoding.UTF8.GetBytes("16-byte-vector-!");
+            // The initialization vector (IV) length must be 16 bytes (128 bits).
+            // Make sure it is the same as the IV in the license creation program.
+            byte[] iv = Encoding.UTF8.GetBytes("16-byte-vector-!");
 
             using (Aes aesAlg = Aes.Create())
             {
@@ -113,8 +112,8 @@ namespace TekstilScada.Core
         }
 
 
-        // Donanım key'ini oluşturan metot
-        public static string GenerateHardwareKey()
+        // Method to generate the hardware key
+        public static string GenerateHardwareKey()
         {
             try
             {
@@ -147,26 +146,26 @@ namespace TekstilScada.Core
             }
             catch (Exception ex)
             {
-                // Hatanın nedenini loglamak veya göstermek için kod ekle
-                LogToFile($"WMI erişim hatası - Sınıf: {wmiClass}, Hata: {ex.Message}");
+                // Add code here to log or display the reason for the error
+                LogToFile($"WMI access error - Class: {wmiClass}, Error: {ex.Message}");
 
             }
             return "";
         }
         private static void LogToFile(string logMessage)
         {
-            // Uygulamanın çalıştığı dizinde "logs" adında bir klasör oluşturur.
-            string logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
+            // Creates a folder named "logs" in the application's working directory.
+            string logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
             if (!Directory.Exists(logDirectory))
             {
                 Directory.CreateDirectory(logDirectory);
             }
 
-            // Dosya yolu: [UygulamaDizini]/logs/hardware_log.txt
-            string logFilePath = Path.Combine(logDirectory, "hardware_log.txt");
+            // File path: [ApplicationDirectory]/logs/hardware_log.txt
+            string logFilePath = Path.Combine(logDirectory, "hardware_log.txt");
 
-            // Mesajı zaman damgasıyla birlikte dosyaya ekler.
-            string formattedMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {logMessage}{Environment.NewLine}";
+            // Appends the message to the file with a timestamp.
+            string formattedMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {logMessage}{Environment.NewLine}";
             File.AppendAllText(logFilePath, formattedMessage);
         }
     }

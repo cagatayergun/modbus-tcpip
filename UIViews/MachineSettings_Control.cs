@@ -191,7 +191,7 @@ namespace TekstilScada.UI.Views
                     MessageBox.Show($"{Resources.makinebilgilerigüncellendi}", $"{Resources.Confirim}", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     if (CurrentUser.IsLoggedIn)
                     {
-                        _userRepository.LogAction(CurrentUser.User.Id, "Makine Ayarları", $"'{_selectedMachine.MachineName}' makinesinin ayarları güncellendi.");
+                        _userRepository.LogAction(CurrentUser.User.Id, "Machine Settings", $"The settings for the machine '{_selectedMachine.MachineName}' have been updated.");
                     }
                 }
 

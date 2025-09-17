@@ -70,18 +70,18 @@ namespace TekstilScada.UI.Views
             // 
             // btnExportToExcel
             // 
-            btnExportToExcel.Location = new Point(800, 63);
+            btnExportToExcel.Location = new Point(848, 63);
             btnExportToExcel.Margin = new Padding(3, 2, 3, 2);
             btnExportToExcel.Name = "btnExportToExcel";
             btnExportToExcel.Size = new Size(105, 22);
             btnExportToExcel.TabIndex = 17;
-            btnExportToExcel.Text = "Excel'e Aktar";
+            btnExportToExcel.Text = "Export to Excel";
             btnExportToExcel.UseVisualStyleBackColor = true;
             btnExportToExcel.Click += btnExportToExcel_Click;
             // 
             // txtOperator
             // 
-            txtOperator.Location = new Point(716, 36);
+            txtOperator.Location = new Point(764, 36);
             txtOperator.Margin = new Padding(3, 2, 3, 2);
             txtOperator.Name = "txtOperator";
             txtOperator.Size = new Size(189, 23);
@@ -90,15 +90,15 @@ namespace TekstilScada.UI.Views
             // label9
             // 
             label9.AutoSize = true;
-            label9.Location = new Point(649, 39);
+            label9.Location = new Point(697, 39);
             label9.Name = "label9";
             label9.Size = new Size(57, 15);
             label9.TabIndex = 15;
-            label9.Text = "Operatör:";
+            label9.Text = "Operator:";
             // 
             // txtCustomerNo
             // 
-            txtCustomerNo.Location = new Point(441, 36);
+            txtCustomerNo.Location = new Point(480, 36);
             txtCustomerNo.Margin = new Padding(3, 2, 3, 2);
             txtCustomerNo.Name = "txtCustomerNo";
             txtCustomerNo.Size = new Size(178, 23);
@@ -109,9 +109,9 @@ namespace TekstilScada.UI.Views
             label8.AutoSize = true;
             label8.Location = new Point(359, 39);
             label8.Name = "label8";
-            label8.Size = new Size(69, 15);
+            label8.Size = new Size(109, 15);
             label8.TabIndex = 13;
-            label8.Text = "Müşteri No:";
+            label8.Text = "Customer Number:";
             // 
             // txtOrderNo
             // 
@@ -126,13 +126,13 @@ namespace TekstilScada.UI.Views
             label7.AutoSize = true;
             label7.Location = new Point(158, 39);
             label7.Name = "label7";
-            label7.Size = new Size(63, 15);
+            label7.Size = new Size(59, 15);
             label7.TabIndex = 11;
-            label7.Text = "Sipariş No:";
+            label7.Text = "Order No:";
             // 
             // txtRecipeName
             // 
-            txtRecipeName.Location = new Point(716, 9);
+            txtRecipeName.Location = new Point(764, 9);
             txtRecipeName.Margin = new Padding(3, 2, 3, 2);
             txtRecipeName.Name = "txtRecipeName";
             txtRecipeName.Size = new Size(189, 23);
@@ -141,11 +141,11 @@ namespace TekstilScada.UI.Views
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(638, 12);
+            label5.Location = new Point(686, 12);
             label5.Name = "label5";
-            label5.Size = new Size(66, 15);
+            label5.Size = new Size(80, 15);
             label5.TabIndex = 9;
-            label5.Text = "Reçete Adı:";
+            label5.Text = "Recipe Name:";
             // 
             // txtBatchNo
             // 
@@ -167,12 +167,12 @@ namespace TekstilScada.UI.Views
             // btnGenerateReport
             // 
             btnGenerateReport.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnGenerateReport.Location = new Point(703, 63);
+            btnGenerateReport.Location = new Point(751, 63);
             btnGenerateReport.Margin = new Padding(3, 2, 3, 2);
             btnGenerateReport.Name = "btnGenerateReport";
             btnGenerateReport.Size = new Size(91, 22);
             btnGenerateReport.TabIndex = 6;
-            btnGenerateReport.Text = "RAPORLA";
+            btnGenerateReport.Text = "Report";
             btnGenerateReport.UseVisualStyleBackColor = true;
             btnGenerateReport.Click += btnGenerateReport_Click;
             // 
@@ -180,20 +180,20 @@ namespace TekstilScada.UI.Views
             // 
             cmbMachines.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbMachines.FormattingEnabled = true;
-            cmbMachines.Location = new Point(424, 9);
+            cmbMachines.Location = new Point(480, 9);
             cmbMachines.Margin = new Padding(3, 2, 3, 2);
             cmbMachines.Name = "cmbMachines";
-            cmbMachines.Size = new Size(195, 23);
+            cmbMachines.Size = new Size(178, 23);
             cmbMachines.TabIndex = 5;
             // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(367, 12);
+            label3.Location = new Point(412, 12);
             label3.Name = "label3";
-            label3.Size = new Size(49, 15);
+            label3.Size = new Size(56, 15);
             label3.TabIndex = 4;
-            label3.Text = "Makine:";
+            label3.Text = "Machine:";
             // 
             // dtpEndTime
             // 
@@ -230,9 +230,9 @@ namespace TekstilScada.UI.Views
             label1.AutoSize = true;
             label1.Location = new Point(9, 12);
             label1.Name = "label1";
-            label1.Size = new Size(72, 15);
+            label1.Size = new Size(70, 15);
             label1.TabIndex = 0;
-            label1.Text = "Tarih Aralığı:";
+            label1.Text = "Date Range:";
             // 
             // dgvProductionReport
             // 

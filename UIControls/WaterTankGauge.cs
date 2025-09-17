@@ -11,7 +11,7 @@ namespace TekstilScada.UI.Controls
     {
         private int _value = 0;
         private int _maximum = 5000;
-        private string _title = "SU MİKTARI";
+        private string _title = "AMOUNT OF WATER";
         private string _unit = "L";
 
         public int Value

@@ -45,9 +45,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             label1.AutoSize = true;
             label1.Location = new Point(12, 47);
             label1.Name = "label1";
-            label1.Size = new Size(78, 15);
+            label1.Size = new Size(95, 15);
             label1.TabIndex = 0;
-            label1.Text = "Miktar (Litre):";
+            label1.Text = "Quantity (Liters):";
             // 
             // numLitre
             // 
@@ -64,9 +64,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkSicakSu.Location = new Point(12, 81);
             chkSicakSu.Margin = new Padding(3, 2, 3, 2);
             chkSicakSu.Name = "chkSicakSu";
-            chkSicakSu.Size = new Size(69, 19);
+            chkSicakSu.Size = new Size(80, 19);
             chkSicakSu.TabIndex = 2;
-            chkSicakSu.Text = "Sıcak Su";
+            chkSicakSu.Text = "Hot Water";
             chkSicakSu.UseVisualStyleBackColor = true;
             // 
             // chkSogukSu
@@ -75,9 +75,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkSogukSu.Location = new Point(12, 105);
             chkSogukSu.Margin = new Padding(3, 2, 3, 2);
             chkSogukSu.Name = "chkSogukSu";
-            chkSogukSu.Size = new Size(75, 19);
+            chkSogukSu.Size = new Size(85, 19);
             chkSogukSu.TabIndex = 3;
-            chkSogukSu.Text = "Soğuk Su";
+            chkSogukSu.Text = "Cold Water";
             chkSogukSu.UseVisualStyleBackColor = true;
             // 
             // chkYumusakSu
@@ -86,9 +86,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkYumusakSu.Location = new Point(12, 129);
             chkYumusakSu.Margin = new Padding(3, 2, 3, 2);
             chkYumusakSu.Name = "chkYumusakSu";
-            chkYumusakSu.Size = new Size(91, 19);
+            chkYumusakSu.Size = new Size(81, 19);
             chkYumusakSu.TabIndex = 4;
-            chkYumusakSu.Text = "Yumuşak Su";
+            chkYumusakSu.Text = "Soft Water";
             chkYumusakSu.UseVisualStyleBackColor = true;
             // 
             // chkTamburDur
@@ -97,9 +97,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkTamburDur.Location = new Point(12, 153);
             chkTamburDur.Margin = new Padding(3, 2, 3, 2);
             chkTamburDur.Name = "chkTamburDur";
-            chkTamburDur.Size = new Size(88, 19);
+            chkTamburDur.Size = new Size(83, 19);
             chkTamburDur.TabIndex = 5;
-            chkTamburDur.Text = "Tambur Dur";
+            chkTamburDur.Text = "Drum Stop";
             chkTamburDur.UseVisualStyleBackColor = true;
             // 
             // chkAlarm
@@ -118,9 +118,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             sualmabasliktext.AutoSize = true;
             sualmabasliktext.Location = new Point(120, 11);
             sualmabasliktext.Name = "sualmabasliktext";
-            sualmabasliktext.Size = new Size(57, 15);
+            sualmabasliktext.Size = new Size(73, 15);
             sualmabasliktext.TabIndex = 9;
-            sualmabasliktext.Text = "SU ALMA";
+            sualmabasliktext.Text = "TAKE WATER";
             // 
             // SuAlmaEditor_Control
             // 

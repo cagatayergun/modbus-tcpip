@@ -51,9 +51,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkSikma.Location = new Point(9, 120);
             chkSikma.Margin = new Padding(3, 2, 3, 2);
             chkSikma.Name = "chkSikma";
-            chkSikma.Size = new Size(64, 19);
+            chkSikma.Size = new Size(92, 19);
             chkSikma.TabIndex = 5;
-            chkSikma.Text = "SIKMA";
+            chkSikma.Text = "SQUEEZING";
             chkSikma.UseVisualStyleBackColor = true;
             // 
             // chkBosaltma
@@ -63,9 +63,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkBosaltma.Location = new Point(9, 98);
             chkBosaltma.Margin = new Padding(3, 2, 3, 2);
             chkBosaltma.Name = "chkBosaltma";
-            chkBosaltma.Size = new Size(89, 19);
+            chkBosaltma.Size = new Size(98, 19);
             chkBosaltma.TabIndex = 4;
-            chkBosaltma.Text = "BOŞALTMA";
+            chkBosaltma.Text = "UNLOADING";
             chkBosaltma.UseVisualStyleBackColor = true;
             // 
             // chkDozaj
@@ -75,9 +75,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkDozaj.Location = new Point(9, 75);
             chkDozaj.Margin = new Padding(3, 2, 3, 2);
             chkDozaj.Name = "chkDozaj";
-            chkDozaj.Size = new Size(64, 19);
+            chkDozaj.Size = new Size(74, 19);
             chkDozaj.TabIndex = 3;
-            chkDozaj.Text = "DOZAJ";
+            chkDozaj.Text = "DOSAGE";
             chkDozaj.UseVisualStyleBackColor = true;
             // 
             // chkCalisma
@@ -87,9 +87,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkCalisma.Location = new Point(9, 52);
             chkCalisma.Margin = new Padding(3, 2, 3, 2);
             chkCalisma.Name = "chkCalisma";
-            chkCalisma.Size = new Size(77, 19);
+            chkCalisma.Size = new Size(85, 19);
             chkCalisma.TabIndex = 2;
-            chkCalisma.Text = "ÇALIŞMA";
+            chkCalisma.Text = "WORKING";
             chkCalisma.UseVisualStyleBackColor = true;
             // 
             // chkIsitma
@@ -99,9 +99,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkIsitma.Location = new Point(9, 30);
             chkIsitma.Margin = new Padding(3, 2, 3, 2);
             chkIsitma.Name = "chkIsitma";
-            chkIsitma.Size = new Size(67, 19);
+            chkIsitma.Size = new Size(77, 19);
             chkIsitma.TabIndex = 1;
-            chkIsitma.Text = "ISITMA";
+            chkIsitma.Text = "HEATING";
             chkIsitma.UseVisualStyleBackColor = true;
             // 
             // chkSuAlma
@@ -111,9 +111,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkSuAlma.Location = new Point(9, 8);
             chkSuAlma.Margin = new Padding(3, 2, 3, 2);
             chkSuAlma.Name = "chkSuAlma";
-            chkSuAlma.Size = new Size(78, 19);
+            chkSuAlma.Size = new Size(97, 19);
             chkSuAlma.TabIndex = 0;
-            chkSuAlma.Text = "SU ALMA";
+            chkSuAlma.Text = "TAKE WATER";
             chkSuAlma.UseVisualStyleBackColor = true;
             // 
             // flpParameters

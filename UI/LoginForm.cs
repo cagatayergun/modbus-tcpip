@@ -22,7 +22,7 @@ namespace TekstilScada.UI
 
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
-                lblError.Text = "Kullanıcı adı ve şifre boş olamaz.";
+                lblError.Text = "Username and password cannot be blank.";
                 return;
             }
 
@@ -36,7 +36,7 @@ namespace TekstilScada.UI
             }
             else
             {
-                lblError.Text = "Kullanıcı adı veya şifre hatalı!";
+                lblError.Text = "Username or password is incorrect!";
             }
         }
 

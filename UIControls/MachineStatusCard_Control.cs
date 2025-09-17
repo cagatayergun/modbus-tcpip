@@ -39,14 +39,14 @@ namespace TekstilScada.UI.Controls
             else if (status.IsInRecipeMode)
             {
                 pnlStatus.BackColor = Color.SeaGreen;
-                lblStatus.Text = $"ÇALIŞIYOR - Adım: {status.AktifAdimNo}";
+                lblStatus.Text = $"WORKING - Step: {status.AktifAdimNo}";
                 lblWater.Text = $"{status.SuMiktari} L";
-                lblRunTime.Text = $"{status.CalismaSuresiDakika} dk";
+                lblRunTime.Text = $"{status.CalismaSuresiDakika} min";
             }
             else
             {
                 pnlStatus.BackColor = Color.SlateGray;
-                lblStatus.Text = "DURUYOR";
+                lblStatus.Text = "STANDS";
                 ClearProductionData();
             }
         }

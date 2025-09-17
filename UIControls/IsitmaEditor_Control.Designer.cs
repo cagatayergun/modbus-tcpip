@@ -47,29 +47,29 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             label1.AutoSize = true;
             label1.Location = new Point(12, 62);
             label1.Name = "label1";
-            label1.Size = new Size(45, 15);
+            label1.Size = new Size(100, 15);
             label1.TabIndex = 0;
-            label1.Text = "Isı (°C):";
+            label1.Text = "Temperature (°C):";
             // 
             // numIsi
             // 
-            this.numIsi.DecimalPlaces = 1; // ONDALIK BASAMAK SAYISINI 1 YAP
-            this.numIsi.Increment = new decimal(new int[] { 1, 0, 0, 65536 }); // ARTIŞ MİKTARINI 0.1 YAP
-            this.numIsi.Location = new System.Drawing.Point(158, 58);
-            this.numIsi.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.numIsi.Maximum = new decimal(new int[] { 1500, 0, 0, 0 }); // BU ZATEN 150.0 DEMEK, DOĞRU
-            this.numIsi.Name = "numIsi";
-            this.numIsi.Size = new System.Drawing.Size(131, 23);
-            this.numIsi.TabIndex = 1;
+            numIsi.DecimalPlaces = 1;
+            numIsi.Increment = new decimal(new int[] { 1, 0, 0, 65536 });
+            numIsi.Location = new Point(158, 58);
+            numIsi.Margin = new Padding(3, 2, 3, 2);
+            numIsi.Maximum = new decimal(new int[] { 1500, 0, 0, 0 });
+            numIsi.Name = "numIsi";
+            numIsi.Size = new Size(131, 23);
+            numIsi.TabIndex = 1;
             // 
             // label2
             // 
             label2.AutoSize = true;
             label2.Location = new Point(12, 92);
             label2.Name = "label2";
-            label2.Size = new Size(59, 15);
+            label2.Size = new Size(88, 15);
             label2.TabIndex = 2;
-            label2.Text = "Süre (DK):";
+            label2.Text = "Duration (min):";
             // 
             // numSure
             // 
@@ -86,9 +86,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkDirekBuhar.Location = new Point(12, 126);
             chkDirekBuhar.Margin = new Padding(3, 2, 3, 2);
             chkDirekBuhar.Name = "chkDirekBuhar";
-            chkDirekBuhar.Size = new Size(87, 19);
+            chkDirekBuhar.Size = new Size(93, 19);
             chkDirekBuhar.TabIndex = 4;
-            chkDirekBuhar.Text = "Direk Buhar";
+            chkDirekBuhar.Text = "Direct Steam";
             chkDirekBuhar.UseVisualStyleBackColor = true;
             // 
             // chkDolayliBuhar
@@ -97,9 +97,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkDolayliBuhar.Location = new Point(12, 149);
             chkDolayliBuhar.Margin = new Padding(3, 2, 3, 2);
             chkDolayliBuhar.Name = "chkDolayliBuhar";
-            chkDolayliBuhar.Size = new Size(96, 19);
+            chkDolayliBuhar.Size = new Size(102, 19);
             chkDolayliBuhar.TabIndex = 5;
-            chkDolayliBuhar.Text = "Dolaylı Buhar";
+            chkDolayliBuhar.Text = "Indirect Steam";
             chkDolayliBuhar.UseVisualStyleBackColor = true;
             // 
             // chkTamburDur
@@ -108,9 +108,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             chkTamburDur.Location = new Point(12, 171);
             chkTamburDur.Margin = new Padding(3, 2, 3, 2);
             chkTamburDur.Name = "chkTamburDur";
-            chkTamburDur.Size = new Size(88, 19);
+            chkTamburDur.Size = new Size(83, 19);
             chkTamburDur.TabIndex = 6;
-            chkTamburDur.Text = "Tambur Dur";
+            chkTamburDur.Text = "Drum Stop";
             chkTamburDur.UseVisualStyleBackColor = true;
             // 
             // chkAlarm
@@ -129,9 +129,9 @@ namespace TekstilScada.UI.Controls.RecipeStepEditors
             isitmabasliktext.AutoSize = true;
             isitmabasliktext.Location = new Point(129, 11);
             isitmabasliktext.Name = "isitmabasliktext";
-            isitmabasliktext.Size = new Size(44, 15);
+            isitmabasliktext.Size = new Size(55, 15);
             isitmabasliktext.TabIndex = 9;
-            isitmabasliktext.Text = "ISITMA";
+            isitmabasliktext.Text = "HEATING";
             // 
             // IsitmaEditor_Control
             // 
