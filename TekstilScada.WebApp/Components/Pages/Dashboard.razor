@@ -1,0 +1,224 @@
+﻿@page "/dashboard"
+@using TekstilScada.WebApp.Services
+@using TekstilScada.Models
+@using TekstilScada.WebApp.Components.Shared
+@inject ScadaDataService ScadaService
+@inject NavigationManager NavManager
+@implements IDisposable
+
+<div class="dashboard-container">
+
+    @if (_isLoading)
+    {
+        <div class="loading-overlay">
+            <p>Veriler yükleniyor ve SignalR bağlantısı kuruluyor...</p>
+        </div>
+    }
+    else
+    {
+        <div class="kpi-cards-row">
+            <KpiCard Title="TOPLAM MAKİNE" Value="@TotalMachines.ToString()" CssClass="kpi-info" />
+            <KpiCard Title="AKTİF ÜRETİM" Value="@RunningMachines.ToString()" CssClass="kpi-success" />
+            <KpiCard Title="ALARM DURUMU" Value="@AlarmMachines.ToString()" CssClass="kpi-danger" />
+            <KpiCard Title="BOŞ BEKLEYEN" Value="@IdleMachines.ToString()" CssClass="kpi-warning" />
+        </div>
+
+        <div class="main-content-area">
+            <div class="machine-groups-column">
+                @if (TotalMachines == 0)
+                {
+                    <p>Sistemde henüz makine tanımlanmamıştır.</p>
+                }
+                else
+                {
+                    @foreach (var group in GroupedMachines)
+                    {
+                        <div class="machine-group-box" style="--group-color: @GetGroupColor(group.Key)">
+                            <div class="group-title">@group.Key</div>
+                            <div class="group-inner-panel">
+                                @foreach (var machineStatus in group)
+                                {
+                                    <MachineCard MachineStatus="machineStatus"
+                                                 @key="machineStatus.MachineId"
+                                                 @onclick="() => NavigateToDetail(machineStatus.MachineId)" />
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+            <div class="sidebar-charts-column">
+
+                <div class="chart-box">
+                    <div class="chart-title">24 SAATLİK OEE GRAFİĞİ</div>
+                    <div class="chart-placeholder">
+                        @if (HourlyOeeData.Any())
+                        {
+                            <p>OEE Değerleri:</p>
+                            <ul style="max-height: 100px; overflow-y: auto;">
+                                @foreach (var data in HourlyOeeData)
+                                {
+                                    <li>@data.Saat:00: @data.AverageOEE.ToString("F1")%</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <span>Veri yok veya yükleniyor.</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="chart-box">
+                    <div class="chart-title">SAATLİK TÜKETİM (Elektrik, Su, Buhar)</div>
+                    <div class="chart-placeholder">
+                        @if (HourlyConsumptionData.Any())
+                        {
+                            <p>Toplam Elektrik: @HourlyConsumptionData.Sum(d => d.ToplamElektrik).ToString("N0")</p>
+                            <p>Toplam Su: @HourlyConsumptionData.Sum(d => d.ToplamSu).ToString("N0")</p>
+                        }
+                        else
+                        {
+                            <span>Veri yok veya yükleniyor.</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="chart-box">
+                    <div class="chart-title">EN SIK ALARMLAR</div>
+                    <div class="chart-placeholder">
+                        @if (TopAlarms.Any())
+                        {
+                            <p>En Sık 3 Alarm:</p>
+                            <ul style="text-align: left; margin: auto; list-style: none;">
+                                @foreach (var alarm in TopAlarms.OrderByDescending(a => a.Count).Take(3))
+                                {
+                                    <li>- @alarm.AlarmText (@alarm.Count)</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <span>Son 24 saatte alarm yok.</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<IGrouping<string, FullMachineStatus>> GroupedMachines = new();
+    private bool _isLoading = true;
+
+    // Sidebar verileri için alanlar (ScadaDataService.cs'deki DTO'lar)
+    private List<HourlyConsumptionData> HourlyConsumptionData = new();
+    private List<HourlyOeeData> HourlyOeeData = new();
+    private List<TopAlarmData> TopAlarms = new();
+
+    // KPI Alanları
+    private int TotalMachines = 0;
+    private int RunningMachines = 0;
+    private int AlarmMachines = 0;
+    private int IdleMachines = 0;
+
+    // Windows Forms'daki renk paletinden alınan ilk 10 renk (CSS'e karşılık gelir)
+    private readonly List<string> DarkColors = new List<string>
+    {
+        "#2c3e50", "#2ecc71", "#e74c3c", "#9b59b6", "#3498db",
+        "#f1c40f", "#16a085", "#c0392b", "#2980b9", "#f39c12",
+    };
+    private Dictionary<string, string> GroupColors = new Dictionary<string, string>();
+    private int _colorIndex = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // 1. SignalR bağlantısını kur.
+        await ScadaService.InitializeAsync();
+
+        // 2. Veri değişimini dinle.
+        ScadaService.OnDataUpdated += HandleDataUpdate;
+
+        // 3. İlk yüklemeyi yap: Hem anlık makine verilerini hem de rapor verilerini çek.
+        await LoadSidebarDataAsync();
+        UpdateDashboardData();
+
+        _isLoading = false;
+
+        await base.OnInitializedAsync();
+    }
+
+    // WinForms'taki UpdateSidebarCharts mantığına karşılık gelir
+    private async Task LoadSidebarDataAsync()
+    {
+        HourlyConsumptionData = await ScadaService.GetHourlyConsumptionAsync() ?? new();
+        HourlyOeeData = await ScadaService.GetHourlyOeeAsync() ?? new();
+        TopAlarms = await ScadaService.GetTopAlarmsAsync() ?? new();
+    }
+
+    // WinForms'taki BuildMachineCards ve UpdateKpiCards mantıklarını birleştirir
+    private void UpdateDashboardData()
+    {
+        var allStatuses = ScadaService.MachineData.Values.ToList();
+
+        // --- KPI Hesaplamaları ---
+        TotalMachines = allStatuses.Count;
+        RunningMachines = allStatuses.Count(s => s.IsInRecipeMode && !s.HasActiveAlarm);
+        AlarmMachines = allStatuses.Count(s => s.HasActiveAlarm);
+        IdleMachines = TotalMachines - RunningMachines - AlarmMachines;
+
+        if (TotalMachines == 0)
+        {
+            GroupedMachines = new List<IGrouping<string, FullMachineStatus>>();
+            return;
+        }
+
+        // --- Makine Gruplama ve Sıralama (GenelBakis_Control.cs'e uygun) ---
+        // 1. Üretim modunda olanlar en üstte.
+        var sortedMachines = allStatuses
+            .OrderByDescending(m => m.IsInRecipeMode)
+            .ThenByDescending(m => m.HasActiveAlarm)
+            .ThenBy(m => m.MachineName);
+
+        // Gruplama kuralı: MakineTipi'ne göre grupla (WinForms'taki MachineSubType'a karşılık gelir)
+        GroupedMachines = sortedMachines
+            .GroupBy(m => string.IsNullOrEmpty(m.MakineTipi) ? "Diğer" : m.MakineTipi)
+            .ToList();
+
+        // Gruplara renk ataması
+        if (GroupColors.Count != GroupedMachines.Count)
+        {
+            _colorIndex = 0;
+            GroupColors.Clear();
+            foreach (var group in GroupedMachines)
+            {
+                GroupColors.TryAdd(group.Key, DarkColors[_colorIndex % DarkColors.Count]);
+                _colorIndex++;
+            }
+        }
+    }
+
+    private void HandleDataUpdate()
+    {
+        // SignalR ile anlık makine durumu geldiğinde sadece makine kartlarını güncelle
+        UpdateDashboardData();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void NavigateToDetail(int machineId)
+    {
+        NavManager.NavigateTo($"/proseskontrol/{machineId}");
+    }
+
+    private string GetGroupColor(string groupKey)
+    {
+        return GroupColors.TryGetValue(groupKey, out var color) ? color : "#6c757d";
+    }
+
+    public void Dispose()
+    {
+        ScadaService.OnDataUpdated -= HandleDataUpdate;
+    }
+}

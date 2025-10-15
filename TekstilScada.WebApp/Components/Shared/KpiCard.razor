@@ -1,0 +1,26 @@
+﻿<div class="kpi-card @CssClass">
+    <div class="kpi-icon-placeholder">
+        @* İsteğe bağlı olarak buraya bir icon eklenebilir *@
+    </div>
+    <div class="kpi-content">
+        <div class="kpi-value">@Value</div>
+        <div class="kpi-title">@Title</div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = "Başlık";
+
+    [Parameter]
+    public string Value { get; set; } = "0";
+
+    [Parameter]
+    public string CssClass { get; set; } = "default";
+
+    // Windows Forms tarafındaki renkleri CSS Class'larına çeviriyoruz
+    // Color.FromArgb(41, 128, 185) -> connected (mavi)
+    // Color.FromArgb(46, 204, 113) -> success (yeşil)
+    // Color.FromArgb(231, 76, 60) -> danger (kırmızı)
+    // Color.FromArgb(243, 156, 18) -> warning (turuncu)
+}

@@ -9,9 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TekstilScada.Core", "Teksti
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "yilmak_scada_setup", "yilmak_scada_setup\yilmak_scada_setup.vdproj", "{B1CD7F7B-7AB1-B301-0876-3381B27F6A40}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TekstilScada.WebApp", "TekstilScada.WebApp\TekstilScada.WebApp.csproj", "{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TekstilScada.WebAPI", "TekstilScada.WebAPI\TekstilScada.WebAPI.csproj", "{B5D0B4AF-C39A-FC91-921C-F37644E14A44}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TekstilScada.WebApp", "TekstilScada.WebApp\TekstilScada.WebApp.csproj", "{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,18 +59,6 @@ Global
 		{B1CD7F7B-7AB1-B301-0876-3381B27F6A40}.Release|x64.Build.0 = Release
 		{B1CD7F7B-7AB1-B301-0876-3381B27F6A40}.Release|x86.ActiveCfg = Release
 		{B1CD7F7B-7AB1-B301-0876-3381B27F6A40}.Release|x86.Build.0 = Release
-		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Debug|x64.Build.0 = Debug|Any CPU
-		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Debug|x86.Build.0 = Debug|Any CPU
-		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Release|x64.ActiveCfg = Release|Any CPU
-		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Release|x64.Build.0 = Release|Any CPU
-		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Release|x86.ActiveCfg = Release|Any CPU
-		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Release|x86.Build.0 = Release|Any CPU
 		{B5D0B4AF-C39A-FC91-921C-F37644E14A44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B5D0B4AF-C39A-FC91-921C-F37644E14A44}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B5D0B4AF-C39A-FC91-921C-F37644E14A44}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -83,6 +71,18 @@ Global
 		{B5D0B4AF-C39A-FC91-921C-F37644E14A44}.Release|x64.Build.0 = Release|Any CPU
 		{B5D0B4AF-C39A-FC91-921C-F37644E14A44}.Release|x86.ActiveCfg = Release|Any CPU
 		{B5D0B4AF-C39A-FC91-921C-F37644E14A44}.Release|x86.Build.0 = Release|Any CPU
+		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Debug|x64.Build.0 = Debug|Any CPU
+		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Debug|x86.Build.0 = Debug|Any CPU
+		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Release|x64.ActiveCfg = Release|Any CPU
+		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Release|x64.Build.0 = Release|Any CPU
+		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Release|x86.ActiveCfg = Release|Any CPU
+		{2AFC1CAC-04C3-B0E1-5B4C-A2AD1EB36826}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

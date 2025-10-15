@@ -25,14 +25,20 @@
 	<ItemGroup>
 	  <Compile Remove="TekstilScada.Api\**" />
 	  <Compile Remove="TekstilScada.Core\**" />
+	  <Compile Remove="TekstilScada.WebAPI\**" />
+	  <Compile Remove="TekstilScada.WebApp\**" />
 	  <Compile Remove="TekstilScada.Web\**" />
 	  <Compile Remove="yilmak_scada_setup\**" />
 	  <EmbeddedResource Remove="TekstilScada.Api\**" />
 	  <EmbeddedResource Remove="TekstilScada.Core\**" />
+	  <EmbeddedResource Remove="TekstilScada.WebAPI\**" />
+	  <EmbeddedResource Remove="TekstilScada.WebApp\**" />
 	  <EmbeddedResource Remove="TekstilScada.Web\**" />
 	  <EmbeddedResource Remove="yilmak_scada_setup\**" />
 	  <None Remove="TekstilScada.Api\**" />
 	  <None Remove="TekstilScada.Core\**" />
+	  <None Remove="TekstilScada.WebAPI\**" />
+	  <None Remove="TekstilScada.WebApp\**" />
 	  <None Remove="TekstilScada.Web\**" />
 	  <None Remove="yilmak_scada_setup\**" />
 	</ItemGroup>

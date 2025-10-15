@@ -1,12 +1,26 @@
 ﻿// TekstilScada.WebAPI/Controllers/DashboardController.cs
 using Microsoft.AspNetCore.Mvc;
-using TekstilScada.Repositories;
-using TekstilScada.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization; // YENİ: DateTime.Parse için eklendi
+using System.Data; // ZORUNLU: DataTable için
+using System.Linq; // ZORUNLU: AsEnumerable() ve Select() için
+using TekstilScada.Models;
+using TekstilScada.Repositories;
 using TekstilScada.WebAPI.Controllers; // YENİ: ReportFiltersDto için eklendi (Namespace'ler farklıysa gereklidir)
+public class HourlyConsumptionData
+{
+    public double Saat { get; set; }
+    public double ToplamElektrik { get; set; }
+    public double ToplamSu { get; set; }
+    public double ToplamBuhar { get; set; }
+}
 
+public class HourlyOeeData
+{
+    public double Saat { get; set; }
+    public double AverageOEE { get; set; }
+}
 namespace TekstilScada.WebAPI.Controllers
 {
     [ApiController]
@@ -14,10 +28,12 @@ namespace TekstilScada.WebAPI.Controllers
     public class DashboardController : ControllerBase
     {
         private readonly DashboardRepository _dashboardRepository;
+        private readonly AlarmRepository _alarmRepository; // YENİ: AlarmRepo eklendi
 
-        public DashboardController(DashboardRepository dashboardRepository)
+        public DashboardController(DashboardRepository dashboardRepository, AlarmRepository alarmRepository) // YENİ: AlarmRepo enjekte edildi
         {
             _dashboardRepository = dashboardRepository;
+            _alarmRepository = alarmRepository; // YENİ: Atama yapıldı
         }
 
         // DÜZELTME: HTTP GET yerine HTTP POST kullanılıyor ve filtreler gövdeden alınıyor.
@@ -44,6 +60,69 @@ namespace TekstilScada.WebAPI.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, $"OEE Raporu oluşturulurken bir hata oluştu: {ex.Message}");
+            }
+        }
+        [HttpGet("hourly-consumption")]
+        public ActionResult<IEnumerable<HourlyConsumptionData>> GetHourlyConsumption()
+        {
+            try
+            {
+                var hourlyData = _dashboardRepository.GetHourlyFactoryConsumption(DateTime.Today);
+
+                var result = hourlyData.AsEnumerable().Select(row => new HourlyConsumptionData
+                {
+                    // DÜZELTME: Field<T> yerine Field<T?> kullanılarak null değerler güvenli bir şekilde ele alınıyor.
+                    Saat = row.Field<double?>("Saat") ?? 0.0,
+                    ToplamElektrik = row.Field<double?>("ToplamElektrik") ?? 0.0,
+                    ToplamSu = row.Field<double?>("ToplamSu") ?? 0.0,
+                    ToplamBuhar = row.Field<double?>("ToplamBuhar") ?? 0.0
+                }).ToList();
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // Hatanın loglanması için 500 hatası döndürülüyor.
+                return StatusCode(500, $"Saatlik tüketim verileri alınırken bir hata oluştu: {ex.Message}");
+            }
+        }
+
+        // YENİ METOT: Saatlik Ortalama OEE Verilerini Getirir
+        [HttpGet("hourly-oee")]
+        public ActionResult<IEnumerable<HourlyOeeData>> GetHourlyAverageOee()
+        {
+            try
+            {
+                var hourlyData = _dashboardRepository.GetHourlyAverageOee(DateTime.Today);
+
+                var result = hourlyData.AsEnumerable().Select(row => new HourlyOeeData
+                {
+                    // DÜZELTME: Field<T> yerine Field<T?> kullanılıyor.
+                    Saat = row.Field<double?>("Saat") ?? 0.0,
+                    AverageOEE = row.Field<double?>("AverageOEE") ?? 0.0
+                }).ToList();
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Saatlik OEE verileri alınırken bir hata oluştu: {ex.Message}");
+            }
+        }
+
+        // YENİ METOT: En Sık Görülen Alarmları Getirir
+        [HttpGet("top-alarms")]
+        public ActionResult<IEnumerable<TopAlarmData>> GetTopAlarms()
+        {
+            try
+            {
+                // Windows Forms'taki gibi son 24 saatlik veri
+                var topAlarms = _alarmRepository.GetTopAlarmsByFrequency(DateTime.Now.AddDays(-1), DateTime.Now);
+                return Ok(topAlarms);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Popüler alarmlar alınırken bir hata oluştu: {ex.Message}");
             }
         }
     }

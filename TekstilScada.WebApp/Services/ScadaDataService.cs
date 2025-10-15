@@ -18,13 +18,30 @@ public class ActionLogFilters
     public string? Username { get; set; }
     public string? Details { get; set; }
 }
+public class HourlyConsumptionData
+{
+    public double Saat { get; set; }
+    public double ToplamElektrik { get; set; }
+    public double ToplamSu { get; set; }
+    public double ToplamBuhar { get; set; }
+}
+
+public class HourlyOeeData
+{
+    public double Saat { get; set; }
+    public double AverageOEE { get; set; }
+}
+
+// Bu DTO, AlarmRepository'den gelen TopAlarmData yapısıyla eşleşmelidir.
+
+
 namespace TekstilScada.WebApp.Services
 {
     public class ScadaDataService
     {
         private HubConnection? _hubConnection;
         private readonly HttpClient _httpClient;
-
+        private bool _isInitialized = false; // YENİ ALAN
         public ConcurrentDictionary<int, FullMachineStatus> MachineData { get; private set; } = new();
         public event Action? OnDataUpdated;
 
@@ -35,6 +52,7 @@ namespace TekstilScada.WebApp.Services
 
         public async Task InitializeAsync()
         {
+            if (_isInitialized) return; // YENİ KONTROL
             var hubUrl = new Uri(_httpClient.BaseAddress!, "/scadaHub");
             _hubConnection = new HubConnectionBuilder()
                 .WithUrl(hubUrl)
@@ -48,6 +66,7 @@ namespace TekstilScada.WebApp.Services
             try
             {
                 await _hubConnection.StartAsync();
+                _isInitialized = true;
             }
             catch (Exception ex)
             {
@@ -284,7 +303,47 @@ namespace TekstilScada.WebApp.Services
 
             return await response.Content.ReadFromJsonAsync<List<TekstilScada.Core.Models.ActionLogEntry>>();
         }
+        // YENİ METOT: Saatlik Tüketim Verilerini Getirme
+        public async Task<List<HourlyConsumptionData>?> GetHourlyConsumptionAsync()
+        {
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<List<HourlyConsumptionData>>("api/dashboard/hourly-consumption");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Saatlik tüketim verileri alınamadı: {ex.Message}");
+                return null;
+            }
+        }
 
+        // YENİ METOT: Saatlik OEE Verilerini Getirme
+        public async Task<List<HourlyOeeData>?> GetHourlyOeeAsync()
+        {
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<List<HourlyOeeData>>("api/dashboard/hourly-oee");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Saatlik OEE verileri alınamadı: {ex.Message}");
+                return null;
+            }
+        }
+
+        // YENİ METOT: Popüler Alarmları Getirme
+        public async Task<List<TopAlarmData>?> GetTopAlarmsAsync()
+        {
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<List<TopAlarmData>>("api/dashboard/top-alarms");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Popüler alarmlar alınamadı: {ex.Message}");
+                return null;
+            }
+        }
 
     }
 }
