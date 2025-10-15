@@ -1,0 +1,73 @@
+﻿@using TekstilScada.Models
+
+<div class="editor-group">
+    <h5>Kurutma Parametreleri</h5>
+    <div class="row">
+        <div class="col-md-6 mb-2">
+            <label class="form-label">Sıcaklık (°C):</label>
+            <InputNumber class="form-control" @bind-Value="recipeStep.StepDataWords[0]" @oninput="NotifyParent" />
+        </div>
+        <div class="col-md-6 mb-2">
+            <label class="form-label">Nem (%):</label>
+            <div class="input-group">
+                <InputNumber class="form-control" @bind-Value="recipeStep.StepDataWords[1]" @oninput="NotifyParent" />
+                <div class="input-group-text">
+                    <InputCheckbox @bind-Value="isNemAktif" @oninput="NotifyParent" /> Aktif
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-2">
+            <label class="form-label">Süre (dk):</label>
+            <div class="input-group">
+                <InputNumber class="form-control" @bind-Value="recipeStep.StepDataWords[2]" @oninput="NotifyParent" />
+                <div class="input-group-text">
+                    <InputCheckbox @bind-Value="isZamanAktif" @oninput="NotifyParent" /> Aktif
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-2">
+            <label class="form-label">Çalışma Devri (rpm):</label>
+            <InputNumber class="form-control" @bind-Value="recipeStep.StepDataWords[3]" @oninput="NotifyParent" />
+        </div>
+        <div class="col-md-6 mb-2">
+            <label class="form-label">Soğutma Süresi (dk):</label>
+            <InputNumber class="form-control" @bind-Value="recipeStep.StepDataWords[4]" @oninput="NotifyParent" />
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public ScadaRecipe Recipe { get; set; }
+
+    [Parameter]
+    public EventCallback OnChanged { get; set; }
+
+    private ScadaRecipeStep recipeStep = new();
+
+    private bool isNemAktif
+    {
+        get => GetBit(1);
+        set => SetBit(1, value);
+    }
+    private bool isZamanAktif
+    {
+        get => GetBit(2);
+        set => SetBit(2, value);
+    }
+
+    protected override void OnParametersSet()
+    {
+        recipeStep = Recipe?.Steps.FirstOrDefault() ?? new ScadaRecipeStep();
+    }
+
+    private bool GetBit(short bit) => (recipeStep.StepDataWords[5] & bit) != 0;
+    private void SetBit(short bit, bool value)
+    {
+        if (value) { recipeStep.StepDataWords[5] |= bit; }
+        else { recipeStep.StepDataWords[5] &= (short)~bit; }
+        NotifyParent();
+    }
+
+    private void NotifyParent() => OnChanged.InvokeAsync();
+}

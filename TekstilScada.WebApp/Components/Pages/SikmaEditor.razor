@@ -1,0 +1,13 @@
+﻿@using TekstilScada.Models
+<div class="editor-group">
+    <h6>Sıkma Parametreleri</h6>
+    <div class="mb-2"><label class="form-label">Sıkma Devri:</label><InputNumber class="form-control" @bind-Value="sikmaParams.SikmaDevri" @oninput="NotifyParent" /></div>
+    <div class="mb-2"><label class="form-label">Sıkma Süre (DK):</label><InputNumber class="form-control" @bind-Value="sikmaParams.SikmaSure" @oninput="NotifyParent" /></div>
+</div>
+@code {
+    [Parameter] public ScadaRecipeStep Step { get; set; }
+    [Parameter] public EventCallback OnChanged { get; set; }
+    private SikmaParams sikmaParams;
+    protected override void OnInitialized() => sikmaParams = new SikmaParams(Step.StepDataWords);
+    private void NotifyParent() => OnChanged.InvokeAsync();
+}

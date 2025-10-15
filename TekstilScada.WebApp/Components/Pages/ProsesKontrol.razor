@@ -1,0 +1,196 @@
+﻿@page "/proses-kontrol"
+
+@using TekstilScada.Models
+@using TekstilScada.WebApp.Services
+@inject ScadaDataService ScadaDataService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Proses Kontrol</PageTitle>
+
+@if (showFtpModal && selectedMachine != null)
+{
+    <FtpSyncModal Machine="selectedMachine" LocalRecipes="recipes" OnClose="() => showFtpModal = false" />
+}
+
+<h1>Proses Kontrol ve Reçete Yönetimi</h1>
+
+<div class="recipe-editor-layout">
+    <div class="recipe-list-panel">
+        <h4>Kayıtlı Reçeteler</h4>
+        <div class="recipe-actions">
+            <button class="btn btn-success btn-sm" @onclick="AddNewRecipe">Yeni</button>
+            <button class="btn btn-danger btn-sm" @onclick="DeleteSelectedRecipe" disabled="@(selectedRecipe == null || isBusy)">Sil</button>
+        </div>
+        @if (recipes == null)
+        {
+            <p><em>Yükleniyor...</em></p>
+        }
+        else
+        {
+            <div class="list-group" style="max-height: 500px; overflow-y: auto;">
+                @foreach (var recipe in recipes)
+                {
+                    <button type="button" class="list-group-item list-group-item-action @(selectedRecipe?.Id == recipe.Id ? "active" : "")"
+                            @onclick="() => SelectRecipe(recipe.Id)">
+                        @recipe.RecipeName
+                    </button>
+                }
+            </div>
+        }
+    </div>
+    <div class="recipe-details-panel">
+        @if (isBusy)
+        {
+            <div class="alert alert-info">@statusMessage</div>
+        }
+        else if (selectedRecipe == null)
+        {
+            <p>Detayları görmek için bir reçete seçin veya yeni bir reçete oluşturun.</p>
+        }
+        else
+        {
+            <div class="d-flex justify-content-between align-items-center">
+                <h4>Reçete Detayları</h4>
+                <div class="recipe-actions">
+                    <button class="btn btn-primary" @onclick="SaveCurrentRecipe">Kaydet</button>
+                    <button class="btn btn-info" @onclick="SendToPlc">PLC'ye Gönder</button>
+                    <button class="btn btn-secondary" @onclick="ReadFromPlc">PLC'den Oku</button>
+                    <button class="btn btn-warning" @onclick="() => showFtpModal = true" disabled="@(selectedMachine == null)">FTP Senk.</button>
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Reçete Adı:</label>
+                    <input class="form-control" @bind="selectedRecipe.RecipeName" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Hedef Makine:</label>
+                    @* --- DEĞİŞİKLİK BURADA --- *@
+                    <select class="form-select" @bind="SelectedMachineId">
+                        @if (machines != null)
+                        {
+                            foreach (var machine in machines)
+                            {
+                                <option value="@machine.Id">@machine.MachineName</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+
+            @if (selectedMachine?.MachineType == "Kurutma Makinesi")
+            {
+                <KurutmaReceteEditor Recipe="selectedRecipe" OnChanged="StateHasChanged" />
+            }
+            else
+            {
+                <div class="recipe-editor-layout">
+                    <div class="recipe-list-panel" style="max-height: 400px; overflow-y: auto;">
+                        <h6>Adımlar</h6>
+                        <ul class="list-group">
+                            @foreach (var step in selectedRecipe.Steps.OrderBy(s => s.StepNumber))
+                            {
+                                <li class="list-group-item @(selectedStep?.StepNumber == step.StepNumber ? "active" : "")" @onclick="() => selectedStep = step">
+                                    Adım @step.StepNumber: @GetStepTypeName(step)
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                    <div class="recipe-details-panel">
+                        @if (selectedStep == null)
+                        {
+                            <p>Detayları düzenlemek için bir adım seçin.</p>
+                        }
+                        else
+                        {
+                            <StepEditor Step="selectedStep" OnChanged="RefreshStepList" />
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private List<ScadaRecipe>? recipes;
+    private List<Machine>? machines;
+    private ScadaRecipe? selectedRecipe;
+    private ScadaRecipeStep? selectedStep;
+    private int selectedMachineId;
+    private bool isBusy = false;
+    private string statusMessage = string.Empty;
+    private bool showFtpModal = false;
+
+    // --- DEĞİŞİKLİK BURADA ---
+    private Machine? selectedMachine;
+
+    private int SelectedMachineId
+    {
+        get => selectedMachineId;
+        set
+        {
+            selectedMachineId = value;
+            selectedMachine = machines?.FirstOrDefault(m => m.Id == value);
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        isBusy = true;
+        statusMessage = "Bileşenler yükleniyor...";
+        recipes = await ScadaDataService.GetRecipesAsync();
+        machines = await ScadaDataService.GetMachinesAsync();
+        if (machines != null && machines.Any())
+        {
+            // SelectedMachineId'yi ayarladığımızda, selectedMachine de otomatik güncellenecek.
+            SelectedMachineId = machines.First().Id;
+        }
+        isBusy = false;
+    }
+
+    private void AddNewRecipe()
+    {
+        selectedStep = null;
+        selectedRecipe = new ScadaRecipe { RecipeName = "YENİ REÇETE" };
+        int stepCount = (selectedMachine?.MachineType == "Kurutma Makinesi") ? 1 : 98;
+
+        selectedRecipe.Steps.Clear();
+        for (int i = 1; i <= stepCount; i++)
+        {
+            selectedRecipe.Steps.Add(new ScadaRecipeStep { StepNumber = i });
+        }
+    }
+
+    private void RefreshStepList() => StateHasChanged();
+
+    private async Task LoadRecipes() { recipes = await ScadaDataService.GetRecipesAsync(); }
+
+    private async Task SelectRecipe(int recipeId)
+    {
+        isBusy = true;
+        statusMessage = "Reçete detayları yükleniyor...";
+        selectedStep = null;
+        selectedRecipe = await ScadaDataService.GetRecipeDetailsAsync(recipeId);
+        isBusy = false;
+    }
+
+    private async Task SaveCurrentRecipe() { /* ... önceki yanıttaki kod ... */ }
+    private async Task DeleteSelectedRecipe() { /* ... önceki yanıttaki kod ... */ }
+    private async Task SendToPlc() { /* ... önceki yanıttaki kod ... */ }
+    private async Task ReadFromPlc() { /* ... önceki yanıttaki kod ... */ }
+
+    private string GetStepTypeName(ScadaRecipeStep step)
+    {
+        var stepTypes = new List<string>();
+        short controlWord = step.StepDataWords.Length > 24 ? step.StepDataWords[24] : (short)0;
+        if ((controlWord & 1) != 0) stepTypes.Add("Su Alma");
+        if ((controlWord & 2) != 0) stepTypes.Add("Isıtma");
+        if ((controlWord & 4) != 0) stepTypes.Add("Çalışma");
+        if ((controlWord & 8) != 0) stepTypes.Add("Dozaj");
+        if ((controlWord & 16) != 0) stepTypes.Add("Boşaltma");
+        if ((controlWord & 32) != 0) stepTypes.Add("Sıkma");
+        return stepTypes.Any() ? string.Join(" + ", stepTypes) : "";
+    }
+}

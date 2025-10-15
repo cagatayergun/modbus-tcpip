@@ -235,12 +235,12 @@ namespace TekstilScada.Services
             if ((controlWord & 8) != 0) stepTypes.Add("Dosing");
             if ((controlWord & 16) != 0) stepTypes.Add("Discharge");
             if ((controlWord & 32) != 0) stepTypes.Add("Squeezing");
-            if ((controlWord & 100) != 0) stepTypes.Add("Moisture Working");
-            if ((controlWord & 101) != 0) stepTypes.Add("Time Working");
-            if ((controlWord & 102) != 0) stepTypes.Add("Moisture/Time Working");
-            if ((controlWord & 103) != 0) stepTypes.Add("Cooling Working");
-            if ((controlWord & 104) != 0) stepTypes.Add("");
-            if ((controlWord & 105) != 0) stepTypes.Add("");
+            if ((controlWord & 64) != 0) stepTypes.Add("Moisture Working");
+            if ((controlWord & 128) != 0) stepTypes.Add("Time Working");
+            if ((controlWord & 256) != 0) stepTypes.Add("Moisture/Time Working");
+            if ((controlWord & 512) != 0) stepTypes.Add("Cooling Working");
+            if ((controlWord & 1024) != 0) stepTypes.Add("");
+            if ((controlWord & 2048) != 0) stepTypes.Add("");
             return stepTypes.Any() ? string.Join(" + ", stepTypes) : "Waiting...";
         }
 

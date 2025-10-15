@@ -1,0 +1,37 @@
+﻿@using TekstilScada.Models
+@using TekstilScada.WebApp.Services
+@inject ScadaDataService ScadaDataService
+
+<h4>Kullanıcı Yönetimi</h4>
+
+@if (users == null)
+{
+    <p><em>Yükleniyor...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr><th>Kullanıcı Adı</th><th>Tam Adı</th><th>Aktif mi?</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.Username</td>
+                    <td>@user.FullName</td>
+                    <td>@user.IsActive</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<User>? users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await ScadaDataService.GetUsersAsync();
+    }
+}

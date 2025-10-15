@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="app.css" />
+
+    <link rel="stylesheet" href="TekstilScada.WebApp.styles.css" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <HeadOutlet @rendermode="InteractiveServer" />
+    <script src="https://cdn.plot.ly/plotly-2.31.1.min.js"></script>
+</head>
+<script>
+    // Blazor'dan gelen veriyi alan ve Plotly ile grafiği çizen fonksiyon
+    // TekstilScada.WebApp/Components/App.razor - <script> bloğu içinde
+
+     // TekstilScada.WebApp/Components/App.razor - <script> bloğu içinde
+
+    function plotTrendChart(chartId, dataPoints, selectedData) {
+        if (!dataPoints || dataPoints.length === 0) {
+            console.log("Grafik çizmek için veri yok.");
+            Plotly.purge(chartId);
+            return;
+        }
+
+        // KRİTİK DÜZELTME: Tüm özellikler camelCase (küçük harfle başlayan) olarak erişilmelidir.
+        const timestamps = dataPoints.map(p => p.timestamp);
+        let values;
+        let yaxisTitle;
+
+        switch (selectedData) {
+            case 'Temperature':
+                // C# (Temperature) -> JS (temperature)
+                values = dataPoints.map(p => p.temperature / 10.0);
+                yaxisTitle = 'Sıcaklık (°C)';
+                break;
+            case 'WaterLevel':
+                // C# (WaterLevel) -> JS (waterLevel)
+                values = dataPoints.map(p => p.waterLevel);
+                yaxisTitle = 'Su Seviyesi';
+                break;
+            case 'Rpm':
+                // C# (Rpm) -> JS (rpm)
+                values = dataPoints.map(p => p.rpm);
+                yaxisTitle = 'Devir (Rpm)';
+                break;
+            default:
+                console.error("Geçersiz veri tipi.");
+                return;
+        }
+
+        // TANI: Değerlerin gerçekten gelip gelmediğini kontrol eder.
+        console.log(`Plotly çizim verisi kontrolü: Times (${timestamps.length} adet), Values (${values.length} adet)`);
+
+        if (values.every(v => v === undefined || v === null)) {
+             console.error("HATA: Değer dizisi boş veya tanımsız. JSON serileştirme hatası devam ediyor.");
+             Plotly.purge(chartId);
+             return;
+        }
+
+
+        const trace = {
+            x: timestamps,
+            y: values,
+            mode: 'lines',
+            type: 'scatter',
+            name: selectedData
+        };
+
+        const layout = {
+            title: `Trend Analizi: ${yaxisTitle} - Makine ${dataPoints[0].machineId}`,
+            xaxis: {
+                title: 'Zaman Damgası',
+                type: 'date'
+            },
+            yaxis: {
+                title: yaxisTitle
+            }
+        };
+
+        Plotly.newPlot(chartId, [trace], layout, { responsive: true });
+    }
+</script>
+<body>
+    <Routes @rendermode="InteractiveServer" />
+    <script src="_framework/blazor.web.js"></script>
+</body>
+
+</html>

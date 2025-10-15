@@ -24,6 +24,7 @@ namespace TekstilScada.UI.Views
             LanguageManager.LanguageChanged += LanguageManager_LanguageChanged;
             InitializeComponent();
             _repository = new MachineRepository();
+            _userRepository = new UserRepository();
         }
         private void LanguageManager_LanguageChanged(object sender, EventArgs e)
         {
@@ -137,7 +138,13 @@ namespace TekstilScada.UI.Views
 
         private void btnNew_Click(object sender, EventArgs e)
         {
+            // Olayı geçici olarak devre dışı bırak
+            dgvMachines.SelectionChanged -= dgvMachines_SelectionChanged;
+
             ClearFields();
+
+            // Olayı tekrar etkinleştir
+            dgvMachines.SelectionChanged += dgvMachines_SelectionChanged;
         }
 
         private async void btnSave_Click(object sender, EventArgs e)
@@ -170,7 +177,7 @@ namespace TekstilScada.UI.Views
                     MessageBox.Show($"{Resources.yenimakinebasarili}", $"{Resources.Confirim}", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     if (CurrentUser.IsLoggedIn)
                     {
-                        _userRepository.LogAction(CurrentUser.User.Id, "Makine Ayarları", $"'{newMachine.MachineName}' adlı yeni makine eklendi.");
+                        _userRepository.LogAction(CurrentUser.User.Id, "Machine Settings", $"'{newMachine.MachineName}' Added new machine called.");
                     }
                 }
                 else // Güncelleme
@@ -194,9 +201,10 @@ namespace TekstilScada.UI.Views
                         _userRepository.LogAction(CurrentUser.User.Id, "Machine Settings", $"The settings for the machine '{_selectedMachine.MachineName}' have been updated.");
                     }
                 }
-
+                dgvMachines.SelectionChanged -= dgvMachines_SelectionChanged;
                 RefreshMachineList();
                 ClearFields();
+                dgvMachines.SelectionChanged += dgvMachines_SelectionChanged;
                 MachineListChanged?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)

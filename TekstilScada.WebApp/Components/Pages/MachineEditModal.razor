@@ -1,0 +1,53 @@
+﻿@using TekstilScada.Models
+
+<div class="modal fade show" style="display:block" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@(Machine.Id == 0 ? "Yeni Makine Ekle" : "Makine Düzenle")</h5>
+                <button type="button" class="btn-close" @onclick="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Makine Adı:</label>
+                    <InputText @bind-Value="Machine.MachineName" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Makine ID (Kullanıcı Tanımlı):</label>
+                    <InputText @bind-Value="Machine.MachineUserDefinedId" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">IP Adresi:</label>
+                    <InputText @bind-Value="Machine.IpAddress" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Makine Tipi:</label>
+                    <InputText @bind-Value="Machine.MachineType" class="form-control" />
+                </div>
+                <div class="form-check mb-3">
+                    <InputCheckbox @bind-Value="Machine.IsEnabled" />
+                    <label class="form-check-label">Aktif</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="Close">İptal</button>
+                <button type="button" class="btn btn-primary" @onclick="SaveChanges">Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop fade show"></div>
+
+@code {
+    [Parameter]
+    public Machine Machine { get; set; } = new();
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    [Parameter]
+    public EventCallback<Machine> OnSave { get; set; }
+
+    private async Task Close() => await OnClose.InvokeAsync();
+    private async Task SaveChanges() => await OnSave.InvokeAsync(Machine);
+}

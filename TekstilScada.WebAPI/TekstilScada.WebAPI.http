@@ -1,0 +1,6 @@
+@TekstilScada.WebAPI_HostAddress = http://localhost:5008
+
+GET {{TekstilScada.WebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

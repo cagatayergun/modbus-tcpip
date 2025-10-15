@@ -1,0 +1,12 @@
+﻿@using TekstilScada.Models
+<div class="editor-group">
+    <h6>Boşaltma Parametreleri</h6>
+    <div class="mb-2"><label class="form-label">Çalışma Devri:</label><InputNumber class="form-control" @bind-Value="bosaltmaParams.CalismaDevri" @oninput="NotifyParent" /></div>
+</div>
+@code {
+    [Parameter] public ScadaRecipeStep Step { get; set; }
+    [Parameter] public EventCallback OnChanged { get; set; }
+    private BosaltmaParams bosaltmaParams;
+    protected override void OnInitialized() => bosaltmaParams = new BosaltmaParams(Step.StepDataWords);
+    private void NotifyParent() => OnChanged.InvokeAsync();
+}

@@ -1,0 +1,59 @@
+﻿@* Dosya: TekstilScada.WebApp/Components/Pages/MachineCard.razor *@
+
+@using TekstilScada.Models
+
+<div class="card machine-card-web @GetConnectionCssClass()">
+    <div class="card-header-web">
+        <span class="machine-number">@MachineStatus.MachineId.</span>
+        <span class="machine-name-web">@MachineStatus.MachineName</span>
+        <div class="icons">
+            <span class="icon vnc-icon">V</span>
+            <span class="icon info-icon">i</span>
+            <span class="icon status-icon @GetConnectionCssClass()"></span>
+        </div>
+    </div>
+    <div class="card-body-web">
+        <div class="status-line">
+            <span>@GetStatusText()</span>
+            @if (MachineStatus.IsInRecipeMode)
+            {
+                <div class="progress-container">
+                    <div class="progress-bar-web" style="width: @(MachineStatus.ProsesYuzdesi)%"></div>
+                </div>
+                <span>@MachineStatus.ProsesYuzdesi%</span>
+            }
+        </div>
+        <div class="details-grid">
+            <span>REÇETE ADI:</span> <span>@MachineStatus.RecipeName</span>
+            <span>OPERATÖR:</span> <span>@MachineStatus.OperatorIsmi</span>
+            <span>ADIM:</span> <span>@($"{MachineStatus.AktifAdimNo} - {MachineStatus.AktifAdimAdi}")</span>
+            <span>MAKİNA ADI:</span> <span>@MachineStatus.MachineName</span>
+            <span>MAKİNA ID:</span> <span>@MachineStatus.SiparisNumarasi</span>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public FullMachineStatus MachineStatus { get; set; } = new();
+
+    private string GetConnectionCssClass()
+    {
+        return MachineStatus.ConnectionState switch
+        {
+            ConnectionStatus.Connected => "connected",
+            ConnectionStatus.Connecting => "connecting",
+            _ => "disconnected"
+        };
+    }
+
+    private string GetStatusText()
+    {
+        if (MachineStatus.ConnectionState != ConnectionStatus.Connected) return "BAĞLANTI YOK";
+        if (MachineStatus.HasActiveAlarm) return $"ALARM: {MachineStatus.ActiveAlarmNumber}";
+        if (MachineStatus.IsPaused) return "DURAKLATILDI";
+        if (MachineStatus.IsInRecipeMode) return "ÇALIŞIYOR";
+        return "DURUYOR";
+    }
+}

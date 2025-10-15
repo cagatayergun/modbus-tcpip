@@ -1,0 +1,1171 @@
+﻿@page "/raporlar"
+
+@using TekstilScada.Models
+@using TekstilScada.Repositories
+@using TekstilScada.WebApp.Services
+@inject ScadaDataService ScadaDataService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Raporlar</PageTitle>
+
+<h1>Raporlar</h1>
+
+<div class="card">
+    <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs">
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "uretim" ? "active" : "")" href="javascript:void(0);" @onclick='() => activeTab = "uretim"'>Üretim Raporu</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "alarmlar" ? "active" : "")" href="javascript:void(0);" @onclick='() => activeTab = "alarmlar"'>Geçmiş Alarmlar</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "oee" ? "active" : "")" href="javascript:void(0);" @onclick='() => activeTab = "oee"'>OEE Raporu</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "trend" ? "active" : "")" href="javascript:void(0);" @onclick='() => activeTab = "trend"'>Trend Analizi</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "receteTuketim" ? "active" : "")" href="javascript:void(0);" @onclick='() => activeTab = "receteTuketim"'>Reçete Tüketim Analizi</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "manuelTuketim" ? "active" : "")" href="javascript:void(0);" @onclick='() => activeTab = "manuelTuketim"'>Manuel Tüketim</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "genelTuketim" ? "active" : "")" href="javascript:void(0);" @onclick='() => activeTab = "genelTuketim"'>Genel Tüketim Raporu</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "eylemKayitlari" ? "active" : "")" href="javascript:void(0);" @onclick='() => activeTab = "eylemKayitlari"'>Eylem Kayıtları</a>
+            </li>
+        </ul>
+    </div>
+    <div class="card-body">
+        @switch (activeTab)
+        {
+            case "uretim":
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Tarih Aralığı</label>
+                                <div class="input-group">
+                                    <InputDate @bind-Value="filters.StartTime" class="form-control" />
+                                    <InputDate @bind-Value="filters.EndTime" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Makine</label>
+                                <select class="form-select" @bind="selectedMachineId">
+                                    <option value="0">TÜM MAKİNELER</option>
+                                    @if (machines != null)
+                                    {
+                                        foreach (var machine in machines)
+                                        {
+                                            <option value="@machine.Id">@machine.MachineName</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Reçete Adı</label>
+                                <InputText @bind-Value="filters.RecipeName" class="form-control" />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Batch No</label>
+                                <InputText @bind-Value="filters.BatchNo" class="form-control" />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Sipariş No</label>
+                                <InputText @bind-Value="filters.SiparisNo" class="form-control" />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Müşteri No</label>
+                                <InputText @bind-Value="filters.MusteriNo" class="form-control" />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Operatör</label>
+                                <InputText @bind-Value="filters.OperatorName" class="form-control" />
+                            </div>
+                            <div class="col-md-4 align-self-end">
+                                <div class="d-grid gap-2 d-md-flex">
+                                    <button class="btn btn-primary w-100" @onclick="GenerateReport" disabled="@isLoading">
+                                        @if (isLoading)
+                                        {
+                                            <span class="spinner-border spinner-border-sm"></span>
+                                        }
+                                        else
+                                        {
+                                            <span>RAPORLA</span>
+                                        }
+                                    </button>
+                                    <button class="btn btn-success w-100" disabled>Excel'e Aktar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (isLoading)
+                {
+                    <p class="mt-3"><em>Rapor oluşturuluyor...</em></p>
+                }
+                else if (reportItems != null)
+                {
+                    <h4 class="mt-2">Rapor Sonuçları (@reportItems.Count kayıt bulundu)</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover table-sm mt-2">
+                            <thead>
+                                <tr>
+                                    <th>Makine Adı</th>
+                                    <th>Reçete Adı</th>
+                                    <th>Batch No</th>
+                                    <th>Operatör</th>
+                                    <th>Başlangıç</th>
+                                    <th>Bitiş</th>
+                                    <th>Süre</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in reportItems)
+                                {
+                                    <tr>
+                                        <td>@item.MachineName</td>
+                                        <td>@item.RecipeName</td>
+                                        <td>@item.BatchId</td>
+                                        <td>@item.OperatorName</td>
+                                        <td>@item.StartTime.ToString("dd.MM.yy HH:mm")</td>
+                                        <td>@item.EndTime.ToString("dd.MM.yyyy HH:mm")</td>
+                                        <td>@item.CycleTime</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                break;
+            case "alarmlar":
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-5">
+                                <label class="form-label">Tarih Aralığı</label>
+                                <div class="input-group">
+                                    <InputDate @bind-Value="alarmFilters.StartTime" class="form-control" />
+                                    <InputDate @bind-Value="alarmFilters.EndTime" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Makine</label>
+                                <select class="form-select" @bind="selectedAlarmMachineId">
+                                    <option value="0">TÜM MAKİNELER</option>
+                                    @if (machines != null)
+                                    {
+                                        foreach (var machine in machines)
+                                        {
+                                            <option value="@machine.Id">@machine.MachineName</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4 align-self-end">
+                                <div class="d-grid gap-2 d-md-flex">
+                                    <button class="btn btn-primary w-100" @onclick="GenerateAlarmReport" disabled="@isLoading">
+                                        @if (isLoading)
+                                        {
+                                            <span class="spinner-border spinner-border-sm"></span>
+                                        }
+                                        else
+                                        {
+                                            <span>RAPORLA</span>
+                                        }
+                                    </button>
+                                    <button class="btn btn-success w-100" disabled>Excel'e Aktar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (isLoading)
+                {
+                    <p class="mt-3"><em>Rapor oluşturuluyor...</em></p>
+                }
+                else if (alarmReportItems != null)
+                {
+                    <h4 class="mt-2">Rapor Sonuçları (@alarmReportItems.Count kayıt bulundu)</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover table-sm mt-2">
+                            <thead>
+                                <tr>
+                                    <th>Makine Adı</th>
+                                    <th>Alarm No</th>
+                                    <th>Alarm Açıklaması</th>
+                                    <th>Başlangıç Zamanı</th>
+                                    <th>Bitiş Zamanı</th>
+                                    <th>Süre</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in alarmReportItems)
+                                {
+                                    <tr class="@(item.Duration == "Aktif" ? "table-danger" : "")">
+                                        <td>@item.MachineName</td>
+                                        <td>@item.AlarmNumber</td>
+                                        <td>@item.AlarmText</td>
+                                        <td>@item.StartTime.ToString("dd.MM.yy HH:mm:ss")</td>
+                                        <td>@(item.EndTime.HasValue? item.EndTime.Value.ToString("dd.MM.yy HH:mm:ss") : "Aktif")</td>
+                                        <td>@item.Duration</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                break;
+
+            case "oee":
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-5">
+                                <label class="form-label">Tarih Aralığı</label>
+                                <div class="input-group">
+                                    <InputDate @bind-Value="oeeFilters.StartTime" class="form-control" />
+                                    <InputDate @bind-Value="oeeFilters.EndTime" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Makine</label>
+                                <select class="form-select" @bind="selectedOeeMachineId">
+                                    <option value="0">TÜM MAKİNELER</option>
+                                    @if (machines != null)
+                                    {
+                                        foreach (var machine in machines)
+                                        {
+                                            <option value="@machine.Id">@machine.MachineName</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4 align-self-end">
+                                <div class="d-grid gap-2 d-md-flex">
+                                    <button class="btn btn-primary w-100" @onclick="GenerateOeeReport" disabled="@isLoading">
+                                        @if (isLoading)
+                                        {
+                                            <span class="spinner-border spinner-border-sm"></span>
+                                        }
+                                        else
+                                        {
+                                            <span>RAPORLA</span>
+                                        }
+                                    </button>
+                                    <button class="btn btn-success w-100" disabled>Excel'e Aktar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (isLoading)
+                {
+                    <p class="mt-3"><em>Rapor oluşturuluyor...</em></p>
+                }
+                else if (oeeReportItems != null)
+                {
+                    <h4 class="mt-2">OEE Raporu Sonuçları (@oeeReportItems.Count kayıt bulundu)</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover table-sm mt-2">
+                            <thead>
+                                <tr>
+                                    <th>Makine Adı</th>
+                                    <th>Batch No</th>
+                                    <th>Kullanılabilirlik (A)</th>
+                                    <th>Performans (P)</th>
+                                    <th>Kalite (Q)</th>
+                                    <th>OEE (A x P x Q)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in oeeReportItems)
+                                {
+                                    <tr class="@(item.OEE < 60 ? "table-danger" : (item.OEE < 85 ? "table-warning" : "table-success"))">
+                                        <td>@item.MachineName</td>
+                                        <td>@item.BatchId</td>
+                                        <td>@item.Availability.ToString("N2")%</td>
+                                        <td>@item.Performance.ToString("N2")%</td>
+                                        <td>@item.Quality.ToString("N2")%</td>
+                                        <td><strong>@item.OEE.ToString("N2")%</strong></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                break;
+
+            case "trend":
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Tarih Aralığı</label>
+                                <InputDate @bind-Value="trendFilters.StartTime" class="form-control mb-1" />
+                                <InputDate @bind-Value="trendFilters.EndTime" class="form-control" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label">Makine</label>
+                                @* DÜZELTME: Sadece 'value' ve 'onchange' ile manuel kontrolü geri getiriyoruz *@
+                                <select class="form-select"
+                                        @onchange="TrendMachineChanged"
+                                        value="@selectedTrendMachineIdString">
+                                    <option value="0">Makine Seçiniz</option>
+                                    @if (machines != null)
+                                    {
+                                        foreach (var machine in machines)
+                                        {
+                                            <option value="@machine.Id">@machine.MachineName</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label">Gösterilecek Veri</label>
+                                <select class="form-select" @bind="selectedTrendData">
+                                    <option value="Temperature">Sıcaklık (°C)</option>
+                                    <option value="WaterLevel">Su Seviyesi</option>
+                                    <option value="Rpm">Devir (Rpm)</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3 align-self-end">
+                                <div class="d-grid gap-2 d-md-flex">
+                                    <button class="btn btn-primary w-100" @onclick="GenerateTrendReport"
+                                            disabled="@isLoading">
+                                        @* DÜZELTME: Sadece isLoading'e bağlıdır *@
+                                        @if (isLoading)
+                                        {
+                                            <span class="spinner-border spinner-border-sm"></span>
+                                        }
+                                        else
+                                        {
+                                            <span>VERİ YÜKLE</span>
+                                        }
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (isLoading)
+                {
+                    <p class="mt-3"><em>Trend verileri yükleniyor...</em></p>
+                }
+                else if (trendDataPoints != null && trendDataPoints.Any())
+                {
+                    <h4 class="mt-2">Trend Grafiği (@selectedTrendData)</h4>
+
+                    @* Grafik Alanı *@
+                    <div id="trendChart" style="width: 100%; height: 500px;"></div>
+
+                    <p class="alert alert-info mt-3">
+                        Trend grafiği için **@selectedTrendData** verileri (@trendDataPoints.Count kayıt) gösteriliyor.
+                    </p>
+                }
+                else if (trendDataPoints != null && !trendDataPoints.Any())
+                {
+                    <p class="alert alert-warning mt-3">Seçilen aralıkta trend verisi bulunamadı.</p>
+                }
+                break;
+
+            case "receteTuketim":
+                <div class="row">
+                    <div class="col-md-4">
+                        <h4>Reçete Listesi</h4>
+                        @if (allRecipes == null)
+                        {
+                            <p><em>Yükleniyor...</em></p>
+                        }
+                        else
+                        {
+                            <div class="list-group" style="max-height: 70vh; overflow-y: auto;">
+                                @foreach (var recipe in allRecipes.OrderBy(r => r.RecipeName))
+                                {
+                                    <button type="button" class="list-group-item list-group-item-action @(selectedRecipeIdForConsumption == recipe.Id ? "active" : "")"
+                                            @onclick="() => SelectRecipeForConsumption(recipe.Id)">
+                                        @recipe.RecipeName (@recipe.TargetMachineType)
+                                    </button>
+                                }
+                            </div>
+                        }
+                    </div>
+                    <div class="col-md-8">
+                        <h4>Kullanım Geçmişi ve Tüketim Analizi</h4>
+                        @if (selectedRecipeIdForConsumption == 0)
+                        {
+                            <p class="alert alert-info">Listeden analiz etmek istediğiniz bir reçeteyi seçin.</p>
+                        }
+                        else if (isLoading)
+                        {
+                            <p class="mt-3"><em>Geçmiş yükleniyor...</em></p>
+                        }
+                        else if (consumptionHistory == null || !consumptionHistory.Any())
+                        {
+                            <p class="alert alert-warning mt-3">Seçilen reçetenin geçmiş üretim kaydı veya tüketim verisi bulunamadı.</p>
+                        }
+                        else
+                        {
+                            <h5 class="mt-2">Geçmiş Kullanımlar (@consumptionHistory.Count kayıt)</h5>
+
+                            <table class="table table-striped table-hover table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Makine Adı</th>
+                                        <th>Batch No</th>
+                                        <th>Bitiş Zamanı</th>
+                                        <th>Süre</th>
+                                        <th>Su (L)</th>
+                                        <th>Elektrik (kW)</th>
+                                        <th>Buhar (kg)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in consumptionHistory)
+                                    {
+                                        <tr>
+                                            <td>@item.MachineName</td>
+                                            <td>@item.BatchId</td>
+                                            <td>@item.EndTime.ToString("dd.MM.yy HH:mm")</td>
+                                            <td>@item.CycleTime</td>
+                                            <td>@item.TotalWater</td>
+                                            <td>@item.TotalElectricity</td>
+                                            <td>@item.TotalSteam</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+                break;
+
+            case "manuelTuketim":
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Tarih Aralığı</label>
+                                <div class="input-group">
+                                    <InputDate @bind-Value="manualFilters.StartTime" class="form-control" />
+                                    <InputDate @bind-Value="manualFilters.EndTime" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Makine (Tekli Seçim)</label>
+                                <select class="form-select" @bind="selectedManualMachineId">
+                                    <option value="0">Makine Seçiniz</option>
+                                    @if (machines != null)
+                                    {
+                                        foreach (var machine in machines)
+                                        {
+                                            <option value="@machine.Id">@machine.MachineName</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4 align-self-end">
+                                <button class="btn btn-primary w-100" @onclick="GenerateManualConsumptionReport" disabled="@isLoading">
+                                    @if (isLoading)
+                                    {
+                                        <span class="spinner-border spinner-border-sm"></span>
+                                    }
+                                    else
+                                    {
+                                        <span>RAPORLA</span>
+                                    }
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (isLoading)
+                {
+                    <p class="mt-3"><em>Rapor oluşturuluyor...</em></p>
+                }
+                else if (consumptionSummary == null && selectedManualMachineId != 0)
+                {
+                    <p class="alert alert-warning mt-3">Seçilen aralıkta manuel tüketim verisi bulunamadı.</p>
+                }
+                else if (consumptionSummary != null)
+                {
+                    <h4 class="mt-2">Manuel Tüketim Özeti - @consumptionSummary.Makine</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item">Rapor Aralığı: <strong>@consumptionSummary.RaporAraligi</strong></li>
+                        <li class="list-group-item">Toplam Manuel Çalışma Süresi: <strong>@consumptionSummary.ToplamManuelSure</strong></li>
+                        <li class="list-group-item">Ortalama Sıcaklık: <strong>@consumptionSummary.OrtalamaSicaklik.ToString("N1") °C</strong></li>
+                        <li class="list-group-item">Ortalama Devir: <strong>@consumptionSummary.OrtalamaDevir.ToString("N0") Rpm</strong></li>
+                        <li class="list-group-item list-group-item-success mt-3">Toplam Su Tüketimi: <strong>@consumptionSummary.ToplamSuTuketimi_Litre.ToString("N0") Litre</strong></li>
+                        <li class="list-group-item list-group-item-success">Toplam Elektrik Tüketimi: <strong>@consumptionSummary.ToplamElektrikTuketimi_kW.ToString("N2") kW</strong></li>
+                        <li class="list-group-item list-group-item-success">Toplam Buhar Tüketimi: <strong>@consumptionSummary.ToplamBuharTuketimi_kg.ToString("N2") kg</strong></li>
+                    </ul>
+                }
+                break;
+
+            case "genelTuketim":
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Tarih Aralığı</label>
+                                <InputDate @bind-Value="generalConsumptionFilters.StartTime" class="form-control mb-1" />
+                                <InputDate @bind-Value="generalConsumptionFilters.EndTime" class="form-control" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label">Tüketim Tipi</label>
+                                @* Tüketim tipi seçimi *@
+                                <select class="form-select" @bind="selectedConsumptionType">
+                                    <option value="TotalElectricity">Elektrik (kW)</option>
+                                    <option value="TotalWater">Su (Litre)</option>
+                                    <option value="TotalSteam">Buhar (kg)</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Makineler (Çoklu Seçim - Ctrl basılı tutun)</label>
+                                @* KRİTİK DÜZELTME: List yerine Array'e bind edildi *@
+                                <select multiple class="form-select" style="min-height: 100px;" @bind="selectedGeneralMachineIdsArray">
+                                    @if (machines != null)
+                                    {
+                                        foreach (var machine in machines)
+                                        {
+                                            <option value="@machine.Id">@machine.MachineName</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-md-2 align-self-end">
+                                <button class="btn btn-primary w-100" @onclick="GenerateGeneralDetailedConsumptionReport"
+                                        disabled="@isLoading">
+                                    @* DİZİ UZUNLUĞU KONTROLÜ *@
+                                    @if (isLoading)
+                                    {
+                                        <span class="spinner-border spinner-border-sm"></span>
+                                    }
+                                    else
+                                    {
+                                        <span>RAPORLA</span>
+                                    }
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (isLoading)
+                {
+                    <p class="mt-3"><em>Detaylı tüketim raporu oluşturuluyor...</em></p>
+                }
+                else if (generalDetailedConsumptionReport == null || !generalDetailedConsumptionReport.Any())
+                {
+                    <p class="alert alert-info mt-3">Seçilen kriterlere uygun tamamlanmış üretim verisi bulunamadı.</p>
+                }
+                else
+                {
+                    <h4 class="mt-2">Detaylı Tüketim Raporu (@GetConsumptionUnitName(selectedConsumptionType))</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Makine Adı</th>
+                                    <th>Batch No</th>
+                                    <th>Bitiş Zamanı</th>
+                                    <th>@GetConsumptionUnitName(selectedConsumptionType)</th>
+                                  
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in generalDetailedConsumptionReport)
+                                {
+                                    <tr>
+                                        <td>@item.MachineName</td>
+                                        <td>@item.BatchId</td>
+                                        <td>@item.EndTime.ToString("dd.MM.yy HH:mm")</td>
+
+                                        @* Seçilen tüketim tipinin değerini vurgula *@
+                                        <td><strong>@GetConsumptionValue(item, selectedConsumptionType)</strong></td>
+
+                                        
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                break;
+
+            case "eylemKayitlari":
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Tarih Aralığı</label>
+                                <InputDate @bind-Value="actionLogFilters.StartTime" class="form-control mb-1" />
+                                <InputDate @bind-Value="actionLogFilters.EndTime" class="form-control" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Kullanıcı Adı</label>
+                                <InputText @bind-Value="actionLogFilters.Username" class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Detay (Kısmi Arama)</label>
+                                <InputText @bind-Value="actionLogFilters.Details" class="form-control" />
+                            </div>
+                            <div class="col-md-2 align-self-end">
+                                <button class="btn btn-primary w-100" @onclick="GenerateActionLogsReport" disabled="@isLoading">
+                                    @if (isLoading)
+                                    {
+                                        <span class="spinner-border spinner-border-sm"></span>
+                                    }
+                                    else
+                                    {
+                                        <span>RAPORLA</span>
+                                    }
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (isLoading)
+                {
+                    <p class="mt-3"><em>Eylem kayıtları yükleniyor...</em></p>
+                }
+                else if (actionLogs != null && actionLogs.Any())
+                {
+                    <h4 class="mt-2">Eylem Kayıtları (@actionLogs.Count kayıt bulundu)</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Zaman Damgası</th>
+                                    <th>Kullanıcı Adı</th>
+                                    <th>Eylem Tipi</th>
+                                    <th>Detaylar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var log in actionLogs)
+                                {
+                                    <tr>
+                                        <td>@log.Timestamp.ToString("dd.MM.yy HH:mm:ss")</td>
+                                        <td>@log.Username</td>
+                                        <td>@log.ActionType</td>
+                                        <td>@log.Details</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else if (actionLogs != null && !actionLogs.Any())
+                {
+                    <p class="alert alert-warning mt-3">Seçilen kriterlere uygun eylem kaydı bulunamadı.</p>
+                }
+                break;
+        }
+    </div>
+</div>
+
+@code {
+    // --- TEMEL FİLTRE ALANLARI ---
+    private string activeTab = "uretim";
+    private List<Machine>? machines;
+    private bool isLoading = false;
+
+    // Üretim Raporu
+    private ReportFilters filters = new();
+    private List<ProductionReportItem>? reportItems;
+    private int selectedMachineId = 0;
+
+    // Alarm Raporu
+    private ReportFilters alarmFilters = new();
+    private List<AlarmReportItem>? alarmReportItems;
+    private int selectedAlarmMachineId = 0;
+
+    // OEE Raporu
+    private ReportFilters oeeFilters = new();
+    private List<OeeData>? oeeReportItems;
+    private int selectedOeeMachineId = 0;
+
+    // --- TREND ANALİZİ ALANLARI ---
+    private ReportFilters trendFilters = new();
+    private List<TrendProcessDataPoint>? trendDataPoints;
+
+    private string selectedTrendMachineIdString = "0";
+    private string selectedTrendData = "Temperature";
+
+    // Helper Property: Buton kontrolü ve API'ye göndermek için
+    private int selectedTrendMachineIdInt => int.TryParse(selectedTrendMachineIdString, out var id) ? id : 0;
+
+    // YENİ FLAG: Grafik çizimini tetiklemek için kullanılır
+    private bool shouldRenderChart = false;
+    private List<ScadaRecipe>? allRecipes; // Tüm reçeteleri tutmak için
+    private int selectedRecipeIdForConsumption = 0; // Seçili reçete ID'si
+    private List<ProductionReportItem>? consumptionHistory; // Tüketim geçmişini tutar
+                                                            // YENİ ALANLAR: Manuel Tüketim Raporu için
+    private ReportFilters manualFilters = new();
+    private ManualConsumptionSummary? consumptionSummary;
+    private int selectedManualMachineId = 0; // Tek makine seçimi zorunlu
+    private ReportFilters generalConsumptionFilters = new();
+    private ConsumptionTotals? consumptionTotals;
+    private List<ProductionReportItem>? generalDetailedConsumptionReport;
+    // DÜZELTME 1: Binding için kullanılacak ARRAY (Blazor bunu dizeden dönüştürebilir)
+    private int[] selectedGeneralMachineIdsArray { get; set; } = Array.Empty<int>();
+
+    // DÜZELTME 2: Logic ve API için Array'i List'e çeviren Helper Property
+    private List<int> SelectedGeneralMachineIdsList => selectedGeneralMachineIdsArray.ToList();
+
+    private string selectedConsumptionType = "TotalElectricity"; // Varsayılan: Elektrik
+    private ActionLogFilters actionLogFilters = new();
+    private List<TekstilScada.Core.Models.ActionLogEntry>? actionLogs;
+    // --- TREND VERİ MODELİ ---
+    private class TrendProcessDataPoint
+    {
+        public int MachineId { get; set; }
+        public DateTime Timestamp { get; set; }
+        public decimal Temperature { get; set; }
+        public decimal WaterLevel { get; set; }
+        public int Rpm { get; set; }
+    }
+
+
+    // --- YAŞAM DÖNGÜSÜ METOTLARI ---
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Filtre başlangıçlarını ayarla
+        var defaultStart = DateTime.Now.Date.AddDays(-7);
+        var defaultEnd = DateTime.Now.Date;
+        manualFilters.StartTime = DateTime.Now.Date.AddDays(-7);
+        manualFilters.EndTime = DateTime.Now.Date;
+        filters.StartTime = defaultStart; filters.EndTime = defaultEnd;
+        alarmFilters.StartTime = defaultStart; alarmFilters.EndTime = defaultEnd;
+        oeeFilters.StartTime = defaultStart; oeeFilters.EndTime = defaultEnd;
+        trendFilters.StartTime = defaultStart; trendFilters.EndTime = defaultEnd;
+        generalConsumptionFilters.StartTime = DateTime.Now.Date.AddDays(-7);
+        generalConsumptionFilters.EndTime = DateTime.Now.Date;
+        actionLogFilters.StartTime = defaultStart;
+        actionLogFilters.EndTime = defaultEnd;
+        generalConsumptionFilters.EndTime = DateTime.Now.Date;
+        generalConsumptionFilters.EndTime = DateTime.Now.Date;
+
+        machines = await ScadaDataService.GetMachinesAsync();
+        allRecipes = await ScadaDataService.GetRecipesAsync();
+        if (machines != null && machines.Any())
+        {
+            selectedTrendMachineIdString = machines.First().Id.ToString();
+        }
+
+        // UI'ı anında yenile.
+        await InvokeAsync(StateHasChanged);
+    }
+
+    // KRİTİK METOT: DOM hazır olduktan sonra çalışır
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Grafik çizimini yalnızca veri yüklendikten sonra ve bir kere çalıştır
+        if (shouldRenderChart && trendDataPoints != null && trendDataPoints.Any())
+        {
+            shouldRenderChart = false; // Tekrar çizimi engelle
+
+            // CallPlotlyJS, DOM'a erişimin garanti olduğu bu noktada çağrılır.
+            await CallPlotlyJS();
+        }
+    }
+
+    // YENİ METOT: Makine seçimi değiştiğinde çalışır (UI binding fix)
+    private void TrendMachineChanged(ChangeEventArgs e)
+    {
+        selectedTrendMachineIdString = e.Value?.ToString() ?? "0";
+        InvokeAsync(StateHasChanged);
+    }
+
+    // YENİ METOT: Plotly JS çağrısını yapan helper metot
+    private async Task CallPlotlyJS()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("plotTrendChart",
+                "trendChart",
+                trendDataPoints,
+                selectedTrendData);
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", "Plotly JS çağrısı başarısız oldu:", ex.Message);
+        }
+    }
+
+    // --- RAPOR OLUŞTURMA METOTLARI ---
+
+    private async Task GenerateReport()
+    {
+        // ... (metot içeriği aynı kalır)
+        isLoading = true;
+        reportItems = null;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            var effectiveFilters = new ReportFilters
+            {
+                StartTime = filters.StartTime.Date,
+                EndTime = filters.EndTime.Date.AddDays(1).AddTicks(-1),
+                MachineId = selectedMachineId == 0 ? (int?)null : selectedMachineId,
+                BatchNo = filters.BatchNo,
+                RecipeName = filters.RecipeName,
+                SiparisNo = filters.SiparisNo,
+                MusteriNo = filters.MusteriNo,
+                OperatorName = filters.OperatorName
+            };
+
+            await JSRuntime.InvokeVoidAsync("console.log", "API'ye gönderilen filtreler:", effectiveFilters);
+
+            reportItems = await ScadaDataService.GetProductionReportAsync(effectiveFilters);
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", "Rapor oluşturulurken Blazor tarafında hata oluştu:", ex.ToString());
+        }
+        finally
+        {
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    private async Task GenerateAlarmReport()
+    {
+        // ... (metot içeriği aynı kalır)
+        isLoading = true;
+        alarmReportItems = null;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            var effectiveFilters = new ReportFilters
+            {
+                StartTime = alarmFilters.StartTime.Date,
+                EndTime = alarmFilters.EndTime.Date.AddDays(1),
+                MachineId = selectedAlarmMachineId == 0 ? (int?)null : selectedAlarmMachineId,
+            };
+
+            await JSRuntime.InvokeVoidAsync("console.log", "API'ye gönderilen Alarm filtreleri:", effectiveFilters);
+            alarmReportItems = await ScadaDataService.GetAlarmReportAsync(effectiveFilters);
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", "Alarm Raporu oluşturulurken hata oluştu:", ex.ToString());
+        }
+        finally
+        {
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    private async Task GenerateOeeReport()
+    {
+        // ... (metot içeriği aynı kalır)
+        isLoading = true;
+        oeeReportItems = null;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            var effectiveFilters = new ReportFilters
+            {
+                StartTime = oeeFilters.StartTime.Date,
+                EndTime = oeeFilters.EndTime.Date.AddDays(1),
+                MachineId = selectedOeeMachineId == 0 ? (int?)null : selectedOeeMachineId,
+            };
+
+            await JSRuntime.InvokeVoidAsync("console.log", "API'ye gönderilen OEE filtreleri:", effectiveFilters);
+            oeeReportItems = await ScadaDataService.GetOeeReportAsync(effectiveFilters);
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", "OEE Raporu oluşturulurken hata oluştu:", ex.ToString());
+        }
+        finally
+        {
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task GenerateTrendReport()
+    {
+        isLoading = true;
+        trendDataPoints = null;
+        // shouldRenderChart = false; // Temizle
+        await InvokeAsync(StateHasChanged);
+
+        if (selectedTrendMachineIdInt == 0)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Trend analizi için makine seçimi yapılmadı. Veri gönderilmeyecektir.");
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        try
+        {
+            var effectiveFilters = new ReportFilters
+            {
+                StartTime = trendFilters.StartTime.Date,
+                EndTime = trendFilters.EndTime.Date.AddDays(1),
+                MachineId = selectedTrendMachineIdInt,
+            };
+
+            await JSRuntime.InvokeVoidAsync("console.log", "API'ye gönderilen Trend filtreleri:", effectiveFilters);
+
+            var rawData = await ScadaDataService.GetTrendDataAsync(effectiveFilters);
+
+            if (rawData != null)
+            {
+                var jsonString = System.Text.Json.JsonSerializer.Serialize(rawData);
+                var trendData = System.Text.Json.JsonSerializer.Deserialize<List<TrendProcessDataPoint>>(jsonString, new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+                trendDataPoints = trendData;
+
+                if (trendDataPoints.Any())
+                {
+                    shouldRenderChart = true; // DOM hazır olduğunda çizim yapsın diye flag'i true yaptık.
+                }
+                else
+                {
+                    shouldRenderChart = false;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            shouldRenderChart = false;
+            await JSRuntime.InvokeVoidAsync("console.error", "Trend Raporu oluşturulurken hata oluştu:", ex.ToString());
+        }
+        finally
+        {
+            isLoading = false;
+            // Bu StateHasChanged, OnAfterRenderAsync'i tetikler.
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    // YENİ HELPER METOT: Tabloda dinamik veriyi göstermek için
+    private object GetTrendValue(TrendProcessDataPoint item, string dataType)
+    {
+        return dataType switch
+        {
+            "Temperature" => item.Temperature / 10.0m,
+            "WaterLevel" => item.WaterLevel,
+            "Rpm" => item.Rpm,
+            _ => "N/A"
+        };
+    }
+    private async Task SelectRecipeForConsumption(int recipeId)
+    {
+        if (selectedRecipeIdForConsumption == recipeId && consumptionHistory != null)
+        {
+            return;
+        }
+
+        selectedRecipeIdForConsumption = recipeId;
+        consumptionHistory = null;
+        isLoading = true;
+
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            consumptionHistory = await ScadaDataService.GetRecipeConsumptionHistoryAsync(recipeId);
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", "Reçete tüketim geçmişi yüklenirken hata:", ex.ToString());
+        }
+        finally
+        {
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    private async Task GenerateManualConsumptionReport()
+    {
+        isLoading = true;
+        consumptionSummary = null;
+        await InvokeAsync(StateHasChanged);
+
+        if (selectedManualMachineId == 0)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Manuel tüketim raporu için tek bir makine seçimi zorunludur.");
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        try
+        {
+            var effectiveFilters = new ReportFilters
+            {
+                StartTime = manualFilters.StartTime.Date,
+                EndTime = manualFilters.EndTime.Date.AddDays(1), // API'de son tick'e çevrilecektir.
+                MachineId = selectedManualMachineId,
+
+                // KRİTİK DÜZELTME: Diğer tüm gereksiz filtreleri null olarak ayarla
+                BatchNo = null,
+                RecipeName = null,
+                SiparisNo = null,
+                MusteriNo = null,
+                OperatorName = null
+            };
+
+            await JSRuntime.InvokeVoidAsync("console.log", "API'ye gönderilen Manuel Tüketim filtreleri:", effectiveFilters);
+
+            consumptionSummary = await ScadaDataService.GetManualConsumptionReportAsync(effectiveFilters);
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", "Manuel Tüketim Raporu oluşturulurken hata oluştu:", ex.ToString());
+        }
+        finally
+        {
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    private async Task GenerateGeneralConsumptionReport()
+    {
+        isLoading = true;
+        consumptionTotals = null;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            var effectiveFilters = new ReportFilters
+            {
+                StartTime = generalConsumptionFilters.StartTime.Date,
+                // EndTime bir sonraki günün başlangıcı (API'de son tick'e çevrilecek)
+                EndTime = generalConsumptionFilters.EndTime.Date,
+                MachineId = null, // Tüm makineleri kapsar
+
+                BatchNo = null,
+                RecipeName = null,
+                SiparisNo = null,
+                MusteriNo = null,
+                OperatorName = null
+            };
+
+            await JSRuntime.InvokeVoidAsync("console.log", "API'ye gönderilen Genel Tüketim filtreleri:", effectiveFilters);
+
+            consumptionTotals = await ScadaDataService.GetConsumptionTotalsAsync(effectiveFilters);
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", "Genel Tüketim Raporu oluşturulurken hata oluştu:", ex.ToString());
+        }
+        finally
+        {
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    private async Task GenerateGeneralDetailedConsumptionReport()
+    {
+        isLoading = true;
+        generalDetailedConsumptionReport = null;
+        await InvokeAsync(StateHasChanged);
+
+        if (selectedGeneralMachineIdsArray.Length == 0)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Lütfen en az bir makine seçin.");
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        try
+        {
+            var effectiveFilters = new GeneralDetailedConsumptionFilters
+            {
+                StartTime = generalConsumptionFilters.StartTime.Date,
+                EndTime = generalConsumptionFilters.EndTime.Date, // API'de ayarlanacak
+                MachineIds = SelectedGeneralMachineIdsList,
+            };
+
+            var rawData = await ScadaDataService.GetGeneralDetailedConsumptionReportAsync(effectiveFilters);
+            generalDetailedConsumptionReport = rawData;
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", "Genel Detaylı Tüketim Raporu oluşturulurken hata oluştu:", ex.ToString());
+        }
+        finally
+        {
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    // YENİ HELPER METOT: Seçilen tüketim tipinin adını ve birimini döndürür
+    private string GetConsumptionUnitName(string type)
+    {
+        return type switch
+        {
+            "TotalWater" => "Su (Litre)",
+            "TotalElectricity" => "Elektrik (kW)",
+            "TotalSteam" => "Buhar (kg)",
+            _ => "Tüketim Değeri"
+        };
+    }
+    private object GetConsumptionValue(ProductionReportItem item, string type)
+    {
+        return type switch
+        {
+            "TotalWater" => item.TotalWater.ToString("N0"),
+            "TotalElectricity" => item.TotalElectricity.ToString("N2"),
+            "TotalSteam" => item.TotalSteam.ToString("N2"),
+            _ => "N/A"
+        };
+    }
+    private async Task GenerateActionLogsReport()
+    {
+        isLoading = true;
+        actionLogs = null;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            var effectiveFilters = new ActionLogFilters
+            {
+                StartTime = actionLogFilters.StartTime.Date,
+                EndTime = actionLogFilters.EndTime.Date,
+                Username = actionLogFilters.Username,
+                Details = actionLogFilters.Details,
+            };
+
+            actionLogs = await ScadaDataService.GetActionLogsAsync(effectiveFilters);
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", "Eylem Kayıtları Raporu oluşturulurken hata oluştu:", ex.ToString());
+        }
+        finally
+        {
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}

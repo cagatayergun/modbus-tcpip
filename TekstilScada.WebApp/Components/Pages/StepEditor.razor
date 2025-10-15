@@ -1,0 +1,82 @@
+﻿@using TekstilScada.Models
+@inject IJSRuntime JSRuntime
+
+<div class="step-editor-container">
+    <div class="step-types">
+        <h6>Adım Tipleri</h6>
+        <div class="form-check"><input class="form-check-input" type="checkbox" @bind="isSuAlma" /> <label>Su Alma</label></div>
+        <div class="form-check"><input class="form-check-input" type="checkbox" @bind="isIsitma" /> <label>Isıtma</label></div>
+        <div class="form-check"><input class="form-check-input" type="checkbox" @bind="isCalisma" /> <label>Çalışma</label></div>
+        <div class="form-check"><input class="form-check-input" type="checkbox" @bind="isDozaj" /> <label>Dozaj</label></div>
+        <div class="form-check"><input class="form-check-input" type="checkbox" @bind="isBosaltma" /> <label>Boşaltma</label></div>
+        <div class="form-check"><input class="form-check-input" type="checkbox" @bind="isSikma" /> <label>Sıkma</label></div>
+    </div>
+    <div class="step-params">
+        @if (isSuAlma)
+        {
+            <SuAlmaEditor Step="Step" OnChanged="NotifyParent" />
+        }
+        @if (isIsitma)
+        {
+            <IsitmaEditor Step="Step" OnChanged="NotifyParent" />
+        }
+        @if (isCalisma)
+        {
+            <CalismaEditor Step="Step" OnChanged="NotifyParent" />
+        }
+        @if (isDozaj)
+        {
+            <DozajEditor Step="Step" OnChanged="NotifyParent" />
+        }
+        @if (isBosaltma)
+        {
+            <BosaltmaEditor Step="Step" OnChanged="NotifyParent" />
+        }
+        @if (isSikma)
+        {
+            <SikmaEditor Step="Step" OnChanged="NotifyParent" />
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public ScadaRecipeStep Step { get; set; }
+    [Parameter] public EventCallback OnChanged { get; set; }
+
+    // Checkbox'lar için property'ler
+    private bool isSuAlma { get => GetBit(1); set => SetBit(1, value); }
+    private bool isIsitma { get => GetBit(2); set => SetBit(2, value); }
+    private bool isCalisma { get => GetBit(4); set => SetBit(4, value); }
+    private bool isDozaj { get => GetBit(8); set => SetBit(8, value); }
+    private bool isBosaltma { get => GetBit(16); set => SetBit(16, value); }
+    private bool isSikma { get => GetBit(32); set => SetBit(32, value); }
+
+    // Kontrol kelimesindeki biti okuyan metot
+    private bool GetBit(short bit) => (Step.StepDataWords[24] & bit) != 0;
+
+    // Kontrol kelimesindeki biti güncelleyen ve KURAL KONTROLÜ yapan metot
+    private async Task SetBit(short bit, bool value)
+    {
+        var currentBits = new List<bool> { isSuAlma, isIsitma, isCalisma, isDozaj, isBosaltma, isSikma };
+        int checkedCount = currentBits.Count(c => c);
+
+        // Eğer yeni bir seçim yapılıyorsa ve zaten 2 tane seçiliyse, engelle.
+        if (value == true && checkedCount >= 2)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Bir adımda en fazla 2 farklı işlem türü seçebilirsiniz.");
+            return; // Değişikliği yapma
+        }
+
+        if (value)
+        {
+            Step.StepDataWords[24] |= bit;
+        }
+        else
+        {
+            Step.StepDataWords[24] &= (short)~bit;
+        }
+        await NotifyParent();
+    }
+
+    private async Task NotifyParent() => await OnChanged.InvokeAsync();
+}
