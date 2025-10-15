@@ -1,34 +1,44 @@
 ﻿@* Dosya: TekstilScada.WebApp/Components/Pages/MachineCard.razor *@
 
 @using TekstilScada.Models
+@using Microsoft.AspNetCore.Components.Web
 
-<div class="card machine-card-web @GetConnectionCssClass()">
+
+<div class="card machine-card-web @GetConnectionCssClass()" @onclick="@OnClick">
     <div class="card-header-web">
-        <span class="machine-number">@MachineStatus.MachineId.</span>
-        <span class="machine-name-web">@MachineStatus.MachineName</span>
+        <span class="machine-number" style="color: black;">@MachineStatus.MachineId.</span>
+        <span class="machine-name-web" style="color: black;">@MachineStatus.MachineName</span>
         <div class="icons">
-            <span class="icon vnc-icon">V</span>
-            <span class="icon info-icon">i</span>
+            <span class="icon vnc-icon" style="color: black;">V</span>
+
+            @* KRİTİK DÜZELTME: OnInfoClick, HandleInfoButtonClick ile çağrılır *@
+            <button type="button"
+                    class="btn btn-sm btn-link icon info-icon"
+                    style="color: black; text-decoration: none; padding: 0 5px;"
+                    @onclick="HandleInfoButtonClick" @* <-- Yerel metodu çağırır *@
+                    @onclick:stopPropagation="true">i</button> @* <-- Olay yayılımını durdurur *@
+
             <span class="icon status-icon @GetConnectionCssClass()"></span>
         </div>
     </div>
     <div class="card-body-web">
         <div class="status-line">
-            <span>@GetStatusText()</span>
+            <span class="status-text @GetStatusCssClass()">@GetStatusText()</span>
             @if (MachineStatus.IsInRecipeMode)
             {
                 <div class="progress-container">
                     <div class="progress-bar-web" style="width: @(MachineStatus.ProsesYuzdesi)%"></div>
                 </div>
-                <span>@MachineStatus.ProsesYuzdesi%</span>
+                <span style="color: black;">@MachineStatus.ProsesYuzdesi%</span>
             }
         </div>
         <div class="details-grid">
-            <span>REÇETE ADI:</span> <span>@MachineStatus.RecipeName</span>
-            <span>OPERATÖR:</span> <span>@MachineStatus.OperatorIsmi</span>
-            <span>ADIM:</span> <span>@($"{MachineStatus.AktifAdimNo} - {MachineStatus.AktifAdimAdi}")</span>
-            <span>MAKİNA ADI:</span> <span>@MachineStatus.MachineName</span>
-            <span>MAKİNA ID:</span> <span>@MachineStatus.SiparisNumarasi</span>
+            <span style="color: black;">REÇETE ADI:</span> <span style="color: black;">@MachineStatus.RecipeName ?? "-"</span>
+            <span style="color: black;">PARTİ NO:</span> <span style="color: black;">@MachineStatus.BatchNumarasi ?? "-"</span>
+            <span style="color: black;">SICAKLIK:</span> <span style="color: black;">@GetFormattedTemperature()°C</span>
+            <span style="color: black;">DEVİR (RPM):</span> <span style="color: black;">@MachineStatus.AnlikDevirRpm</span>
+            <span style="color: black;">ADIM:</span> <span style="color: black;">@($"{MachineStatus.AktifAdimNo} - {MachineStatus.AktifAdimAdi}")</span>
+            <span style="color: black;">OPERATÖR:</span> <span style="color: black;">@MachineStatus.OperatorIsmi ?? "-"</span>
         </div>
     </div>
 </div>
@@ -37,6 +47,21 @@
 @code {
     [Parameter]
     public FullMachineStatus MachineStatus { get; set; } = new();
+
+    // DÜZELTME: OnClick artık MouseEventArgs almalıdır (HTML uyumluluğu için).
+    [Parameter]
+    public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+    // DÜZELTME: OnInfoClick MachineId (int) argümanını bekler.
+    [Parameter]
+    public EventCallback<int> OnInfoClick { get; set; }
+
+    // YENİ METOT: 'i' butonuna tıklama olayını yakalar ve MachineId ile dışarı yollar.
+    private async Task HandleInfoButtonClick(MouseEventArgs args)
+    {
+        // OnInfoClick'i MachineId ile invoke eder.
+        await OnInfoClick.InvokeAsync(MachineStatus.MachineId);
+    }
 
     private string GetConnectionCssClass()
     {
@@ -53,7 +78,19 @@
         if (MachineStatus.ConnectionState != ConnectionStatus.Connected) return "BAĞLANTI YOK";
         if (MachineStatus.HasActiveAlarm) return $"ALARM: {MachineStatus.ActiveAlarmNumber}";
         if (MachineStatus.IsPaused) return "DURAKLATILDI";
-        if (MachineStatus.IsInRecipeMode) return "ÇALIŞIYOR";
+        if (MachineStatus.IsInRecipeMode) return $"ÇALIŞIYOR - ADIM {MachineStatus.AktifAdimNo}";
         return "DURUYOR";
+    }
+
+    private string GetStatusCssClass()
+    {
+        if (MachineStatus.HasActiveAlarm) return "status-alarm-text";
+        if (MachineStatus.IsInRecipeMode) return "status-running-text";
+        return "status-stopped-text";
+    }
+
+    private string GetFormattedTemperature()
+    {
+        return (MachineStatus.AnlikSicaklik / 10.0m).ToString("F1");
     }
 }

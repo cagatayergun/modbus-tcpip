@@ -28,7 +28,25 @@ namespace TekstilScada.WebAPI.Controllers
         [HttpGet("{id}/status")]
         public ActionResult<FullMachineStatus> GetMachineStatus(int id)
         {
-            return _pollingService.MachineDataCache.TryGetValue(id, out var status) ? Ok(status) : NotFound();
+            // 1. Canlı durumu Polling Cache'ten al.
+            if (!_pollingService.MachineDataCache.TryGetValue(id, out var status))
+            {
+                return NotFound();
+            }
+
+            // 2. MachineRepository'den makinenin statik detaylarını (MachineSubType) al.
+            var machineDetails = _machineRepository.GetAllMachines().FirstOrDefault(m => m.Id == id);
+
+
+            // 3. FullMachineStatus objesine MachineSubType bilgisini ekle.
+            // Bu bilgi, Dashboard'daki gruplama için kullanılır.
+            if (machineDetails != null)
+            {
+                // Machine objesindeki MachineSubType bilgisini FullMachineStatus objesinin MakineTipi alanına ata.
+                status.MakineTipi = machineDetails.MachineSubType;
+            }
+
+            return Ok(status);
         }
 
         // === YENİ METOTLAR ===

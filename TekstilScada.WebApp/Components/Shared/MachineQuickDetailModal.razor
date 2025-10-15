@@ -1,0 +1,139 @@
+﻿@using TekstilScada.Models
+@using TekstilScada.WebApp.Services
+@inject ScadaDataService ScadaService
+@implements IDisposable
+
+
+@if (Show)
+{
+    // Modal Arka Planı
+    <div class="modal fade show d-block" tabindex="-1" role="dialog" @onclick="Close">
+     
+        <div class="modal-dialog modal-lg" role="document" @onclick:stopPropagation="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@MachineStatus?.MachineName Anlık Detaylar</h5>
+                    <button type="button" class="close btn-close" @onclick="Close" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @if (MachineStatus == null)
+                    {
+                        <p>Makine verileri yükleniyor...</p>
+                    }
+                    else
+                    {
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Temel Bilgiler</h6>
+                                <p><strong>ID:</strong> @MachineId</p>
+                                <p><strong>Bağlantı Durumu:</strong> @MachineStatus.ConnectionState</p>
+                                <p><strong>Makine Tipi:</strong> @MachineStatus.MakineTipi</p>
+                                <p><strong>Operatör:</strong> @MachineStatus.OperatorIsmi ?? "-"</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Proses Bilgileri</h6>
+                                <p><strong>Reçete Adı:</strong> @MachineStatus.RecipeName ?? "-"</p>
+                                <p><strong>Parti No:</strong> @MachineStatus.BatchNumarasi ?? "-"</p>
+                                <p><strong>Aktif Adım:</strong> @MachineStatus.AktifAdimNo - @MachineStatus.AktifAdimAdi</p>
+                                <p><strong>Proses Yüzdesi:</strong> @MachineStatus.ProsesYuzdesi%</p>
+                            </div>
+                        </div>
+                        
+                        <hr />
+                        
+                        <h6>Anlık Değerler</h6>
+                        <div class="details-grid-extended">
+                            <div class="detail-item">
+                                <strong>Sıcaklık:</strong> 
+                                <span class="@GetTempCssClass()">@GetFormattedTemperature()°C</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Devir (RPM):</strong> 
+                                <span>@MachineStatus.AnlikDevirRpm RPM</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Su Seviyesi:</strong> 
+                                <span>@MachineStatus.AnlikSuSeviyesi</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Alarm Var:</strong> 
+                                <span class="@(MachineStatus.HasActiveAlarm ? "text-danger" : "text-success")">
+                                    @(MachineStatus.HasActiveAlarm ? $"EVET ({MachineStatus.ActiveAlarmNumber})" : "HAYIR")
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Çalışma Süresi:</strong> 
+                                <span>@MachineStatus.CalismaSuresiDakika dk</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="Close">Kapat</button>
+                    @if (MachineStatus != null)
+                    {
+                        @* Tam Detay Sayfasına Gitme butonu *@
+                        <button type="button" class="btn btn-primary" @onclick="NavigateToFullDetail">Tam Proses Kontrolü</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    [Parameter] public bool Show { get; set; }
+
+    // KRİTİK EKLEME: @bind-Show için gerekli parametre
+    [Parameter] public EventCallback<bool> ShowChanged { get; set; }
+
+    [Parameter] public int MachineId { get; set; }
+
+    // OnClose event'i (ek temizleme işlemleri için)
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    [Inject] public NavigationManager NavManager { get; set; } = default!;
+
+    private FullMachineStatus? MachineStatus => ScadaService.MachineData.ContainsKey(MachineId) ? ScadaService.MachineData[MachineId] : null;
+
+    protected override void OnInitialized()
+    {
+        // Anlık veri güncellemelerini dinle
+        ScadaService.OnDataUpdated += OnDataUpdatedHandler;
+    }
+
+    private void OnDataUpdatedHandler()
+    {
+        // YALNIZCA Modal açıksa ve ilgili makinenin verisi değişiyorsa UI'ı güncelle
+        if (Show && MachineId != 0)
+        {
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public void Dispose()
+    {
+        ScadaService.OnDataUpdated -= OnDataUpdatedHandler;
+    }
+
+    private string GetFormattedTemperature() => (MachineStatus?.AnlikSicaklik / 10.0m)?.ToString("F1") ?? "-";
+
+    private string GetTempCssClass() => MachineStatus?.AnlikSicaklik > 800 ? "text-danger" : "text-success"; // Örnek kural
+
+    private async Task Close()
+    {
+        // 1. Ebeveyn bileşene Modal'ın kapandığını bildirir (showDetailModal = false yapar)
+        await ShowChanged.InvokeAsync(false);
+
+        // 2. Ebeveyn bileşendeki ek temizleme/sıfırlama işlemini tetikler (HandleModalClose).
+        await OnClose.InvokeAsync();
+    }
+
+    private void NavigateToFullDetail()
+    {
+        // Modalı kapatıp ana detay sayfasına yönlendir
+        Close();
+        NavManager.NavigateTo($"/proseskontrol/{MachineId}");
+    }
+}

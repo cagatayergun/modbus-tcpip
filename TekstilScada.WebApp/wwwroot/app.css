@@ -280,6 +280,7 @@ html, body {
     border-radius: 8px;
     overflow: hidden; /* Baþlýk ve içeriði kapsamak için */
     border: 1px solid var(--group-color); /* Baþlýk renginde kenarlýk */
+    color: #000000 !important;
 }
 
 .group-title {
@@ -298,27 +299,36 @@ html, body {
     padding: 10px;
     overflow-x: auto; /* Yatay kaydýrma çubuðu */
     white-space: nowrap; /* Kartlarýn alt satýra geçmesini engelle */
+
 }
 
 /* Makine kartlarýnýn görünümü için (MachineCard.razor'a uyumlu) */
 .machine-card-web {
-    min-width: 250px;
-    max-width: 250px;
-    height: 180px; /* Sabit yükseklik */
+    /* Geniþliði 280px'ten 320px'e yükseltiyoruz */
+    width: 320px;
+    /* Yüksekliði 180px'ten 220px'e yükselterek daha fazla alan saðlýyoruz */
+    height: 280px;
+   
     display: inline-block;
     vertical-align: top;
     cursor: pointer;
     background-color: #4a627d; /* Hafif koyu arka plan */
-    color: white;
+    color: #000000 !important;
     border-radius: 6px;
     overflow: hidden;
     transition: transform 0.2s;
 }
 
-    .machine-card-web:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    }
+.machine-card-web span {
+    color: #000000 !important;
+
+}
+
+.machine-card-web:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+    
 
 /* GRAFÝK YER TUTUCULARI */
 .chart-box {
@@ -346,4 +356,120 @@ html, body {
     border-radius: 4px;
     font-size: 0.8rem;
     color: #95a5a6;
+}
+.dashboard-machine-card {
+    /* Genel kart görünümü */
+    color: #000000;
+    width: 280px;
+    height: 320px;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    cursor: pointer;
+    background-color: #f7f7f7;
+}
+
+    .dashboard-machine-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+.card-header-dashboard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.status-line-dashboard {
+    font-size: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.details-grid-dashboard {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    font-size: 12px;
+    gap: 2px;
+    margin-bottom: 10px;
+}
+
+.data-row {
+    display: flex;
+    justify-content: space-between;
+    text-align: center;
+}
+
+.data-kpi .label {
+    font-size: 11px;
+    color: #000000 !important;
+}
+
+.data-kpi .value {
+    font-size: 20px;
+    font-weight: bold;
+    color: #000000 !important;
+}
+
+/* Durum Renkleri (WinForms'tan alýnan renkler) */
+.status-alarm .status-text, .status-alarm .value {
+    color: #e74c3c !important;
+}
+/* Koyu Kýrmýzý */
+.status-running .status-text, .status-running .value {
+    color: #2ecc71 !important;
+}
+/* Zümrüt Yeþili */
+.status-stopped .status-text, .status-stopped .value {
+    color: #708090 !important;
+}
+/* Gri */
+
+
+.status-alarm .status-text, .status-alarm .value {
+    color: #e74c3c;
+}
+
+.status-running .status-text, .status-running .value {
+    color: #2ecc71;
+}
+
+.status-stopped .status-text, .status-stopped .value {
+    color: #708090;
+}
+
+.sparkline-placeholder {
+    margin-top: 10px;
+    padding: 5px;
+    background-color: #eee;
+    text-align: center;
+}
+/* DURUYOR (Siyah/Koyu Gri) */
+.status-stopped-text {
+    color: #000000 !important;
+    font-weight: bold;
+}
+
+/* ALARM (Kýrmýzý) */
+.status-alarm-text {
+    color: #e74c3c !important; /* Koyu Kýrmýzý (WinForms'tan alýnan renk) */
+    font-weight: bold;
+}
+
+/* ÇALIÞIYOR (Yeþil) */
+.status-running-text {
+    color: #2ecc71 !important; /* Zümrüt Yeþili (WinForms'tan alýnan renk) */
+    font-weight: bold;
 }

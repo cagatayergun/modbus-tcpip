@@ -1,0 +1,75 @@
+﻿@* Dosya: TekstilScada.WebApp/Components/Shared/DashboardMachineCard.razor *@
+@using TekstilScada.Models
+@using Microsoft.AspNetCore.Components.Web
+
+<div class="card dashboard-machine-card @GetStatusCssClass()"
+     @onclick="@OnClick">
+
+    <div class="card-header-dashboard">
+        <span class="machine-id">@MachineStatus.MachineId.</span>
+        <span class="machine-name">@MachineStatus.MachineName</span>
+        <div class="status-indicator @GetStatusCssClass()"></div>
+    </div>
+
+    <div class="card-body-dashboard">
+
+        <div class="status-line-dashboard">
+            <span class="status-text @GetStatusCssClass()">@GetStatusText()</span>
+            @if (MachineStatus.IsInRecipeMode)
+            {
+                <span class="step-info">Adım: @MachineStatus.AktifAdimNo</span>
+            }
+        </div>
+
+        <div class="details-grid-dashboard">
+            <span>REÇETE:</span> <span class="recipe-name">@MachineStatus.RecipeName  -</span>
+            <span>PARTİ NO:</span> <span class="batch-id">@MachineStatus.BatchNumarasi  -</span>
+        </div>
+
+        <div class="data-row">
+            <div class="data-kpi temp-kpi">
+                <div class="label">SICAKLIK</div>
+                <div class="value @GetStatusCssClass()">@GetFormattedTemperature()°C</div>
+            </div>
+            <div class="data-kpi rpm-kpi">
+                <div class="label">DEVİR (RPM)</div>
+                <div class="value">@MachineStatus.AnlikDevirRpm</div>
+            </div>
+        </div>
+
+        @* WinForms'taki Sparkline (Sıcaklık Trendi) için yer tutucu *@
+        <div class="sparkline-placeholder">
+            <small>Sıcaklık Trendi (Son 15 dk)</small>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public FullMachineStatus MachineStatus { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+    private string GetStatusText()
+    {
+        if (MachineStatus.ConnectionState != ConnectionStatus.Connected) return "BAĞLANTI YOK";
+        if (MachineStatus.HasActiveAlarm) return $"ALARM: {MachineStatus.ActiveAlarmNumber}";
+        if (MachineStatus.IsInRecipeMode) return "ÇALIŞIYOR";
+        return "DURUYOR";
+    }
+
+    private string GetStatusCssClass()
+    {
+        if (MachineStatus.HasActiveAlarm) return "status-alarm";
+        if (MachineStatus.IsInRecipeMode) return "status-running";
+        return "status-stopped";
+    }
+
+    // WinForms'taki gibi AnlikSicaklik değerini 10'a bölerek gösterir
+    private string GetFormattedTemperature()
+    {
+        return (MachineStatus.AnlikSicaklik / 10.0m).ToString("F1");
+    }
+}

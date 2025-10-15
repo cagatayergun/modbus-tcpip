@@ -3,60 +3,78 @@
 @* Gerekli sınıflara ve servislere erişim için using ve inject yönergeleri *@
 @using TekstilScada.Models
 @using TekstilScada.WebApp.Services
+@using TekstilScada.WebApp.Components.Shared
 @inject ScadaDataService ScadaDataService
+@inject NavigationManager NavManager 
 @implements IDisposable
+
+@* 1. Detay Modalını Sayfaya Ekle *@
+<MachineQuickDetailModal @bind-Show="showDetailModal" 
+                         MachineId="selectedMachineId" 
+                         OnClose="HandleModalClose" />
 
 <PageTitle>Genel Bakış</PageTitle>
 
 <h1>Genel Makine Durumu</h1>
 
-@* Eğer serviste henüz hiç makine verisi yoksa bu mesajı göster *@
 @if (ScadaDataService.MachineData.IsEmpty)
 {
-    <p><em>Makinelerden veri bekleniyor... (WebAPI projesinin çalıştığından emin olun)</em></p>
+    <p><em>Makinelerden veri bekleniyor... (WebAPI projesinin çalıştığından emin olun)</em></p>
 }
 else
 {
-    @* Veri varsa, machine-grid stilini kullanarak kartları sırala *@
-    <div class="machine-grid">
-        @*
-            ScadaDataService içindeki MachineData sözlüğündeki her bir makine için
-            döngü oluşturuyoruz. OrderBy ile kartların her zaman aynı sırada
-            görünmesini sağlıyoruz.
-        *@
-        @foreach (var machineStatus in ScadaDataService.MachineData.Values.OrderBy(m => m.MachineId))
-        {
-            @*
-                Daha önce oluşturduğumuz MachineCard bileşenini burada çağırıyoruz.
-                MachineStatus parametresine, döngüdeki mevcut makinenin durumunu atıyoruz.
-            *@
-            <MachineCard MachineStatus="machineStatus" />
-        }
-    </div>
+    <div class="machine-grid">
+        @foreach (var machineStatus in ScadaDataService.MachineData.Values.OrderBy(m => m.MachineId))
+        {
+            <MachineCard MachineStatus="machineStatus"
+                         @key="machineStatus.MachineId"
+                         @onclick="() => NavigateToDetail(machineStatus.MachineId)" 
+                         OnInfoClick="HandleInfoClick" /> @* <-- DÜZELTME: Artık doğrudan metodu bağlıyoruz *@
+        }
+    </div>
 }
 
 @code {
-    // Bu metot, sayfa ilk yüklendiğinde bir kez çalışır.
-    protected override void OnInitialized()
+    private bool showDetailModal = false;
+    private int selectedMachineId = 0;
+
+    protected override void OnInitialized()
+    {
+        ScadaDataService.OnDataUpdated += OnDataUpdatedHandler;
+    }
+
+    private void OnDataUpdatedHandler()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+    
+    // DÜZELTME: Bu metot artık doğrudan EventCallback<int>'ten çağrılıyor ve MachineId'yi alıyor.
+    private async Task HandleInfoClick(int machineId)
     {
-        // Veri güncellendiğinde artık doğrudan StateHasChanged'i değil,
-        // bizim yazdığımız OnDataUpdatedHandler metodunu çağırıyoruz.
-        ScadaDataService.OnDataUpdated += OnDataUpdatedHandler;
+        // Konsola log yazdırarak olayın tetiklendiğini kontrol edebilirsiniz.
+        Console.WriteLine($"Info button clicked for Machine ID: {machineId}");
+
+        selectedMachineId = machineId;
+        showDetailModal = true;
+        // UI güncellemesi Blazor tarafından otomatik yapılır.
+        await InvokeAsync(StateHasChanged); 
+    }
+    
+    private Task HandleModalClose()
+    {
+        showDetailModal = false;
+        selectedMachineId = 0;
+        return Task.CompletedTask;
+    }
+    
+    private void NavigateToDetail(int machineId)
+    {
+        // Kartın ana gövdesine tıklandığında çalışır.
+        NavManager.NavigateTo($"/proseskontrol/{machineId}");
     }
 
-    // Bu metot, SignalR'dan yeni bir veri geldiğinde çağrılacak.
-    private void OnDataUpdatedHandler()
-    {
-        // InvokeAsync, içindeki kodun arayüz iş parçacığında
-        // güvenli bir şekilde çalıştırılmasını sağlar.
-        // Bu sayede "The current thread is not associated with the Dispatcher" hatasını çözeriz.
-        InvokeAsync(StateHasChanged);
-    }
-
-    // Bu metot, kullanıcı sayfadan ayrıldığında çalışır.
-    public void Dispose()
-    {
-        // Aboneliği sonlandırıyoruz.
-        ScadaDataService.OnDataUpdated -= OnDataUpdatedHandler;
-    }
+    public void Dispose()
+    {
+        ScadaDataService.OnDataUpdated -= OnDataUpdatedHandler;
+    }
 }
