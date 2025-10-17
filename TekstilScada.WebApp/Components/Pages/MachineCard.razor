@@ -11,12 +11,13 @@
         <div class="icons">
             <span class="icon vnc-icon" style="color: black;">V</span>
 
-            @* KRİTİK DÜZELTME: OnInfoClick, HandleInfoButtonClick ile çağrılır *@
-            <button type="button"
+            <button type="button" 
                     class="btn btn-sm btn-link icon info-icon"
-                    style="color: black; text-decoration: none; padding: 0 5px;"
-                    @onclick="HandleInfoButtonClick" @* <-- Yerel metodu çağırır *@
-                    @onclick:stopPropagation="true">i</button> @* <-- Olay yayılımını durdurur *@
+                    style="color: black; text-decoration: none; padding: 0 5px;" 
+                    @onclick="HandleInfoButtonClick"
+                    @onclick:stopPropagation="true">i
+            </button>
+            
 
             <span class="icon status-icon @GetConnectionCssClass()"></span>
         </div>
@@ -45,6 +46,12 @@
 
 
 @code {
+    [Parameter] public Action<int>? OnInfoClickAction { get; set; } // Yeni parametre
+
+    private void HandleInfoButtonClick()
+    {
+        OnInfoClickAction?.Invoke(MachineStatus.MachineId); // Invoke ile doğrudan çağır.
+    }
     [Parameter]
     public FullMachineStatus MachineStatus { get; set; } = new();
 

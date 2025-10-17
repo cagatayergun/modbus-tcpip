@@ -1,4 +1,4 @@
-﻿// Dosya: TekstilScada.WebApp/Services/ScadaDataService.cs (SON DÜZELTİLMİŞ VE GÜÇLENDİRİLMİŞ SÜRÜM)
+﻿// Dosya: TekstilScada.WebApp/Services/ScadaDataService.cs (SON KARARLI SÜRÜM)
 
 using Microsoft.AspNetCore.SignalR.Client;
 using System.Collections.Concurrent;
@@ -40,17 +40,14 @@ public class HourlyOeeData
 
 namespace TekstilScada.WebApp.Services
 {
-    // IAsyncDisposable arayüzünü uyguluyoruz
+    // KRİTİK GÜNCELLEME: IAsyncDisposable arayüzünü uyguluyoruz
     public class ScadaDataService : IAsyncDisposable
     {
         private HubConnection? _hubConnection;
         private readonly HttpClient _httpClient;
-        // _isInitialized bayrağı artık sadece kontrol için değil, durum için kullanılacak.
-        // SignalR bağlantısının durumunu doğrudan kontrol etmek daha güvenlidir.
-        // private bool _isInitialized = false; 
 
         public ConcurrentDictionary<int, FullMachineStatus> MachineData { get; private set; } = new();
-        // YENİ ALAN: Makine SubType bilgisini (grup adı) tutmak için statik önbellek
+        // Dashboard için grup bilgisi önbelleği
         public ConcurrentDictionary<int, Machine> MachineDetailsCache { get; private set; } = new();
 
         public event Action? OnDataUpdated;
@@ -60,7 +57,7 @@ namespace TekstilScada.WebApp.Services
             _httpClient = httpClient;
         }
 
-        // KRİTİK GÜNCELLEME: InitializeAsync metodunu yeniden düzenliyoruz.
+        // KRİTİK GÜNCELLEME: InitializeAsync metodunda agresif temizlik
         public async Task InitializeAsync()
         {
             // 1. Zaten bağlıysa hiçbir şey yapma.
@@ -69,28 +66,25 @@ namespace TekstilScada.WebApp.Services
                 return;
             }
 
-            // 2. Bir bağlantı varsa ancak sağlıklı değilse (Disconnected, Connecting, vb.),
-            //    onu agresifçe temizle ve sıfırla.
+            // 2. Bir bağlantı varsa ancak sağlıklı değilse, onu agresifçe temizle ve sıfırla.
             if (_hubConnection != null)
             {
-                Console.WriteLine("Mevcut, ancak sağlıklı olmayan bir SignalR bağlantısı temizleniyor...");
                 try
                 {
-                    // Bu, otomatik yeniden bağlanmayı durdurur ve kaynakları serbest bırakır.
+                    // Bağlantıyı durdur ve kaynakları serbest bırak.
                     await _hubConnection.StopAsync();
                     await _hubConnection.DisposeAsync();
                 }
                 catch { /* Hataları yut */ }
 
-                // CRITICAL: Referansı sıfırla
-                _hubConnection = null;
+                _hubConnection = null; // CRITICAL: Referansı sıfırla
             }
 
             // 3. Yeni ve temiz bir HubConnection örneği oluştur.
             var hubUrl = new Uri(_httpClient.BaseAddress!, "/scadaHub");
             _hubConnection = new HubConnectionBuilder()
                 .WithUrl(hubUrl)
-                .WithAutomaticReconnect() // Blazor Server'ın devre kopuşlarında değil, ağ kopuşlarında yeniden bağlanmaya çalışır
+                .WithAutomaticReconnect()
                 .Build();
 
             // 4. Event handler'ı ayarla.
@@ -112,10 +106,9 @@ namespace TekstilScada.WebApp.Services
             }
         }
 
-        // KRİTİK METOT: Blazor devresi kapandığında veya servis atıldığında çağrılır.
+        // KRİTİK METOT: IAsyncDisposable uygulaması (Çöküşleri ve refresh hatalarını çözer)
         public async ValueTask DisposeAsync()
         {
-            // Bağlantı nesnesini yerel bir değişkene al.
             var hub = _hubConnection;
             _hubConnection = null; // CRITICAL: Referansı hemen null yap.
 
@@ -123,20 +116,17 @@ namespace TekstilScada.WebApp.Services
             {
                 try
                 {
-                    // Bağlantıyı durdur.
+                    // Bağlantıyı durdur ve kaynakları serbest bırak.
                     await hub.StopAsync();
-                    // Kaynakları serbest bırak.
                     await hub.DisposeAsync();
                     Console.WriteLine("SignalR bağlantısı güvenle kapatıldı ve atıldı.");
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"SignalR Dispose Hatası: {ex.Message}");
-                }
+                catch { /* Hataları yut */ }
             }
         }
 
-        // --- Diğer Metotlar (Aynı Bırakılmıştır) ---
+        // --- Diğer Metotlar (Aynı Kalır) ---
+
         public async Task<List<Machine>?> GetMachinesAsync()
         {
             try
@@ -144,7 +134,6 @@ namespace TekstilScada.WebApp.Services
                 var machines = await _httpClient.GetFromJsonAsync<List<Machine>>("api/machines");
                 if (machines != null)
                 {
-                    // Önbelleği temizle ve statik detayları doldur.
                     MachineDetailsCache.Clear();
                     foreach (var m in machines)
                     {
@@ -252,7 +241,6 @@ namespace TekstilScada.WebApp.Services
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"API Hatası (Alarm Raporu): {response.StatusCode}");
-                Console.WriteLine($"Hata Detayı: {errorContent}");
                 return new List<AlarmReportItem>();
             }
 
@@ -267,12 +255,12 @@ namespace TekstilScada.WebApp.Services
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"API Hatası (OEE Raporu): {response.StatusCode}");
-                Console.WriteLine($"Hata Detayı: {errorContent}");
                 return new List<OeeData>();
             }
 
             return await response.Content.ReadFromJsonAsync<List<OeeData>>();
         }
+
         public async Task<List<object>?> GetTrendDataAsync(ReportFilters filters)
         {
             var response = await _httpClient.PostAsJsonAsync("api/reports/trend", filters);
@@ -286,6 +274,7 @@ namespace TekstilScada.WebApp.Services
 
             return await response.Content.ReadFromJsonAsync<List<object>>();
         }
+
         public async Task<List<ProductionReportItem>?> GetRecipeConsumptionHistoryAsync(int recipeId)
         {
             try
@@ -312,12 +301,12 @@ namespace TekstilScada.WebApp.Services
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"API Hatası (Manuel Tüketim): {response.StatusCode}");
-                Console.WriteLine($"Hata Detayı: {errorContent}");
                 return null;
             }
 
             return await response.Content.ReadFromJsonAsync<ManualConsumptionSummary>();
         }
+
         public async Task<ConsumptionTotals?> GetConsumptionTotalsAsync(ReportFilters filters)
         {
             var response = await _httpClient.PostAsJsonAsync("api/reports/consumption-totals", filters);
@@ -331,7 +320,6 @@ namespace TekstilScada.WebApp.Services
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"API Hatası (Genel Tüketim): {response.StatusCode}");
-                Console.WriteLine($"Hata Detayı: {errorContent}");
                 return null;
             }
 
@@ -346,12 +334,12 @@ namespace TekstilScada.WebApp.Services
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"API Hatası (Genel Detaylı Tüketim): {response.StatusCode}");
-                Console.WriteLine($"Hata Detayı: {errorContent}");
                 return null;
             }
 
             return await response.Content.ReadFromJsonAsync<List<ProductionReportItem>>();
         }
+
         public async Task<List<TekstilScada.Core.Models.ActionLogEntry>?> GetActionLogsAsync(ActionLogFilters filters)
         {
             var response = await _httpClient.PostAsJsonAsync("api/reports/action-logs", filters);
@@ -360,7 +348,6 @@ namespace TekstilScada.WebApp.Services
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"API Hatası (Eylem Kayıtları): {response.StatusCode}");
-                Console.WriteLine($"Hata Detayı: {errorContent}");
                 return new List<TekstilScada.Core.Models.ActionLogEntry>();
             }
 
@@ -380,7 +367,6 @@ namespace TekstilScada.WebApp.Services
             }
         }
 
-
         public async Task<List<HourlyOeeData>?> GetHourlyOeeAsync()
         {
             try
@@ -394,7 +380,6 @@ namespace TekstilScada.WebApp.Services
             }
         }
 
-
         public async Task<List<TopAlarmData>?> GetTopAlarmsAsync()
         {
             try
@@ -407,6 +392,5 @@ namespace TekstilScada.WebApp.Services
                 return null;
             }
         }
-
     }
 }

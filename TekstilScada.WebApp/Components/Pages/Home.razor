@@ -1,16 +1,15 @@
 ﻿@page "/proses-izleme"
 
-@* Gerekli sınıflara ve servislere erişim için using ve inject yönergeleri *@
 @using TekstilScada.Models
 @using TekstilScada.WebApp.Services
 @using TekstilScada.WebApp.Components.Shared
 @inject ScadaDataService ScadaDataService
-@inject NavigationManager NavManager 
+@inject NavigationManager NavManager
 @implements IDisposable
 
 @* 1. Detay Modalını Sayfaya Ekle *@
-<MachineQuickDetailModal @bind-Show="showDetailModal" 
-                         MachineId="selectedMachineId" 
+<MachineQuickDetailModal @bind-Show="showDetailModal"
+                         MachineId="selectedMachineId"
                          OnClose="HandleModalClose" />
 
 <PageTitle>Genel Bakış</PageTitle>
@@ -19,62 +18,59 @@
 
 @if (ScadaDataService.MachineData.IsEmpty)
 {
-    <p><em>Makinelerden veri bekleniyor... (WebAPI projesinin çalıştığından emin olun)</em></p>
+    <p><em>Makinelerden veri bekleniyor... (WebAPI projesinin çalıştığından emin olun)</em></p>
 }
 else
 {
-    <div class="machine-grid">
-        @foreach (var machineStatus in ScadaDataService.MachineData.Values.OrderBy(m => m.MachineId))
-        {
-            <MachineCard MachineStatus="machineStatus"
+    <div class="machine-grid">
+        @foreach (var machineStatus in ScadaDataService.MachineData.Values.OrderBy(m => m.MachineId))
+        {
+            <MachineCard MachineStatus="machineStatus"
                          @key="machineStatus.MachineId"
-                         @onclick="() => NavigateToDetail(machineStatus.MachineId)" 
-                         OnInfoClick="HandleInfoClick" /> @* <-- DÜZELTME: Artık doğrudan metodu bağlıyoruz *@
-        }
-    </div>
+                         @onclick="() => NavigateToDetail(machineStatus.MachineId)"
+                         OnInfoClickAction="(id) => HandleInfoClickAction(id)" /> @* <-- DÜZELTME: Yeni Action parametresi kullanıldı *@
+        }
+    </div>
 }
 
 @code {
     private bool showDetailModal = false;
     private int selectedMachineId = 0;
 
-    protected override void OnInitialized()
-    {
-        ScadaDataService.OnDataUpdated += OnDataUpdatedHandler;
-    }
-
-    private void OnDataUpdatedHandler()
-    {
-        InvokeAsync(StateHasChanged);
-    }
-    
-    // DÜZELTME: Bu metot artık doğrudan EventCallback<int>'ten çağrılıyor ve MachineId'yi alıyor.
-    private async Task HandleInfoClick(int machineId)
+    protected override void OnInitialized()
     {
-        // Konsola log yazdırarak olayın tetiklendiğini kontrol edebilirsiniz.
-        Console.WriteLine($"Info button clicked for Machine ID: {machineId}");
+        ScadaDataService.OnDataUpdated += OnDataUpdatedHandler;
+    }
 
+    private void OnDataUpdatedHandler()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    // YENİ METOT: Action delegate'e karşılık gelir (Action olduğu için async/Task değil, void olmalıdır)
+    private void HandleInfoClickAction(int machineId)
+    {
         selectedMachineId = machineId;
         showDetailModal = true;
-        // UI güncellemesi Blazor tarafından otomatik yapılır.
-        await InvokeAsync(StateHasChanged); 
+
+        // Action metotları doğrudan UI thread'inde çalışır, bu yüzden InvokeAsync yeterlidir.
+        InvokeAsync(StateHasChanged);
     }
-    
+
     private Task HandleModalClose()
     {
         showDetailModal = false;
         selectedMachineId = 0;
         return Task.CompletedTask;
     }
-    
+
     private void NavigateToDetail(int machineId)
     {
-        // Kartın ana gövdesine tıklandığında çalışır.
         NavManager.NavigateTo($"/proseskontrol/{machineId}");
     }
 
-    public void Dispose()
-    {
-        ScadaDataService.OnDataUpdated -= OnDataUpdatedHandler;
-    }
+    public void Dispose()
+    {
+        ScadaDataService.OnDataUpdated -= OnDataUpdatedHandler;
+    }
 }
