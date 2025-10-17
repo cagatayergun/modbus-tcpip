@@ -44,13 +44,13 @@ namespace TekstilScada.Services
         private readonly ConcurrentDictionary<int, DateTime> _batchStartTimes;
         private readonly ConcurrentDictionary<int, double> _batchNonProductiveSeconds;
 
-        public PlcPollingService(AlarmRepository alarmRepository, ProcessLogRepository processLogRepository, ProductionRepository productionRepository, RecipeRepository recipeRepository)
+        public PlcPollingService(AlarmRepository alarmRepository, ProcessLogRepository processLogRepository, ProductionRepository productionRepository, RecipeRepository recipeRepository,MachineRepository machineRepository)
         {
             _alarmRepository = alarmRepository;
             _processLogRepository = processLogRepository;
             _productionRepository = productionRepository;
             _recipeRepository = recipeRepository;
-
+            _machinerepository = machineRepository;
             _plcManagers = new ConcurrentDictionary<int, IPlcManager>();
             MachineDataCache = new ConcurrentDictionary<int, FullMachineStatus>();
             _reconnectAttempts = new ConcurrentDictionary<int, DateTime>();

@@ -60,45 +60,19 @@ namespace TekstilScada.WebApp.Services
         // KRİTİK GÜNCELLEME: InitializeAsync metodunda agresif temizlik
         public async Task InitializeAsync()
         {
-            // 1. Zaten bağlıysa hiçbir şey yapma.
-            if (_hubConnection?.State == HubConnectionState.Connected)
-            {
-                return;
-            }
-
-            // 2. Bir bağlantı varsa ancak sağlıklı değilse, onu agresifçe temizle ve sıfırla.
-            if (_hubConnection != null)
-            {
-                try
-                {
-                    // Bağlantıyı durdur ve kaynakları serbest bırak.
-                    await _hubConnection.StopAsync();
-                    await _hubConnection.DisposeAsync();
-                }
-                catch { /* Hataları yut */ }
-
-                _hubConnection = null; // CRITICAL: Referansı sıfırla
-            }
-
-            // 3. Yeni ve temiz bir HubConnection örneği oluştur.
             var hubUrl = new Uri(_httpClient.BaseAddress!, "/scadaHub");
             _hubConnection = new HubConnectionBuilder()
                 .WithUrl(hubUrl)
                 .WithAutomaticReconnect()
                 .Build();
-
-            // 4. Event handler'ı ayarla.
             _hubConnection.On<FullMachineStatus>("ReceiveMachineUpdate", (status) =>
             {
                 MachineData[status.MachineId] = status;
                 OnDataUpdated?.Invoke();
             });
-
-            // 5. Bağlantıyı başlat.
             try
             {
                 await _hubConnection.StartAsync();
-                Console.WriteLine("SignalR bağlantısı başarıyla kuruldu/yeniden kuruldu.");
             }
             catch (Exception ex)
             {
