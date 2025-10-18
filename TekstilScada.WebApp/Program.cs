@@ -1,5 +1,6 @@
 // Dosya: TekstilScada.WebApp/Program.cs
 
+using Microsoft.AspNetCore.Components.Server.Circuits;
 using TekstilScada.WebApp.Components;
 using TekstilScada.WebApp.Services;
 
@@ -36,7 +37,8 @@ builder.Services.AddSingleton(sp =>
 });
 
 // --- YAPILANDIRMA SONU ---
-
+builder.Services.AddScoped<CircuitHandler, UnhandledCircuitExceptionHandler>();
+builder.Services.AddLogging(); // Logger kullanmak için gerekli (zaten olabilir)
 
 var app = builder.Build();
 
@@ -57,5 +59,34 @@ app.MapRazorComponents<App>()
 // Uygulama baþlarken ScadaDataService'i baþlatýyoruz.
 var scadaDataService = app.Services.GetRequiredService<ScadaDataService>();
 await scadaDataService.InitializeAsync();
+// *** KRÝTÝK ADIM: Blazor Server Devre Hata Ýþleyicisini Ekliyoruz ***
+var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
 
+// CircuitHost için Logger tanýmlýyoruz
+var circuitLogger = loggerFactory.CreateLogger("CircuitLogger");
+
+// Uygulamanýn en sonunda, tüm Blazor hatalarýný yakala
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next(context);
+    }
+    catch (Exception ex)
+    {
+        // Yalnýzca /_blazor (Blazor Circuit) yolunda oluþan hatalarý yakalamaya odaklan
+        if (context.Request.Path.StartsWithSegments("/_blazor"))
+        {
+            // Detaylý hatayý sunucu konsoluna yazdýr
+            circuitLogger.LogError(ex, ">>> KRÝTÝK BLZOR DEVRE HATASI YAKALANDI! <<<");
+
+            // Kullanýcýya genel bir hata mesajý gönder, böylece uygulama donmaz
+            context.Response.ContentType = "text/plain";
+            context.Response.StatusCode = 500;
+            await context.Response.WriteAsync("Blazor devre hatasý: Sunucu baðlantýsý kesildi. Detaylar için sunucu loglarýna bakýn.");
+            return;
+        }
+        throw; // Diðer HTTP hatalarýný normal þekilde fýrlat
+    }
+});
 app.Run();

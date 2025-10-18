@@ -3,7 +3,7 @@
 @using Microsoft.AspNetCore.Components.Web
 
 <div class="card dashboard-machine-card @GetStatusCssClass()"
-     @onclick="@OnClick">
+     @onclick="HandleClick">
 
     <div class="card-header-dashboard">
         <span class="machine-id">@MachineStatus.MachineId.</span>
@@ -71,5 +71,17 @@
     private string GetFormattedTemperature()
     {
         return (MachineStatus.AnlikSicaklik / 10.0m).ToString("F1");
+    }
+    private async Task HandleClick(MouseEventArgs e)
+    {
+        // OnClick EventCallback'in atanıp atanmadığını kontrol etme zorunluluğu yoktur,
+        // ancak bazen Blazor Circuit crash'lerini önler.
+        // Yine de, asıl amacımız buraya bir breakpoint koyarak hatayı yakalamaktır.
+
+        // **BURAYA BIR KESME NOKTASI (BREAKPOINT) KOYUN!**
+        if (OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync(e);
+        }
     }
 }

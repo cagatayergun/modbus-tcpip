@@ -76,6 +76,7 @@ namespace TekstilScada.WebApp.Services
             }
             catch (Exception ex)
             {
+                _hubConnection = null;
                 Console.WriteLine($"SignalR bağlantı hatası: {ex.Message}");
             }
         }

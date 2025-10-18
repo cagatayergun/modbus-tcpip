@@ -264,12 +264,21 @@
 
     private void HandleDataUpdate()
     {
-        // YENİ: Bileşen atılma sürecindeyse veya atılmışsa işlemi durdur.
-        if (_isDisposed) return;
+        // KRİTİK DÜZELTME: Devre çöküşünü engellemek için try-catch ekle
+        try
+        {
+            if (_isDisposed) return;
 
-        UpdateDashboardData();
-        // UI güncellemesi için Blazor'a sinyal gönderir.
-        InvokeAsync(StateHasChanged);
+            UpdateDashboardData();
+            // UI güncellemesi için Blazor'a sinyal gönderir.
+            InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            // Bu, kilitlenmeyi durdurur ve size asıl hatayı konsolda gösterir.
+            Console.WriteLine($"!!! KRİTİK VERİ GÜNCELLEME HATASI (Devre Çökmesi Engellendi): {ex.Message}");
+            // Hata ayıklama modunda buraya bir kesme noktası (breakpoint) koyun!
+        }
     }
 
     private void NavigateToDetail(int machineId)

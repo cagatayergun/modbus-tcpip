@@ -182,7 +182,7 @@ namespace TekstilScada.Services
                             }
 
                             ProcessLiveStepAnalysis(machine.Id, newStatus);
-                            CheckAndLogBatchStartAndEnd(machine.Id, newStatus);
+                            await CheckAndLogBatchStartAndEnd(machine.Id, newStatus);
                             CheckAndLogAlarms(machine.Id, newStatus);
                             status = newStatus;
 
@@ -244,7 +244,7 @@ namespace TekstilScada.Services
             return stepTypes.Any() ? string.Join(" + ", stepTypes) : "Waiting...";
         }
 
-        private async void CheckAndLogBatchStartAndEnd(int machineId, FullMachineStatus currentStatus)
+        private async Task CheckAndLogBatchStartAndEnd(int machineId, FullMachineStatus currentStatus)
         {
             _currentBatches.TryGetValue(machineId, out string lastTrackedBatchId);
 
@@ -339,21 +339,35 @@ namespace TekstilScada.Services
 
                 if (_plcManagers.TryGetValue(machineId, out var plcManager))
                 {
-                    Task.Run(async () => {
-                        var summaryResult = await plcManager.ReadBatchSummaryDataAsync();
-                        if (summaryResult.IsSuccess)
+                    // Hatanın çökmemesi için görevi Task.Run ile başlatıyoruz.
+                    Task.Run(async () =>
+                    {
+                        try // <-- EKLENDİ: Hata yakalama bloğu
                         {
-                            _productionRepository.UpdateBatchSummary(machineId, lastTrackedBatchId, summaryResult.Content);
+                            var summaryResult = await plcManager.ReadBatchSummaryDataAsync();
+                            if (summaryResult.IsSuccess)
+                            {
+                                _productionRepository.UpdateBatchSummary(machineId, lastTrackedBatchId, summaryResult.Content);
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Parti özeti okunamadı ({lastTrackedBatchId}): {summaryResult.Message}");
+                            }
+
+                            // Bu operasyonlar kritik olabilir, sırayla ve güvenle çalıştırılmalı.
+                            await plcManager.IncrementProductionCounterAsync();
+                            await plcManager.ResetOeeCountersAsync();
                         }
-                        else
+                        catch (Exception ex) // <-- EKLENDİ: Hata yakalama
                         {
-                            Console.WriteLine($"Summary data could not be read for batch {lastTrackedBatchId}: {summaryResult.Message}");
+                            // Hatanın detayını loglayarak uygulamanın çökmesini engelliyoruz.
+                            Console.WriteLine($"FATAL ERROR during batch finalization for machine {machineId}, batch {lastTrackedBatchId}: {ex.Message}");
+                            // Buraya daha gelişmiş bir loglama mekanizması (Serilog, NLog vb.) ekleyebilirsiniz.
                         }
-                        await plcManager.IncrementProductionCounterAsync();
-                        await plcManager.ResetOeeCountersAsync();
                     });
                 }
             }
+            
         }
         private void HandleDisconnection(int machineId)
         {
