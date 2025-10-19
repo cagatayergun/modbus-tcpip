@@ -69,7 +69,7 @@ public class ReportsController : ControllerBase
     private readonly UserRepository _userRepository;
 
     // Constructor güncellenmeli
-    public ReportsController(ProductionRepository productionRepository, AlarmRepository alarmRepository, ProcessLogRepository processLogRepository,MachineRepository machineRepository,DashboardRepository dashboardRepository,UserRepository userRepository)
+    public ReportsController(ProductionRepository productionRepository, AlarmRepository alarmRepository, ProcessLogRepository processLogRepository, MachineRepository machineRepository, DashboardRepository dashboardRepository, UserRepository userRepository)
     {
         _productionRepository = productionRepository;
         _alarmRepository = alarmRepository;
@@ -214,7 +214,7 @@ public class ReportsController : ControllerBase
             return StatusCode(500, $"Manuel tüketim raporu oluşturulurken bir hata oluştu: {ex.Message}");
         }
         // YENİ METOT: Genel Tüketim Toplamları
-       
+
 
     }
     [HttpPost("consumption-totals")]

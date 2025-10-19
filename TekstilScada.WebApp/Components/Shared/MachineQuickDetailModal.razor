@@ -105,10 +105,20 @@
 
     private void OnDataUpdatedHandler()
     {
-        // YALNIZCA Modal açıksa ve ilgili makinenin verisi değişiyorsa UI'ı güncelle
-        if (Show && MachineId != 0)
+        // KRİTİK DÜZELTME: Bu metodun unhandled exception fırlatmasını engeller.
+        try
         {
-            InvokeAsync(StateHasChanged);
+            // YALNIZCA Modal açıksa ve ilgili makinenin verisi değişiyorsa UI'ı güncelle
+            if (Show && MachineId != 0)
+            {
+                InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Bu, devrenin çökmesini engeller.
+            Console.WriteLine($"!!! KRİTİK MODAL VERİ GÜNCELLEME HATASI: {ex.Message}");
+            // Hata Ayıklayıcıyı (Debugger) açıp buraya bir KESME NOKTASI (BREAKPOINT) koyun.
         }
     }
 
