@@ -473,3 +473,118 @@ html, body {
     color: #2ecc71 !important; /* Zümrüt Yeþili (WinForms'tan alýnan renk) */
     font-weight: bold;
 }
+/* Makine Detay Sayfasý Stilleri */
+
+.status-card {
+    transition: all 0.3s ease;
+    border-left: 5px solid;
+}
+
+    .status-card .card-title {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    .status-card .status-text {
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+/* Baðlantý Durumu */
+.connected {
+    border-color: #28a745;
+}
+    /* Yeþil */
+    .connected .status-text {
+        color: #28a745;
+    }
+
+.connecting {
+    border-color: #ffc107;
+}
+    /* Sarý */
+    .connecting .status-text {
+        color: #ffc107;
+    }
+
+.disconnected {
+    border-color: #dc3545;
+}
+    /* Kýrmýzý */
+    .disconnected .status-text {
+        color: #dc3545;
+    }
+
+/* Proses Durumu */
+.running {
+    border-color: #17a2b8;
+}
+    /* Mavi */
+    .running .status-text {
+        color: #17a2b8;
+    }
+
+.paused {
+    border-color: #ffc107;
+}
+    /* Sarý */
+    .paused .status-text {
+        color: #ffc107;
+    }
+
+.stopped {
+    border-color: #6c757d;
+}
+    /* Gri */
+    .stopped .status-text {
+        color: #6c757d;
+    }
+
+.manual {
+    border-color: #007bff;
+}
+    /* Açýk Mavi */
+    .manual .status-text {
+        color: #007bff;
+    }
+
+
+/* Alarm Durumu */
+.alarm-active {
+    border-color: #dc3545;
+    background-color: #f8d7da; /* Açýk kýrmýzý arka plan */
+    animation: pulse-red 1s infinite;
+}
+
+    .alarm-active .status-text {
+        color: #dc3545;
+        font-weight: 700;
+    }
+
+.alarm-clear {
+    border-color: #28a745;
+}
+
+/* Animasyon */
+@keyframes pulse-red {
+    0% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+    }
+}
+
+/* List group için detay stili */
+.list-group-item:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.list-group-item span {
+    font-weight: 600;
+}

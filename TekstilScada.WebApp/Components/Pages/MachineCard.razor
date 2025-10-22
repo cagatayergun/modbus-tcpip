@@ -2,9 +2,9 @@
 
 @using TekstilScada.Models
 @using Microsoft.AspNetCore.Components.Web
+@inject NavigationManager NavigationManager
 
-
-<div class="card machine-card-web @GetConnectionCssClass()" @onclick="@OnClick">
+<div class="card machine-card-web @GetConnectionCssClass()" @onclick="@NavigateToDetail">
     <div class="card-header-web">
         <span class="machine-number" style="color: black;">@MachineStatus.MachineId.</span>
         <span class="machine-name-web" style="color: black;">@MachineStatus.MachineName</span>
@@ -100,5 +100,10 @@
     private string GetFormattedTemperature()
     {
         return (MachineStatus.AnlikSicaklik / 10.0m).ToString("F1");
+    }
+    private void NavigateToDetail()
+    {
+        // Makine detay sayfasına yönlendirme
+        NavigationManager.NavigateTo($"/makine-detay/{MachineStatus.MachineId}");
     }
 }

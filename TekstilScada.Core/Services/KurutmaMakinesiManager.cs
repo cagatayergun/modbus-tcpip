@@ -398,7 +398,7 @@ namespace TekstilScada.Services
                 var controlWordAddress = await Task.Run(() => _plcClient.ReadInt16("5"));
                 if (!controlWordAddress.IsSuccess) return OperateResult.CreateFailedResult<short[]>(controlWordAddress);
                 // Return the read values in a standard array format
-                short[] recipeData = new short[5];
+                short[] recipeData = new short[6];
                 recipeData[0] = tempResult.Content;
                 recipeData[1] = humidityResult.Content;
                 recipeData[2] = durationResult.Content;

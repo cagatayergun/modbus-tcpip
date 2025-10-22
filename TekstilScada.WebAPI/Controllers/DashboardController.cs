@@ -8,6 +8,7 @@ using System.Linq; // ZORUNLU: AsEnumerable() ve Select() için
 using TekstilScada.Models;
 using TekstilScada.Repositories;
 using TekstilScada.WebAPI.Controllers; // YENİ: ReportFiltersDto için eklendi (Namespace'ler farklıysa gereklidir)
+using static System.Convert;
 public class HourlyConsumptionData
 {
     public double Saat { get; set; }
@@ -71,11 +72,10 @@ namespace TekstilScada.WebAPI.Controllers
 
                 var result = hourlyData.AsEnumerable().Select(row => new HourlyConsumptionData
                 {
-                    // DÜZELTME: Field<T> yerine Field<T?> kullanılarak null değerler güvenli bir şekilde ele alınıyor.
-                    Saat = row.Field<double?>("Saat") ?? 0.0,
-                    ToplamElektrik = row.Field<double?>("ToplamElektrik") ?? 0.0,
-                    ToplamSu = row.Field<double?>("ToplamSu") ?? 0.0,
-                    ToplamBuhar = row.Field<double?>("ToplamBuhar") ?? 0.0
+                    Saat = ToDouble(row.Field<object>("Saat") ?? 0),
+                    ToplamElektrik = ToDouble(row.Field<object>("ToplamElektrik") ?? 0),
+                    ToplamSu = ToDouble(row.Field<object>("ToplamSu") ?? 0),
+                    ToplamBuhar = ToDouble(row.Field<object>("ToplamBuhar") ?? 0)
                 }).ToList();
 
                 return Ok(result);
@@ -97,9 +97,9 @@ namespace TekstilScada.WebAPI.Controllers
 
                 var result = hourlyData.AsEnumerable().Select(row => new HourlyOeeData
                 {
-                    // DÜZELTME: Field<T> yerine Field<T?> kullanılıyor.
-                    Saat = row.Field<double?>("Saat") ?? 0.0,
-                    AverageOEE = row.Field<double?>("AverageOEE") ?? 0.0
+                    // KRİTİK DÜZELTME: Güvenli dönüşüm için Convert.ToDouble kullanıldı.
+                    Saat = ToDouble(row.Field<object>("Saat") ?? 0),
+                    AverageOEE = ToDouble(row.Field<object>("AverageOEE") ?? 0)
                 }).ToList();
 
                 return Ok(result);

@@ -18,27 +18,66 @@
     <div class="recipe-list-panel">
         <h4>Kayıtlı Reçeteler</h4>
         <div class="recipe-actions">
-            <button class="btn btn-success btn-sm" @onclick="AddNewRecipe">Yeni</button>
+            <button class="btn btn-success btn-sm" @onclick="AddNewRecipe" disabled="@(isBusy || selectedMachine == null)">Yeni</button>
             <button class="btn btn-danger btn-sm" @onclick="DeleteSelectedRecipe" disabled="@(selectedRecipe == null || isBusy)">Sil</button>
+            <button class="btn btn-secondary btn-sm" @onclick="LoadRecipes" disabled="@isBusy">Yenile</button>
         </div>
-        @if (recipes == null)
+
+        @if (isBusy && recipes == null)
         {
-            <p><em>Yükleniyor...</em></p>
+            <p><em>@statusMessage</em></p>
+        }
+        else if (recipes == null)
+        {
+            <p><em>Reçeteler yüklenemedi.</em></p>
         }
         else
         {
             <div class="list-group" style="max-height: 500px; overflow-y: auto;">
-                @foreach (var recipe in recipes)
+                @* Filtrelenmiş reçete listesi (Başlangıçta tüm reçeteler görünür) *@
+                @foreach (var recipe in filteredRecipes)
+
                 {
-                    <button type="button" class="list-group-item list-group-item-action @(selectedRecipe?.Id == recipe.Id ? "active" : "")"
-                            @onclick="() => SelectRecipe(recipe.Id)">
-                        @recipe.RecipeName
-                    </button>
-                }
+                    <button type="button" class="list-group-item list-group-item-action @(selectedRecipe?.Id == recipe.Id ?
+                                           "active" : "")"
+                    @onclick="() => SelectRecipe(recipe.Id, isFromList: true)">
+                @recipe.RecipeName
+            </button>
+                        }
+
             </div>
         }
     </div>
+
+    @* --- KRİTİK ALAN: Makine Seçimi ve Reçete Adı (selectedRecipe'den BAĞIMSIZ) --- *@
     <div class="recipe-details-panel">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Hedef Makine:</label>
+                <select class="form-select" @bind="SelectedMachineId">
+                    <option value="0">Makine Seçiniz</option>
+                    @if (machines != null)
+                    {
+                        foreach (var machine in machines)
+                        {
+                            <option value="@machine.Id">@machine.MachineName - (@(GetMachineFilterType(machine)))</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            @* Reçete Adı alanı: Null-safe binding ile NRE hatası çözüldü *@
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Reçete Adı:</label>
+                <input class="form-control"
+                       value="@(selectedRecipe?.RecipeName ?? string.Empty)"
+                       @onchange="@(e => { if (selectedRecipe != null) selectedRecipe.RecipeName = e.Value?.ToString() ?? string.Empty; })"
+                       disabled="@(selectedRecipe == null)" />
+            </div>
+        </div>
+
+        <hr />
+
         @if (isBusy)
         {
             <div class="alert alert-info">@statusMessage</div>
@@ -49,36 +88,29 @@
         }
         else
         {
+            @* --- BUTONLAR VE EDİTÖR (Sadece selectedRecipe varken görünür) --- *@
             <div class="d-flex justify-content-between align-items-center">
                 <h4>Reçete Detayları</h4>
                 <div class="recipe-actions">
-                    <button class="btn btn-primary" @onclick="SaveCurrentRecipe">Kaydet</button>
-                    <button class="btn btn-info" @onclick="SendToPlc">PLC'ye Gönder</button>
-                    <button class="btn btn-secondary" @onclick="ReadFromPlc">PLC'den Oku</button>
-                    <button class="btn btn-warning" @onclick="() => showFtpModal = true" disabled="@(selectedMachine == null)">FTP Senk.</button>
+                    <button class="btn btn-primary" @onclick="SaveCurrentRecipe" disabled="@isBusy">Kaydet</button>
+
+                    <button class="btn btn-info" @onclick="SendToPlc" disabled="@(isBusy || SelectedMachineId == 0)">PLC'ye Gönder</button>
+                    <button class="btn btn-secondary" @onclick="ReadFromPlc" disabled="@(isBusy || SelectedMachineId == 0)">PLC'den Oku</button>
+                    <button class="btn btn-warning" @onclick="() => showFtpModal = true" disabled="@(isBusy || SelectedMachineId == 0 || string.IsNullOrEmpty(selectedMachine?.FtpUsername))">FTP Senk.</button>
                 </div>
+
             </div>
             <hr />
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">Reçete Adı:</label>
-                    <input class="form-control" @bind="selectedRecipe.RecipeName" />
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">Hedef Makine:</label>
-                    @* --- DEĞİŞİKLİK BURADA --- *@
-                    <select class="form-select" @bind="SelectedMachineId">
-                        @if (machines != null)
-                        {
-                            foreach (var machine in machines)
-                            {
-                                <option value="@machine.Id">@machine.MachineName</option>
-                            }
-                        }
-                    </select>
-                </div>
-            </div>
 
+            @* Uyumsuzluk Kontrolü *@
+            @if (selectedMachine != null && selectedRecipe.TargetMachineType != GetMachineFilterType(selectedMachine))
+            {
+                <div class="alert alert-danger">
+                    Seçili reçete tipi (**@selectedRecipe.TargetMachineType**) makine tipiyle (**@GetMachineFilterType(selectedMachine)**) **eşleşmiyor**. Lütfen bu reçeteyi bu makineye göndermeden önce dikkat edin.
+                </div>
+            }
+
+            @* EDİTÖR ALANI *@
             @if (selectedMachine?.MachineType == "Kurutma Makinesi")
             {
                 <KurutmaReceteEditor Recipe="selectedRecipe" OnChanged="StateHasChanged" />
@@ -97,6 +129,7 @@
                             }
                         </ul>
                     </div>
+
                     <div class="recipe-details-panel">
                         @if (selectedStep == null)
                         {
@@ -114,25 +147,38 @@
 </div>
 
 @code {
-    private List<ScadaRecipe>? recipes;
+    private List<ScadaRecipe>?
+ recipes;
+    private List<ScadaRecipe> filteredRecipes = new();
     private List<Machine>? machines;
-    private ScadaRecipe? selectedRecipe;
+    private ScadaRecipe? selectedRecipe; // Sayfa açılışında null
     private ScadaRecipeStep? selectedStep;
-    private int selectedMachineId;
+    private int selectedMachineId; // Sayfa açılışında 0
     private bool isBusy = false;
     private string statusMessage = string.Empty;
     private bool showFtpModal = false;
 
-    // --- DEĞİŞİKLİK BURADA ---
-    private Machine? selectedMachine;
+    private Machine?
+ selectedMachine;
+
+    private string GetMachineFilterType(Machine? machine)
+    {
+        if (machine == null) return string.Empty;
+        return string.IsNullOrEmpty(machine.MachineSubType) ? machine.MachineType : machine.MachineSubType;
+    }
 
     private int SelectedMachineId
     {
         get => selectedMachineId;
         set
         {
+            if (selectedMachineId == value) return;
+
             selectedMachineId = value;
             selectedMachine = machines?.FirstOrDefault(m => m.Id == value);
+
+            // Makine değiştiğinde, reçete listesini filtrele. Otomatik seçim, filtreleme mantığı içinde yapılacak.
+            FilterRecipesByMachine(autoSelectFirst: false); // FALSE: Sadece filtrele, ilkini seçme
         }
     }
 
@@ -140,46 +186,296 @@
     {
         isBusy = true;
         statusMessage = "Bileşenler yükleniyor...";
-        recipes = await ScadaDataService.GetRecipesAsync();
+
+        // 1. Makineler yükleniyor (selectedMachineId = 0 olarak kalır)
+        await LoadMachines();
+
+        // 2. Reçeteler yükleniyor
+        await LoadRecipes();
+        isBusy = false;
+
+        // 3. İlk filtrelemeyi yap. Sayfa boş açılsın diye selectedRecipe = null
+        selectedRecipe = null;
+        selectedStep = null;
+
+        // Tüm reçeteleri göster (makine seçimi 0 olduğu için)
+        FilterRecipesByMachine(autoSelectFirst: false);
+
+        StateHasChanged();
+    }
+
+    private async Task LoadMachines()
+    {
         machines = await ScadaDataService.GetMachinesAsync();
         if (machines != null && machines.Any())
         {
-            // SelectedMachineId'yi ayarladığımızda, selectedMachine de otomatik güncellenecek.
-            SelectedMachineId = machines.First().Id;
+            // İlk yüklemede, varsayılan makine seçilmeyecek, sadece listeyi dolduracağız.
+            // selectedMachineId = 0 olarak kalır.
         }
+        else
+        {
+            selectedMachineId = 0;
+            selectedMachine = null;
+        }
+    }
+
+    private async Task LoadRecipes()
+    {
+        isBusy = true;
+        recipes = await ScadaDataService.GetRecipesAsync();
         isBusy = false;
+    }
+
+    private void FilterRecipesByMachine(bool autoSelectFirst = false)
+    {
+        // Filtrelemeden önce her zaman mevcut seçimi temizle
+        selectedRecipe = null;
+        selectedStep = null;
+
+        // 0. Hiç makine seçilmediyse, tüm reçeteleri göster (filtresiz)
+        if (SelectedMachineId == 0 || machines == null || recipes == null)
+        {
+            filteredRecipes = recipes ?? new List<ScadaRecipe>();
+            StateHasChanged();
+            return;
+        }
+
+        var machine = machines.FirstOrDefault(m => m.Id == SelectedMachineId);
+        if (machine == null)
+        {
+            filteredRecipes = recipes;
+            StateHasChanged();
+            return;
+        }
+
+        // 1. Makineye göre filtrele
+        string filterType = GetMachineFilterType(machine);
+
+        filteredRecipes = recipes.Where(r => r.TargetMachineType == filterType).ToList();
+
+        // 2. İsteğe bağlı olarak ilk reçeteyi seç (Yani makineyi seçtiğinde, reçete varsa detaylar gelsin)
+        if (autoSelectFirst && filteredRecipes.Any())
+        {
+            var firstRecipe = filteredRecipes.First();
+            selectedRecipe = firstRecipe;
+        }
+
+        StateHasChanged();
     }
 
     private void AddNewRecipe()
     {
         selectedStep = null;
-        selectedRecipe = new ScadaRecipe { RecipeName = "YENİ REÇETE" };
-        int stepCount = (selectedMachine?.MachineType == "Kurutma Makinesi") ? 1 : 98;
+        if (selectedMachine == null)
+        {
+            statusMessage = "Lütfen önce hedef makineyi seçin.";
+            return;
+        }
+
+        string targetType = GetMachineFilterType(selectedMachine);
+
+        selectedRecipe = new ScadaRecipe
+        {
+            RecipeName = "YENİ REÇETE",
+            TargetMachineType = targetType
+        };
+
+        int stepCount = (selectedMachine?.MachineType == "Kurutma Makinesi") ?
+ 1 : 98;
 
         selectedRecipe.Steps.Clear();
         for (int i = 1; i <= stepCount; i++)
         {
-            selectedRecipe.Steps.Add(new ScadaRecipeStep { StepNumber = i });
+            selectedRecipe.Steps.Add(new ScadaRecipeStep { StepNumber = i, StepDataWords = new short[25] });
         }
+        statusMessage = "Yeni reçete oluşturuldu.";
+        StateHasChanged();
     }
 
     private void RefreshStepList() => StateHasChanged();
 
-    private async Task LoadRecipes() { recipes = await ScadaDataService.GetRecipesAsync(); }
-
-    private async Task SelectRecipe(int recipeId)
+    private async Task SelectRecipe(int recipeId, bool isFromList = false)
     {
+        if (selectedRecipe?.Id == recipeId && isFromList) return;
+
         isBusy = true;
         statusMessage = "Reçete detayları yükleniyor...";
         selectedStep = null;
+
         selectedRecipe = await ScadaDataService.GetRecipeDetailsAsync(recipeId);
+
         isBusy = false;
+
+        if (selectedRecipe != null && selectedMachine != null)
+        {
+            selectedRecipe.TargetMachineType = GetMachineFilterType(selectedMachine);
+        }
+
+        StateHasChanged();
     }
 
-    private async Task SaveCurrentRecipe() { /* ... önceki yanıttaki kod ... */ }
-    private async Task DeleteSelectedRecipe() { /* ... önceki yanıttaki kod ... */ }
-    private async Task SendToPlc() { /* ... önceki yanıttaki kod ... */ }
-    private async Task ReadFromPlc() { /* ... önceki yanıttaki kod ... */ }
+    private async Task SaveCurrentRecipe()
+    {
+        if (selectedRecipe == null) return;
+        if (string.IsNullOrWhiteSpace(selectedRecipe.RecipeName))
+        {
+            statusMessage = "Reçete adı boş olamaz.";
+            return;
+        }
+
+        if (selectedMachine != null && selectedRecipe.TargetMachineType != GetMachineFilterType(selectedMachine))
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"HATA: Reçete tipi ({selectedRecipe.TargetMachineType}) seçili makine tipiyle ({GetMachineFilterType(selectedMachine)}) eşleşmiyor. Lütfen yeni bir reçete oluşturun veya makine tipini değiştirin.");
+            return;
+        }
+
+        isBusy = true;
+        statusMessage = "Reçete kaydediliyor...";
+        StateHasChanged();
+
+        try
+        {
+            var savedRecipe = await ScadaDataService.SaveRecipeAsync(selectedRecipe);
+            if (savedRecipe != null)
+            {
+                selectedRecipe = savedRecipe;
+                await LoadRecipes();
+                FilterRecipesByMachine(autoSelectFirst: false);
+                statusMessage = "Reçete başarıyla kaydedildi.";
+                await JSRuntime.InvokeVoidAsync("alert", "Reçete başarıyla kaydedildi.");
+            }
+            else
+            {
+                statusMessage = "Kaydetme başarısız oldu. API hatası.";
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Kaydetme sırasında hata: {ex.Message}";
+        }
+        finally
+        {
+            isBusy = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task DeleteSelectedRecipe()
+    {
+        if (selectedRecipe == null) return;
+
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"'{selectedRecipe.RecipeName}' reçetesini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.");
+
+        if (!confirmed) return;
+
+        isBusy = true;
+        statusMessage = "Reçete siliniyor...";
+        StateHasChanged();
+
+        try
+        {
+            bool success = await ScadaDataService.DeleteRecipeAsync(selectedRecipe.Id);
+
+            if (success)
+            {
+                selectedRecipe = null;
+                selectedStep = null;
+                await LoadRecipes();
+                FilterRecipesByMachine(autoSelectFirst: true);
+                statusMessage = "Reçete başarıyla silindi.";
+                await JSRuntime.InvokeVoidAsync("alert", "Reçete başarıyla silindi.");
+            }
+            else
+            {
+                statusMessage = "Silme başarısız oldu. API hatası.";
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Silme sırasında hata: {ex.Message}";
+        }
+        finally
+        {
+            isBusy = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SendToPlc()
+    {
+        if (selectedRecipe == null || selectedMachine == null) return;
+
+        isBusy = true;
+        statusMessage = $"Reçete '{selectedMachine.MachineName}' makinesine gönderiliyor...";
+        StateHasChanged();
+
+        try
+        {
+            bool success = await ScadaDataService.SendRecipeToPlcAsync(selectedRecipe.Id, selectedMachine.Id);
+
+            if (success)
+            {
+                statusMessage = $"Reçete başarıyla '{selectedMachine.MachineName}' makinesine gönderildi.";
+                await JSRuntime.InvokeVoidAsync("alert", statusMessage);
+            }
+            else
+            {
+                statusMessage = "PLC/FTP'ye gönderme başarısız oldu. API/Bağlantı hatası.";
+                await JSRuntime.InvokeVoidAsync("alert", statusMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Gönderme sırasında hata: {ex.Message}";
+            await JSRuntime.InvokeVoidAsync("alert", statusMessage);
+        }
+        finally
+        {
+            isBusy = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ReadFromPlc()
+    {
+        if (selectedMachine == null) return;
+
+        isBusy = true;
+        statusMessage = $"Reçete '{selectedMachine.MachineName}' makinesinden okunuyor...";
+        selectedRecipe = null;
+        StateHasChanged();
+
+        try
+        {
+            var recipeFromPlc = await ScadaDataService.ReadRecipeFromPlcAsync(selectedMachine.Id);
+
+            if (recipeFromPlc != null)
+            {
+                recipeFromPlc.RecipeName = $"PLC_{selectedMachine.MachineUserDefinedId}_{DateTime.Now:HHmm}";
+                recipeFromPlc.TargetMachineType = GetMachineFilterType(selectedMachine);
+                selectedRecipe = recipeFromPlc;
+                selectedStep = null;
+                statusMessage = $"Reçete makineden başarıyla okundu. Yeni bir isim verip kaydedin.";
+                await JSRuntime.InvokeVoidAsync("alert", statusMessage);
+            }
+            else
+            {
+                statusMessage = "PLC'den okuma başarısız oldu. Bağlantı/PLC hatası.";
+                await JSRuntime.InvokeVoidAsync("alert", statusMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Okuma sırasında hata: {ex.Message}";
+            await JSRuntime.InvokeVoidAsync("alert", statusMessage);
+        }
+        finally
+        {
+            isBusy = false;
+            StateHasChanged();
+        }
+    }
+
 
     private string GetStepTypeName(ScadaRecipeStep step)
     {
