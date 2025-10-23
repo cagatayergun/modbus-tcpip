@@ -35,12 +35,12 @@
             }
         </div>
         <div class="details-grid">
-            <span style="color: black;">REÇETE ADI:</span> <span style="color: black;">@MachineStatus.RecipeName ?? "-"</span>
-            <span style="color: black;">PARTİ NO:</span> <span style="color: black;">@MachineStatus.BatchNumarasi ?? "-"</span>
+            <span style="color: black;">REÇETE ADI:</span> <span style="color: black;">@MachineStatus.RecipeName </span>
+            <span style="color: black;">PARTİ NO:</span> <span style="color: black;">@MachineStatus.BatchNumarasi </span>
             <span style="color: black;">SICAKLIK:</span> <span style="color: black;">@GetFormattedTemperature()°C</span>
             <span style="color: black;">DEVİR (RPM):</span> <span style="color: black;">@MachineStatus.AnlikDevirRpm</span>
             <span style="color: black;">ADIM:</span> <span style="color: black;">@($"{MachineStatus.AktifAdimNo} - {MachineStatus.AktifAdimAdi}")</span>
-            <span style="color: black;">OPERATÖR:</span> <span style="color: black;">@MachineStatus.OperatorIsmi ?? "-"</span>
+            <span style="color: black;">OPERATÖR:</span> <span style="color: black;">@MachineStatus.OperatorIsmi </span>
         </div>
     </div>
 </div>

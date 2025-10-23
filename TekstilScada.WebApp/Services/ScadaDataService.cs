@@ -35,9 +35,22 @@ public class HourlyOeeData
     public double Saat { get; set; }
     public double AverageOEE { get; set; }
 }
-
+public class ReportFilters1
+{
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
+    public int? MachineId { get; set; } // Tek makine filtresi için
+   // public List<int>? MachineIds { get; set; } // KRİTİK DÜZELTME: Sparkline için gerekli alan
+}
 // TekstilScada.Models.TopAlarmData'nın kullanıldığı varsayılmıştır.
-
+public class JsReadyTrendDataPoint
+{
+    public DateTime Timestamp { get; set; }
+    public double TimestampOADate { get; set; } // KRİTİK EKLENTİ
+    public double Temperature { get; set; } // JS tarafında ondalık sorunu yaşamamak için
+    public double Rpm { get; set; }
+    public double WaterLevel { get; set; }
+}
 namespace TekstilScada.WebApp.Services
 {
     // KRİTİK GÜNCELLEME: IAsyncDisposable arayüzünü uyguluyoruz
@@ -366,6 +379,31 @@ namespace TekstilScada.WebApp.Services
                 Console.WriteLine($"Popüler alarmlar alınamadı: {ex.Message}");
                 return null;
             }
+        }
+        public async Task<List<object>?> GetTemperatureSparklineAsync(TimeSpan duration)
+        {
+            // Tüm makinelerin ortalama trend verisini almak için tüm MachineId'leri kullan.
+            var allMachineIds = MachineDetailsCache.Keys.ToList();
+
+            var filters = new ReportFilters1
+            {
+                StartTime = DateTime.Now.Subtract(duration),
+                EndTime = DateTime.Now.AddMinutes(1),
+
+            };
+            
+            // Mevcut Trend API'sini kullanıyoruz. API'nin ortalama/birleşik veriyi döndürmesi beklenir.
+            var response = await _httpClient.PostAsJsonAsync("api/reports/trend", filters);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"API Hatası (Sparkline Trend Raporu): {response.StatusCode}");
+                return null;
+            }
+
+            // Gelen ham veriyi (List<object>) döndür, dönüşümü Dashboard.razor'da yapacağız.
+            return await response.Content.ReadFromJsonAsync<List<object>>();
         }
     }
 }

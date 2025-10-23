@@ -221,10 +221,11 @@ html, body {
 
 .sidebar-charts-column {
     flex-shrink: 0;
-    width: 350px; /* Sidebar Geniþliði */
+    width: 500px; /* Sidebar Geniþliði */
+    /* Grafiklerin bulunduðu sütun */
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px; /* Kutular arasýnda boþluk býrakýr */
 }
 
 /* KPI KARTLARI */
@@ -332,10 +333,12 @@ html, body {
 /* GRAFÝK YER TUTUCULARI */
 .chart-box {
     background-color: #34495e; /* Grup iç paneli ile ayný renk */
+    border: 1px solid #ddd;
     border-radius: 8px;
     padding: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    height: 200px; /* Grafik yüksekliði */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    height: 300px; /* Grafik yüksekliði */
+
 }
 
 .chart-title {
@@ -587,4 +590,36 @@ html, body {
 
 .list-group-item span {
     font-weight: 600;
+}
+/* app.css veya custom dashboard stil dosyanýz */
+
+.chart-wrapper {
+    /* Grafiðin kapsayýcýsýnýn esnek alanda tam geniþlik almasýný saðlar */
+    width: 100%;
+    height: 100%;
+}
+
+.sparkline-box {
+    height: 140px; /* Chart box'tan daha kýsa */
+}
+
+/* Sparkline'ýn içindeki div'in sabit yükseklik almasýný saðlar */
+.sparkline-wrapper {
+    height: 80px !important; /* JS'deki height: 80 ayarýyla eþleþmeli */
+    width: 100% !important;
+}
+
+.chart-wrapper1 {
+    /* Grafiðin kapsayýcýsýnýn esnek alanda tam geniþlik almasýný saðlar */
+    width: 100%;
+    height: 100%;
+}
+.chart-box1 {
+    background-color: #34495e; /* Grup iç paneli ile ayný renk */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    height: 100px; /* Grafik yüksekliði */
+    width: 100px;
 }

@@ -84,6 +84,239 @@
         Plotly.newPlot(chartId, [trace], layout, { responsive: true });
     }
 </script>
+<script>
+   
+
+    // Blazor'dan gelen ÜÇ SERİLİ veriyi alan ve Plotly ile grafiği çizen fonksiyon
+    function plotTrendChart1(chartId, dataPoints, title) {
+        if (!dataPoints || dataPoints.length === 0) {
+            console.log("Grafik çizmek için veri yok.");
+            Plotly.purge(chartId);
+            return;
+        }
+         const timestamps = dataPoints.map(p => p.timestamp);
+    
+        // 1. Veri Hazırlama: TimestampOADate'i Date objesine çeviriyoruz.
+        const xTime = timestamps;
+        const yTemp = dataPoints.map(d => d.temperature);
+        const yRpm = dataPoints.map(d => d.rpm);
+        const yWater = dataPoints.map(d => d.waterLevel);
+
+        // 2. Grafik Serileri (Traces)
+        const traceTemp = {
+            x: xTime,
+            y: yTemp,
+            name: 'Sıcaklık (°C)',
+            type: 'scatter',
+            mode: 'lines',
+            line: { color: 'red' },
+            yaxis: 'y1'
+        };
+
+        const traceRpm = {
+            x: xTime,
+            y: yRpm,
+            name: 'Devir (RPM)',
+            type: 'scatter',
+            mode: 'lines',
+            line: { color: 'blue' },
+            yaxis: 'y2'
+        };
+
+        const traceWater = {
+            x: xTime,
+            y: yWater,
+            name: 'Su Seviyesi',
+            type: 'scatter',
+            mode: 'lines',
+            line: { color: 'green' },
+            yaxis: 'y3'
+        };
+
+        // 3. Grafik Düzeni (Layout)
+        const layout = {
+            title: title || 'Canlı Proses Trend Grafiği',
+            xaxis: {
+                title: 'Zaman Damgası',
+                type: 'timestamps', // Artık Plotly'ye Date objeleri gönderdiğimiz için bu doğru çalışacaktır.
+                tickformat: '%Y-%m-%d\n%H:%M:%S' // Zaman formatını göster
+            },
+            yaxis: {
+                title: 'Sıcaklık (°C)',
+                showgrid: true,
+                zeroline: true,
+                side: 'left',
+                automargin: true,
+            },
+            yaxis2: {
+                title: 'Devir (RPM)',
+                overlaying: 'y',
+                side: 'right',
+                showgrid: false,
+                zeroline: false,
+                automargin: true,
+                position: 0.98, // Devir ekseni pozisyonu (sağdan 2%)
+            },
+            yaxis3: {
+                title: 'Su Seviyesi',
+                overlaying: 'y',
+                side: 'right',
+                position: 0.90, // Su seviyesi ekseni pozisyonu (sağdan 10%)
+                showgrid: false,
+                zeroline: false,
+                automargin: true,
+            },
+            margin: { r: 0, b: 0 } // Sağ ve alt kenar boşluklarını artır
+        };
+
+        Plotly.newPlot(chartId, [traceTemp, traceRpm, traceWater], layout, { responsive: true });
+    }
+        // Bu fonksiyonu App.razor veya sitenizdeki bir JS dosyasına ekleyin
+
+    function plotDashboardCharts(hourlyOeeData, hourlyConsumptionData, topAlarmsData) {
+        if (!Plotly) {
+            console.error("Plotly kütüphanesi yüklenmedi.");
+            return;
+        }
+
+        // 1. OEE Grafiği (Bar Chart)
+        const plotOee = () => {
+            const containerId = 'oeeChartContainer';
+            const data = hourlyOeeData.map(d => ({ hour: d.saat, oee: d.averageOEE }));
+
+            if (data.length === 0) return Plotly.purge(containerId);
+
+            const trace = {
+                x: data.map(d => `${d.hour}:00`),
+                y: data.map(d => d.oee),
+                type: 'bar',
+                marker: { color: 'rgba(46, 204, 113, 0.8)' }, // kpi-success rengi
+                name: 'Ortalama OEE (%)'
+            };
+
+            const layout = {
+              
+                xaxis: { title: 'Saat', tickangle: 45 },
+                yaxis: { title: 'OEE (%)', range: [0, 100] },
+                margin: { t: 30, b: 0, l: 0, r: 0 },
+                height: 250 // Dashboard görünümüne uygun yükseklik
+                
+            };
+
+            Plotly.newPlot(containerId, [trace], layout, { displayModeBar: false, responsive: true });
+        };
+
+        // 2. Tüketim Grafikleri (Bar Chart - Gruplandırılmış)
+        const plotConsumption = (containerId, consumptionKey, title, unit, color) => {
+            const data = hourlyConsumptionData;
+
+            if (data.length === 0) return Plotly.purge(containerId);
+
+            // consumptionKey'i kullanarak ilgili tüketim değerini al
+            const values = data.map(d => d[consumptionKey]);
+
+            const trace = {
+                x: data.map(d => `${d.saat}:00`),
+                y: values,
+                type: 'bar',
+                marker: { color: color },
+                name: title
+            };
+
+            const layout = {
+                title: title,
+                xaxis: { title: 'Saat', tickangle: 45 },
+                yaxis: { title: unit, automargin: true },
+                 margin: { t: 30, b: 0, l: 0, r: 0 },
+                height: 250
+            };
+
+            Plotly.newPlot(containerId, [trace], layout, { displayModeBar: false, responsive: true });
+        };
+
+        // 3. En Sık Alarmlar Grafiği (Yatay Bar Chart)
+        const plotTopAlarms = () => {
+            const containerId = 'topAlarmsChartContainer';
+            const data = topAlarmsData.sort((a, b) => a.count - b.count).slice(-5); // En çok tekrar eden 5 alarm
+
+            if (data.length === 0) return Plotly.purge(containerId);
+
+            const trace = {
+                x: data.map(d => d.count),
+                y: data.map(d => d.alarmText.length > 20 ? d.alarmText.substring(0, 17) + '...' : d.alarmText), // Uzun isimleri kısalt
+                type: 'bar',
+                orientation: 'h', // Yatay bar
+                marker: { color: 'rgba(231, 76, 60, 0.8)' }, // kpi-danger rengi
+                name: 'Tekrar Sayısı'
+            };
+
+            const layout = {
+               
+                xaxis: { title: 'Tekrar Sayısı', automargin: true },
+                yaxis: { automargin: true },
+                margin: { t: 30, b: 40, l: 150, r: 0 }, // Solda alarm isimleri için geniş boşluk
+                height: 250
+            };
+
+            Plotly.newPlot(containerId, [trace], layout, { displayModeBar: false, responsive: true });
+        };
+
+
+        // Tüm grafikleri çağır
+        plotOee();
+        plotConsumption('electricChartContainer', 'toplamElektrik', '', 'kWh', '#3498db');
+        plotConsumption('waterChartContainer', 'toplamSu', '', 'Litre', '#2c3e50');
+        plotConsumption('steamChartContainer', 'toplamBuhar', '', 'kg', '#9b59b6');
+        plotTopAlarms();
+    }
+        function plotTemperatureSparkline(containerId, dataPoints) {
+        const container = document.getElementById(containerId);
+        if (!container || !dataPoints || dataPoints.length === 0) {
+            Plotly.purge(containerId);
+            return;
+        }
+
+        // Veri dönüşümü: Sadece TimestampOADate ve Temperature kullanıyoruz
+        const xTime = dataPoints.map(d => oaDateToDate(d.timestampOADate));
+        const yTemp = dataPoints.map(d => d.temperature);
+
+        const trace = {
+            x: xTime,
+            y: yTemp,
+            mode: 'lines',
+            type: 'scatter',
+            line: { color: 'orange', width: 2.5 },
+            hoverinfo: 'x+y' // Sadece değerleri göster
+        };
+
+        const layout = {
+            // Sparkline özellikleri:
+            xaxis: {
+                visible: false, // Eksen etiketlerini gizle
+                showgrid: false,
+                zeroline: false,
+                type: 'date'
+            },
+            yaxis: {
+                visible: false, // Eksen etiketlerini gizle
+                showgrid: false,
+                zeroline: false,
+                range: [Math.min(...yTemp) * 0.95, Math.max(...yTemp) * 1.05] // Değerlere göre küçük bir tamponla ölçeklendir
+            },
+            margin: { t: 0, b: 0, l: 0, r: 0 }, // Kenar boşluklarını kaldır (KRİTİK)
+            height: 80, // Sparkline için düşük yükseklik
+            showlegend: false
+        };
+
+        const config = {
+            displayModeBar: false, // Menü çubuğunu gizle
+            responsive: true
+        };
+
+        Plotly.newPlot(containerId, [trace], layout, config);
+    }
+</script>
+
 <body>
     <Routes @rendermode="InteractiveServer" />
     <script src="_framework/blazor.web.js"></script>

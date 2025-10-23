@@ -5,6 +5,7 @@
 @using TekstilScada.WebApp.Components.Shared
 @inject ScadaDataService ScadaService
 @inject NavigationManager NavManager
+
 @implements IDisposable
 
 <div class="dashboard-container">
@@ -52,91 +53,55 @@
 
             <div class="sidebar-charts-column">
 
-                @* WinForms'taki gbHourlyOee'ye karşılık gelir (24 Saatlik OEE) *@
+             
                 <div class="chart-box">
                     <div class="chart-title">24 SAATLİK OEE GRAFİĞİ</div>
-                    <div class="chart-placeholder">
-                        @if (HourlyOeeData.Any())
-                        {
-                            <p>OEE Değerleri:</p>
-                            <ul style="max-height: 100px; overflow-y: auto;">
-                                @foreach (var data in HourlyOeeData)
-                                {
-                                    <li>@data.Saat:00: @data.AverageOEE.ToString("F1")%</li>
-                                }
-                            </ul>
-                        }
-                        else
+                    <div id="oeeChartContainer" class="chart-wrapper">
+                        @if (!HourlyOeeData.Any())
                         {
                             <span>Veri yok veya yükleniyor.</span>
                         }
                     </div>
                 </div>
 
-                @* WinForms'taki formsPlotHourly'ye karşılık gelir (Saatlik Elektrik Tüketimi) *@
+           
                 <div class="chart-box">
                     <div class="chart-title">SAATLİK ELEKTRİK TÜKETİMİ</div>
-                    <div class="chart-placeholder">
-                        @if (HourlyConsumptionData.Any())
-                        {
-                            <p>Toplam Elektrik: @HourlyConsumptionData.Sum(d => d.ToplamElektrik).ToString("N0")</p>
-                            <small>Saate göre dağılım verisi placeholder.</small>
-                        }
-                        else
+                    <div id="electricChartContainer" class="chart-wrapper">
+                        @if (!HourlyConsumptionData.Any())
                         {
                             <span>Veri yok veya yükleniyor.</span>
                         }
                     </div>
                 </div>
 
-                @* WinForms'taki formsPlotHourlyWater'a karşılık gelir (Saatlik Su Tüketimi) *@
+               
                 <div class="chart-box">
                     <div class="chart-title">SAATLİK SU TÜKETİMİ</div>
-                    <div class="chart-placeholder">
-                        @if (HourlyConsumptionData.Any())
-                        {
-                            <p>Toplam Su: @HourlyConsumptionData.Sum(d => d.ToplamSu).ToString("N0")</p>
-                            <small>Saate göre dağılım verisi placeholder.</small>
-                        }
-                        else
+                    <div id="waterChartContainer" class="chart-wrapper">
+                        @if (!HourlyConsumptionData.Any())
                         {
                             <span>Veri yok veya yükleniyor.</span>
                         }
                     </div>
                 </div>
 
-                @* WinForms'taki formsPlotHourlySteam'e karşılık gelir (Saatlik Buhar Tüketimi) *@
+          
                 <div class="chart-box">
                     <div class="chart-title">SAATLİK BUHAR TÜKETİMİ</div>
-                    <div class="chart-placeholder">
-                        @if (HourlyConsumptionData.Any())
-                        {
-                            <p>Toplam Buhar: @HourlyConsumptionData.Sum(d => d.ToplamBuhar).ToString("N0")</p>
-                            <small>Saate göre dağılım verisi placeholder.</small>
-                        }
-                        else
+                    <div id="steamChartContainer" class="chart-wrapper">
+                        @if (!HourlyConsumptionData.Any())
                         {
                             <span>Veri yok veya yükleniyor.</span>
                         }
                     </div>
                 </div>
 
-
-                @* WinForms'taki formsPlotTopAlarms'a karşılık gelir (En Sık Alarmlar) *@
+               
                 <div class="chart-box">
                     <div class="chart-title">EN SIK ALARMLAR</div>
-                    <div class="chart-placeholder">
-                        @if (TopAlarms.Any())
-                        {
-                            <p>En Sık 3 Alarm:</p>
-                            <ul style="text-align: left; margin: auto; list-style: none;">
-                                @foreach (var alarm in TopAlarms.OrderByDescending(a => a.Count).Take(3))
-                                {
-                                    <li>- @alarm.AlarmText (@alarm.Count)</li>
-                                }
-                            </ul>
-                        }
-                        else
+                    <div id="topAlarmsChartContainer" class="chart-wrapper">
+                        @if (!TopAlarms.Any())
                         {
                             <span>Son 24 saatte alarm yok.</span>
                         }
@@ -148,22 +113,26 @@
 </div>
 
 @code {
+    [Inject]
+    public IJSRuntime JSRuntime { get; set; } // KRİTİK: JS çağrısı için enjeksiyon
+
     private List<IGrouping<string, FullMachineStatus>> GroupedMachines = new();
     private bool _isLoading = true;
-    private bool _isDisposed = false; // KRİTİK: Atılma durum bayrağı
+    private bool _isDisposed = false;
+    private bool _shouldRenderCharts = false; // KRİTİK: Çizim bayrağı
 
     // Sidebar verileri için alanlar (ScadaDataService.cs'deki DTO'lar)
     private List<HourlyConsumptionData> HourlyConsumptionData = new();
     private List<HourlyOeeData> HourlyOeeData = new();
     private List<TopAlarmData> TopAlarms = new();
-
+    private List<JsReadyTrendDataPoint> SparklineData = new();
     // KPI Alanları
     private int TotalMachines = 0;
     private int RunningMachines = 0;
     private int AlarmMachines = 0;
     private int IdleMachines = 0;
 
-    // Windows Forms'daki renk paletinden alınan ilk 10 renk (CSS'e karşılık gelir)
+    // Windows Forms'taki renk paletinden alınan ilk 10 renk (CSS'e karşılık gelir)
     private readonly List<string> DarkColors = new List<string>
     {
         "#2c3e50", "#2ecc71", "#e74c3c", "#9b59b6", "#3498db",
@@ -176,14 +145,10 @@
     {
         try
         {
-            // 1. SignalR bağlantısını kur.
             await ScadaService.InitializeAsync();
             await ScadaService.GetMachinesAsync();
-            // 2. Veri değişimini dinle.
-            // Bu, HandleDataUpdate metodunu güvenli hale getirir.
             ScadaService.OnDataUpdated += HandleDataUpdate;
 
-            // 3. İlk yüklemeyi yap: Hem anlık makine verilerini hem de rapor verilerini çek.
             await LoadSidebarDataAsync();
             UpdateDashboardData();
 
@@ -191,24 +156,93 @@
         }
         catch (Exception ex)
         {
-            // ÖNEMLİ: Herhangi bir asenkron hatada (SignalR veya API) çöküşü engeller.
-            // Konsola hatayı yazdırın (Geliştirme ortamında sorunun kök nedenini bulmak için önemlidir)
             Console.WriteLine($"Dashboard Yükleme Hatası: {ex.Message}");
-
-            // Hata oluşsa bile yükleme ekranını kapat ve boş/hatalı veriyi göster
             _isLoading = false;
         }
 
         await base.OnInitializedAsync();
     }
+    
+    // KRİTİK: OnAfterRenderAsync metodu eklendi
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_shouldRenderCharts)
+        {
+            _shouldRenderCharts = false; // Tekrar çizimi engelle
+            
+            // Tüm grafik verilerini tek bir çağrıda gönderiyoruz.
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("plotDashboardCharts", 
+                    HourlyOeeData, 
+                    HourlyConsumptionData, 
+                    TopAlarms);
+                // YENİ: Sparkline grafiğini çağır
+                if (SparklineData.Any())
+                {
+                    await JSRuntime.InvokeVoidAsync("plotTemperatureSparkline",
+                        "tempSparklineContainer",
+                        SparklineData);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"JS Grafik Çizimi Hatası: {ex.Message}");
+            }
+        }
+    }
 
     // WinForms'taki UpdateSidebarCharts mantığına karşılık gelir
     private async Task LoadSidebarDataAsync()
     {
-        // Bu metodun OnInitializedAsync içindeki try-catch bloğu tarafından korunmaktadır.
+        // Data Service'den verileri çekiyoruz
         HourlyConsumptionData = await ScadaService.GetHourlyConsumptionAsync() ?? new();
         HourlyOeeData = await ScadaService.GetHourlyOeeAsync() ?? new();
         TopAlarms = await ScadaService.GetTopAlarmsAsync() ?? new();
+        // YENİ: Sparkline verisini çekme (Son 15 dakikalık ortalama sıcaklık trendi)
+        // NOT: Bu metodun ScadaDataService'de tanımlı ve TrendDataPointRich tipinde veri döndürdüğü varsayılır.
+        var rawSparklineData = await ScadaService.GetTemperatureSparklineAsync(TimeSpan.FromMinutes(15));
+
+        if (rawSparklineData != null)
+        {
+            try
+            {
+                // API'den List<object> geldiği için, önce JSON'a çevirip sonra hedef DTO'ya dönüştürüyoruz
+                var jsonString = System.Text.Json.JsonSerializer.Serialize(rawSparklineData);
+                var intermediateData = System.Text.Json.JsonSerializer.Deserialize<List<JsReadyTrendDataPoint>>(
+                    jsonString,
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+                );
+
+                if (intermediateData != null)
+                {
+                    // Son DTO oluşumu: Sıcaklık bölmesi ve OADate hesaplaması
+                    SparklineData = intermediateData.Select(d => new JsReadyTrendDataPoint
+                    {
+                        Timestamp = d.Timestamp,
+                        TimestampOADate = d.Timestamp.ToOADate(),
+                        Temperature = (double)d.Temperature / 10.0, // KRİTİK: Sıcaklık dönüşümü
+                        Rpm = (double)d.Rpm,
+                        WaterLevel = (double)d.WaterLevel
+                    }).ToList();
+                }
+                else
+                {
+                    SparklineData = new List<JsReadyTrendDataPoint>();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Sparkline verisi dönüşüm hatası: {ex.Message}");
+                SparklineData = new List<JsReadyTrendDataPoint>();
+            }
+        }
+        else
+        {
+            SparklineData = new List<JsReadyTrendDataPoint>();
+        }
+        // Veri yüklendi, artık çizim sinyali verilebilir.
+        _shouldRenderCharts = true; 
     }
 
     // WinForms'taki BuildMachineCards ve UpdateKpiCards mantıklarını birleştirir
@@ -219,11 +253,10 @@
         {
             if (ScadaService.MachineDetailsCache.TryGetValue(status.MachineId, out var machineDetails))
             {
-                // Machine.MachineSubType (Ayarlar sayfasından gelen grup bilgisi)
-                // FullMachineStatus.MakineTipi alanına atanır.
                 status.MakineTipi = machineDetails.MachineSubType;
             }
         }
+        
         // --- KPI Hesaplamaları ---
         TotalMachines = allStatuses.Count;
         RunningMachines = allStatuses.Count(s => s.IsInRecipeMode && !s.HasActiveAlarm);
@@ -237,13 +270,11 @@
         }
 
         // --- Makine Gruplama ve Sıralama (GenelBakis_Control.cs'e uygun) ---
-        // 1. Makine Kartları İçindeki Sıralama
         var sortedMachines = allStatuses
-            .OrderByDescending(m => m.IsInRecipeMode) // 1. Çalışanlar en üstte (WinForms önceliği)
-            .ThenBy(m => m.HasActiveAlarm)           // 2. Alarmı olmayanlar önce
-            .ThenBy(m => m.MachineName);             // 3. Makine adına göre
+            .OrderByDescending(m => m.IsInRecipeMode)
+            .ThenBy(m => m.HasActiveAlarm)
+            .ThenBy(m => m.MachineName);
 
-        // 2. Makine Gruplama (Makine Tipine göre)
         GroupedMachines = sortedMachines
              .GroupBy(m => string.IsNullOrEmpty(m.MakineTipi) ? "Diğer" : m.MakineTipi)
              .OrderByDescending(g => g.Any(m => m.IsInRecipeMode))
@@ -265,20 +296,19 @@
 
     private void HandleDataUpdate()
     {
-        // KRİTİK DÜZELTME: Devre çöküşünü engellemek için try-catch ekle
         try
         {
             if (_isDisposed) return;
 
             UpdateDashboardData();
-            // UI güncellemesi için Blazor'a sinyal gönderir.
+            // Makine verisi güncellendiğinde, yan çubuk verilerini yeniden yüklemeye GEREK YOKTUR,
+            // sadece JS'e çizim sinyali gönderilir, çünkü yan çubuk verileri saatliktir.
+            _shouldRenderCharts = true;
             InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
-            // Bu, kilitlenmeyi durdurur ve size asıl hatayı konsolda gösterir.
-            Console.WriteLine($"!!! KRİTİK VERİ GÜNCELLEME HATASI (Devre Çökmesi Engellendi): {ex.Message}");
-            // Hata ayıklama modunda buraya bir kesme noktası (breakpoint) koyun!
+            Console.WriteLine($"!!! KRİTİK VERİ GÜNCELLEME HATASI: {ex.Message}");
         }
     }
 
@@ -294,7 +324,6 @@
 
     public void Dispose()
     {
-        // KRİTİK: Atılma bayrağını ayarla ve aboneliği temizle
         _isDisposed = true;
         ScadaService.OnDataUpdated -= HandleDataUpdate;
     }

@@ -142,86 +142,101 @@ namespace TekstilScada.Services
 
         private async Task PollMachineLoop(Machine machine, IPlcManager manager, CancellationToken token)
         {
-            while (!token.IsCancellationRequested)
+            try
             {
-                try
+                // KRİTİK DÜZELTME: Tüm döngüyü OperationCanceledException'ı yakalamak için sarmalıyoruz.
+                while (!token.IsCancellationRequested)
                 {
-                    if (!MachineDataCache.TryGetValue(machine.Id, out var status)) return;
+                    try
+                    {
+                        if (!MachineDataCache.TryGetValue(machine.Id, out var status)) return;
 
-                    if (status.ConnectionState != ConnectionStatus.Connected)
-                    {
-                        HandleReconnection(machine.Id, manager);
-                    }
-                    else
-                    {
-                        var readResult = manager.ReadLiveStatusData();
-                        if (readResult.IsSuccess)
+                        if (status.ConnectionState != ConnectionStatus.Connected)
                         {
-                            var newStatus = readResult.Content;
-                            newStatus.MachineId = machine.Id;
-                            newStatus.MachineName = status.MachineName;
-                            newStatus.ConnectionState = ConnectionStatus.Connected;
-
-                            newStatus.AktifAdimAdi = GetStepTypeName(newStatus.AktifAdimTipiWordu);
-                            // Add here
-
-                            var analyzer = _liveAnalyzers.TryGetValue(machine.Id, out var a) ? a : null;
-                            if (newStatus.IsInRecipeMode && analyzer != null && _batchTotalTheoreticalTimes.TryGetValue(machine.Id, out double totalTheoreticalTime) && totalTheoreticalTime > 0)
-                            {
-                                double timeInCurrentStep = (DateTime.Now - analyzer.CurrentStepStartTime).TotalSeconds;
-                                var remainingSteps = analyzer.Recipe.Steps.Where(s => s.StepNumber >= newStatus.AktifAdimNo);
-                                double remainingTheoreticalTime = RecipeAnalysis.CalculateTheoreticalTimeForSteps(remainingSteps);
-                                double completedStepsTime = totalTheoreticalTime - remainingTheoreticalTime;
-                                double totalProgressSeconds = completedStepsTime + timeInCurrentStep;
-                                double percentage = (totalProgressSeconds / totalTheoreticalTime) * 100.0;
-                                newStatus.ProsesYuzdesi = (short)Math.Min(100.0, Math.Max(0.0, percentage));
-                            }
-                            else
-                            {
-                                newStatus.ProsesYuzdesi = 0;
-                            }
-
-                            ProcessLiveStepAnalysis(machine.Id, newStatus);
-                            CheckAndLogBatchStartAndEnd(machine.Id, newStatus);
-                            CheckAndLogAlarms(machine.Id, newStatus);
-                            status = newStatus;
-
-                            if (_currentBatches.TryGetValue(machine.Id, out var activeBatch) && activeBatch != null)
-                            {
-                                if (_liveAlarmCounters.TryGetValue(machine.Id, out var counters))
-                                {
-                                    // The alarm state takes precedence over the paused state.
-                                    if (newStatus.HasActiveAlarm)
-                                    {
-                                        counters.machineAlarmSeconds += _pollingIntervalMs / 1000;
-                                    }
-                                    else if (newStatus.IsPaused)
-                                    {
-                                        counters.operatorPauseSeconds += _pollingIntervalMs / 1000;
-                                    }
-                                    _liveAlarmCounters[machine.Id] = counters;
-                                }
-                            }
+                            HandleReconnection(machine.Id, manager);
                         }
                         else
                         {
-                            HandleDisconnection(machine.Id);
-                            if (MachineDataCache.ContainsKey(machine.Id))
-                                status = MachineDataCache[machine.Id];
-                        }
-                    }
-                    if (MachineDataCache.ContainsKey(machine.Id))
-                    {
-                        MachineDataCache[machine.Id] = status;
-                    }
-                    OnMachineDataRefreshed?.Invoke(machine.Id, status);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error in polling loop for machine {machine.Id}: {ex.Message}");
-                }
+                            var readResult = manager.ReadLiveStatusData();
+                            if (readResult.IsSuccess)
+                            {
+                                var newStatus = readResult.Content;
+                                newStatus.MachineId = machine.Id;
+                                newStatus.MachineName = status.MachineName;
+                                newStatus.ConnectionState = ConnectionStatus.Connected;
 
-                await Task.Delay(_pollingIntervalMs, token);
+                                newStatus.AktifAdimAdi = GetStepTypeName(newStatus.AktifAdimTipiWordu);
+
+                                var analyzer = _liveAnalyzers.TryGetValue(machine.Id, out var a) ? a : null;
+                                if (newStatus.IsInRecipeMode && analyzer != null && _batchTotalTheoreticalTimes.TryGetValue(machine.Id, out double totalTheoreticalTime) && totalTheoreticalTime > 0)
+                                {
+                                    double timeInCurrentStep = (DateTime.Now - analyzer.CurrentStepStartTime).TotalSeconds;
+                                    var remainingSteps = analyzer.Recipe.Steps.Where(s => s.StepNumber >= newStatus.AktifAdimNo);
+                                    double remainingTheoreticalTime = RecipeAnalysis.CalculateTheoreticalTimeForSteps(remainingSteps);
+                                    double completedStepsTime = totalTheoreticalTime - remainingTheoreticalTime;
+                                    double totalProgressSeconds = completedStepsTime + timeInCurrentStep;
+                                    double percentage = (totalProgressSeconds / totalTheoreticalTime) * 100.0;
+                                    newStatus.ProsesYuzdesi = (short)Math.Min(100.0, Math.Max(0.0, percentage));
+                                }
+                                else
+                                {
+                                    newStatus.ProsesYuzdesi = 0;
+                                }
+
+                                ProcessLiveStepAnalysis(machine.Id, newStatus);
+                                CheckAndLogBatchStartAndEnd(machine.Id, newStatus);
+                                CheckAndLogAlarms(machine.Id, newStatus);
+                                status = newStatus;
+
+                                if (_currentBatches.TryGetValue(machine.Id, out var activeBatch) && activeBatch != null)
+                                {
+                                    if (_liveAlarmCounters.TryGetValue(machine.Id, out var counters))
+                                    {
+                                        // The alarm state takes precedence over the paused state.
+                                        if (newStatus.HasActiveAlarm)
+                                        {
+                                            counters.machineAlarmSeconds += _pollingIntervalMs / 1000;
+                                        }
+                                        else if (newStatus.IsPaused)
+                                        {
+                                            counters.operatorPauseSeconds += _pollingIntervalMs / 1000;
+                                        }
+                                        _liveAlarmCounters[machine.Id] = counters;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                HandleDisconnection(machine.Id);
+                                if (MachineDataCache.ContainsKey(machine.Id))
+                                    status = MachineDataCache[machine.Id];
+                            }
+                        }
+                        if (MachineDataCache.ContainsKey(machine.Id))
+                        {
+                            MachineDataCache[machine.Id] = status;
+                        }
+                        OnMachineDataRefreshed?.Invoke(machine.Id, status);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Polling mantığındaki beklenmedik hataları yakalar.
+                        Console.WriteLine($"Error in polling loop for machine {machine.Id}: {ex.Message}");
+                    }
+
+                    // Task.Delay, token iptal edildiğinde OperationCanceledException fırlatır.
+                    await Task.Delay(_pollingIntervalMs, token);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // KRİTİK: Görev iptal edildiğinde fırlatılan BEKLENEN istisnayı burada yakalıyoruz.
+                // Bu, sunucu durdurulduğunda log kirliliğini ve WinForms uygulamasının çökmesini engeller.
+            }
+            catch (Exception ex)
+            {
+                // Diğer, nadir görülen kritik hataları yakalar.
+                Console.WriteLine($"FATAL error in polling loop for machine {machine.Id}: {ex.Message}");
             }
         }
 
