@@ -1,5 +1,10 @@
 ﻿@inherits LayoutComponentBase
 
+@* --- EKSİK KISIM 1: BU SATIRLARI EKLEYİN --- *@
+@using TekstilScada.WebApp.Services
+@inject CustomAuthStateProvider AuthProvider
+@* ------------------------------------------- *@
+
 <div class="page">
     <div class="sidebar">
         <NavMenu />
@@ -7,7 +12,8 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            @* Buraya bir "Çıkış Yap" butonu ekleyebilirsiniz *@
+            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">Hakkında</a>
         </div>
 
         <article class="content px-4">
@@ -17,7 +23,22 @@
 </div>
 
 <div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
+    Bir hata oluştu.
+    <a href="" class="reload">Yeniden Yükle</a>
     <a class="dismiss">🗙</a>
 </div>
+
+@* --- EKSİK KISIM 2: BU @CODE BLOĞUNU EKLEYİN --- *@
+@code {
+    private bool _hasInitialized = false;
+
+    // Bu, CustomAuthStateProvider'daki InitializeAuthenticationStateAsync'i çağırır
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_hasInitialized)
+        {
+            _hasInitialized = true;
+            await AuthProvider.InitializeAuthenticationStateAsync();
+        }
+    }
+}

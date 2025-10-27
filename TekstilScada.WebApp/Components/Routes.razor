@@ -1,6 +1,42 @@
-﻿<Router AppAssembly="typeof(Program).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
-    </Found>
-</Router>
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using TekstilScada.WebApp.Components.Layout
+@using TekstilScada.WebApp.Components.Shared
+@* (RedirectToLogin.razor'u 'Shared' klasörüne koyduğumuzu varsayarak) *@
+
+<CascadingAuthenticationState>
+    <Router AppAssembly="typeof(Program).Assembly">
+        <Found Context="routeData">
+
+            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)">
+
+                @* GİRİŞ YAPMAMIŞ KULLANCIYI YAKALA *@
+                <NotAuthorized>
+                    @if (context.User.Identity?.IsAuthenticated != true)
+                    {
+                        @* Login sayfasına GÖNDER *@
+                        <RedirectToLogin />
+                    }
+                    else
+                    {
+                        <p>Bu sayfayı görüntülemek için yetkiniz bulunmamaktadır.</p>
+                    }
+                </NotAuthorized>
+
+                @* (Opsiyonel) Yükleniyor ekranı *@
+                <Authorizing>
+                    <p>Yetki kontrol ediliyor...</p>
+                </Authorizing>
+
+            </AuthorizeRouteView>
+
+            <FocusOnNavigate RouteData="routeData" Selector="h1" />
+
+        </Found>
+        <NotFound>
+            <PageTitle>Bulunamadı</PageTitle>
+            <LayoutView Layout="typeof(MainLayout)">
+                <p role="alert">Üzgünüz, bu adreste bir şey yok.</p>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>

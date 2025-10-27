@@ -3,14 +3,38 @@
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using TekstilScada.WebApp.Components;
 using TekstilScada.WebApp.Services;
-
+using Microsoft.AspNetCore.Components.Authorization; // Bunu ekleyin
+using Blazored.LocalStorage; // Bunu ekleyin
+using TekstilScada.WebApp.Services; // Bunu ekleyin
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+// 1. Blazored Local Storage'ý ekle
+// 1. Blazored Local Storage
+builder.Services.AddBlazoredLocalStorage();
 
-// --- DOÐRU YAPILANDIRMA ---
+// 2. Blazor Yetkilendirme
+builder.Services.AddAuthorizationCore();
+
+// 3. (ÖNEMLÝ) CustomAuthStateProvider'ý doðru HttpClient ile kaydetme
+builder.Services.AddScoped<CustomAuthStateProvider>(sp =>
+{
+    var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
+    // "WebApiClient" adýný ScadaDataService ile ayný kullandýðýnýzdan emin olun
+    var httpClient = httpClientFactory.CreateClient("WebApiClient");
+    var localStorage = sp.GetRequiredService<ILocalStorageService>();
+    return new CustomAuthStateProvider(httpClient, localStorage);
+});
+
+// 4. (ÖNEMLÝ) Arayüzü (interface) somut sýnýfa (concrete class) yönlendirme
+builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
+    provider.GetRequiredService<CustomAuthStateProvider>());
+
+// Arayüz (interface) kaydýný, yukarýdaki somut (concrete) sýnýfa yönlendir
+// Bu, Blazor'un temel sisteminin arayüzü kullanmasýný saðlar.
+
 
 // 1. "WebApiClient" adýyla özel bir HttpClient yapýlandýrýyoruz.
 builder.Services.AddHttpClient("WebApiClient", client =>

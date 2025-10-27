@@ -1,0 +1,87 @@
+﻿@page "/login"
+@attribute [AllowAnonymous] 
+
+
+@using Microsoft.AspNetCore.Authorization 
+@using TekstilScada.WebApp.Components.Layout
+@using TekstilScada.WebApp.Services
+@inject CustomAuthStateProvider AuthProvider
+@inject NavigationManager NavigationManager
+
+@layout EmptyLayout 
+
+
+
+<h3>Giriş Yap</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<div class="card">
+    <div class="card-body">
+        <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <label>Kullanıcı Adı</label>
+                <InputText class="form-control" @bind-Value="loginModel.Username" />
+                <ValidationMessage For="() => loginModel.Username" />
+            </div>
+            <div class="mb-3">
+                <label>Şifre</label>
+                <InputText type="password" class="form-control" @bind-Value="loginModel.Password" />
+                <ValidationMessage For="() => loginModel.Password" />
+            </div>
+            <button type="submit" class="btn btn-primary" disabled="@isBusy">
+                @if (isBusy)
+                {
+                    <span class="spinner-border spinner-border-sm"></span>
+                }
+                Giriş Yap
+            </button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private LoginRequest loginModel = new();
+    private string? errorMessage;
+    private bool isBusy = false;
+
+    private async Task HandleLogin()
+    {
+        isBusy = true;
+        errorMessage = null;
+        try
+        {
+            var success = await AuthProvider.LoginAsync(loginModel.Username, loginModel.Password);
+            if (success)
+            {
+                NavigationManager.NavigateTo("/"); // Ana sayfaya yönlendir
+            }
+            else
+            {
+                errorMessage = "Kullanıcı adı veya şifre hatalı.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Giriş yapılamadı: {ex.Message}";
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    public class LoginRequest
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Kullanıcı adı zorunludur.")]
+        public string Username { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Şifre zorunludur.")]
+        public string Password { get; set; } = string.Empty;
+    }
+}

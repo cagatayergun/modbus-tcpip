@@ -1,0 +1,12 @@
+﻿@inherits LayoutComponentBase
+
+@* Bu layout, MainLayout'tan farklı olarak NavMenu'yü içermez.
+  Sadece sayfanın ana içeriğini (@Body) render eder.
+*@
+<div class="page">
+    <main>
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>

@@ -1,0 +1,10 @@
+﻿@inject NavigationManager Navigation
+
+@code {
+    protected override void OnInitialized()
+    {
+        // Bu bileşen render edildiği anda,
+        // kullanıcıyı /login sayfasına yönlendir.
+        Navigation.NavigateTo("/login");
+    }
+}
