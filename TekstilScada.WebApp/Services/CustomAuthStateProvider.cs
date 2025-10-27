@@ -74,13 +74,14 @@ namespace TekstilScada.WebApp.Services
             // ...
 
             // 1. Payload oluşturma
+            // 1. Payload oluşturma (Burası C# olduğu için PascalCase kalmalı, bu doğru)
             var loginPayload = new { Username = username, Password = password };
 
-            // 2. KRİTİK DÜZELTME: JSON'u Web API standardı olan 'camelCase' formatında serileştirin.
+            // 2. JSON'u API'nin beklediği 'camelCase' formatında serileştir.
             var serializerOptions = new JsonSerializerOptions
             {
-                // DÜZELTME: C# özellik adlarını (PascalCase) korumak için 'null' kullanın
-                PropertyNamingPolicy = null
+                // DÜZELTME: API'nin Program.cs'teki ayarıyla eşleşmesi için 'CamelCase' kullan
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
             var jsonContent = JsonSerializer.Serialize(loginPayload, serializerOptions);
 
@@ -147,10 +148,19 @@ namespace TekstilScada.WebApp.Services
         {
             var claims = new List<Claim>();
             var payload = jwt.Split('.')[1];
-            var jsonBytes = Convert.FromBase64String(
-                payload.PadRight(payload.Length + (4 - payload.Length % 4) % 4)
-            );
 
+            // 1. Base64Url formatını standart Base64 formatına çevir
+            payload = payload.Replace('-', '+').Replace('_', '/');
+
+            // 2. Eksik olan '=' dolgu karakterlerini ekle
+            switch (payload.Length % 4)
+            {
+                case 2: payload += "=="; break;
+                case 3: payload += "="; break;
+            }
+
+            // 3. Artık standart Base64'e dönen string'i çöz
+            var jsonBytes = Convert.FromBase64String(payload);
             var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
 
             keyValuePairs.TryGetValue(ClaimTypes.Name, out object username);

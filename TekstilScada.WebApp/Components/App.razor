@@ -10,7 +10,7 @@
 
     <link rel="stylesheet" href="TekstilScada.WebApp.styles.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
-    <HeadOutlet @rendermode="InteractiveServer" />
+    <HeadOutlet @rendermode="new InteractiveServerRenderMode(prerender: false)" />
     <script src="https://cdn.plot.ly/plotly-2.31.1.min.js"></script>
 </head>
 <script>
@@ -273,8 +273,11 @@
 </script>
 
 <body>
-    <Routes @rendermode="InteractiveServer" />
+    @* Sadece bir <Routes /> olmalı ve CascadingAuthenticationState'in içinde kalmalı *@
+    <CascadingAuthenticationState>
+        <Routes @rendermode="new InteractiveServerRenderMode(prerender: false)" />
+    </CascadingAuthenticationState>
+    
     <script src="_framework/blazor.web.js"></script>
 </body>
-
 </html>

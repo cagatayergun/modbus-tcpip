@@ -3,22 +3,23 @@
 @using TekstilScada.WebApp.Components.Shared
 @* (RedirectToLogin.razor'u 'Shared' klasörüne koyduğumuzu varsayarak) *@
 
-<CascadingAuthenticationState>
-    <Router AppAssembly="@typeof(Program).Assembly">
-        <Found Context="routeData">
-            @* DefaultLayout olarak MainLayout'u kullan, ancak yetkisiz ise RedirectToLogin'a yönlendir. *@
-            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
-                <NotAuthorized>
-                    @* Kullanıcı yetkili değilse, onu oturum açma sayfasına yönlendir. *@
-                    <RedirectToLogin />
-                </NotAuthorized>
-            </AuthorizeRouteView>
-            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-        </Found>
-        <NotFound>
-            <LayoutView Layout="@typeof(MainLayout)">
-                <p role="alert">Üzgünüz, böyle bir sayfa bulunamadı.</p>
-            </LayoutView>
-        </NotFound>
-    </Router>
-</CascadingAuthenticationState>
+<Router AppAssembly="@typeof(Program).Assembly">
+    <Found Context="routeData">
+        @* DefaultLayout olarak MainLayout'u kullan, ancak yetkisiz ise RedirectToLogin'a yönlendir.
+ *@
+        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+            <NotAuthorized>
+                @* Kullanıcı yetkili değilse, onu oturum açma sayfasına yönlendir.
+ *@
+                <RedirectToLogin />
+            </NotAuthorized>
+        </AuthorizeRouteView>
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+
+            <p role="alert">Üzgünüz, böyle bir sayfa bulunamadı.</p>
+        </LayoutView>
+    </NotFound>
+</Router>

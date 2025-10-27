@@ -3,10 +3,9 @@
 @code {
     protected override void OnInitialized()
     {
-        // Mevcut URL'yi al
         var returnUrl = Navigation.ToBaseRelativePath(Navigation.Uri);
 
-        // DÜZELTME: Doğru giriş sayfasına yönlendir
-        Navigation.NavigateTo($"/login?ReturnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true);
+        // DÜZELTME: forceLoad: true kaldırıldı
+        Navigation.NavigateTo($"/login?ReturnUrl={Uri.EscapeDataString(returnUrl)}");
     }
 }

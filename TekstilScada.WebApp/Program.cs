@@ -14,7 +14,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // KRÝTÝK DÜZELTME: UseAuthentication'ý desteklemek için boþ bir þema ekliyoruz.
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie();
+    .AddCookie(options =>
+    {
+        // Sisteme Blazor giriþ sayfanýzýn nerede olduðunu söyleyin
+        options.LoginPath = "/login";
+    });
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -27,13 +31,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddBlazoredLocalStorage();
 
 // 2. Blazor Yetkilendirme (AuthorizationCore yerine, full yetkilendirme servislerini kullan)
-builder.Services.AddAuthorization(options =>
-{
-    // FallbackPolicy tüm sayfalarýn yetkilendirme gerektirmesini saðlar
-    options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
-});
+builder.Services.AddAuthorization();
 
 // 3. CustomAuthStateProvider kaydý
 builder.Services.AddScoped<CustomAuthStateProvider>(sp =>

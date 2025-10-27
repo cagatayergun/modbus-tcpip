@@ -9,6 +9,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using TekstilScada.Core.Models; // Model referansınız
+using System.Text.Json.Serialization; // <-- 1. BU SATIRI EKLEYİN
 
 using TekstilScada.Repositories;
 
@@ -16,7 +17,9 @@ namespace TekstilScada.WebAPI.Controllers
 {
     public class LoginModel
     {
+      
         public string Username { get; set; }
+
         public string Password { get; set; }
     }
 

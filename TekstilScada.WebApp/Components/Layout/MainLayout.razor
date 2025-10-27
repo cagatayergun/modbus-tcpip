@@ -1,9 +1,9 @@
 ﻿@inherits LayoutComponentBase
-
-@* --- EKSİK KISIM 1: BU SATIRLARI EKLEYİN --- *@
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
 @using TekstilScada.WebApp.Services
 @inject CustomAuthStateProvider AuthProvider
-@* ------------------------------------------- *@
+@inject NavigationManager NavigationManager 
 
 <div class="page">
     <div class="sidebar">
@@ -12,7 +12,10 @@
 
     <main>
         <div class="top-row px-4">
-            @* Buraya bir "Çıkış Yap" butonu ekleyebilirsiniz *@
+            
+            @* --- 2. ÇIKIŞ YAP BUTONUNU EKLE --- *@
+            <button class="btn btn-link nav-link" @onclick="HandleLogout">Çıkış Yap</button>
+            
             <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">Hakkında</a>
         </div>
 
@@ -21,24 +24,17 @@
         </article>
     </main>
 </div>
-
-<div id="blazor-error-ui">
-    Bir hata oluştu.
-    <a href="" class="reload">Yeniden Yükle</a>
-    <a class="dismiss">🗙</a>
-</div>
-
-@* --- EKSİK KISIM 2: BU @CODE BLOĞUNU EKLEYİN --- *@
+...
 @code {
-    private bool _hasInitialized = false;
-
-    // Bu, CustomAuthStateProvider'daki InitializeAuthenticationStateAsync'i çağırır
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender && !_hasInitialized)
-        {
-            _hasInitialized = true;
-            await AuthProvider.InitializeAuthenticationStateAsync();
-        }
+        await AuthProvider.InitializeAuthenticationStateAsync();
+    }
+
+    // --- 3. BUTONUN METODUNU EKLE ---
+    private async Task HandleLogout()
+    {
+        await AuthProvider.LogoutAsync();
+        NavigationManager.NavigateTo("/login", true); // Çıkış yapınca login'e zorla
     }
 }
