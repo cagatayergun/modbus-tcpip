@@ -86,6 +86,19 @@ public class JsReadyTrendDataPoint
     public double Rpm { get; set; }
     public double WaterLevel { get; set; }
 }
+public class StepTypeDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+}
+
+public class SaveLayoutRequest
+{
+    public string LayoutName { get; set; }
+    public string MachineSubType { get; set; }
+    public int StepTypeId { get; set; }
+    public string LayoutJson { get; set; }
+}
 namespace TekstilScada.WebApp.Services
 {
     // KRİTİK GÜNCELLEME: IAsyncDisposable arayüzünü uyguluyoruz
@@ -525,6 +538,77 @@ namespace TekstilScada.WebApp.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Excel dışa aktarımı başarısız: {ex.Message}");
+                return false;
+            }
+        }
+        public async Task<string> GetLayoutJsonAsync(string machineSubType, int stepId)
+        {
+            try
+            {
+                // API'nin iç implementasyonunun değişmesi, bu çağrıyı etkilemez.
+                var response = await _httpClient.GetAsync($"api/Json/config/layout/{machineSubType}/{stepId}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadAsStringAsync();
+                }
+                else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    
+                    return string.Empty;
+                }
+                else
+                {
+                    // ... (mevcut hata yönetimi) ...
+                    throw new Exception($"API call failed: {response.ReasonPhrase}");
+                }
+            }
+            catch (Exception ex)
+            {
+               
+                throw;
+            }
+        }
+
+        // --- BİR REÇETE TASARIM EKRANI İÇİN GEREKLİ YENİ METOTLAR ---
+
+        public async Task<List<StepTypeDto>> GetStepTypesAsync()
+        {
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<List<StepTypeDto>>("api/Json/config/steptypes");
+            }
+            catch (Exception ex)
+            {
+           
+                return new List<StepTypeDto>(); // Hata durumunda boş liste dön
+            }
+        }
+
+        public async Task<List<string>> GetMachineSubTypesAsync()
+        {
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<List<string>>("api/Json/config/machinesubtypes");
+            }
+            catch (Exception ex)
+            {
+                
+                return new List<string> { "DEFAULT" }; // Hata durumunda sadece DEFAULT dön
+            }
+        }
+
+        public async Task<bool> SaveLayoutAsync(SaveLayoutRequest request)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("api/Json/config/savelayout", request);
+                response.EnsureSuccessStatusCode(); // Hata varsa exception fırlatır
+                return true;
+            }
+            catch (Exception ex)
+            {
+                
                 return false;
             }
         }
