@@ -77,12 +77,22 @@ namespace TekstilScada.UI
 
         private void LoadLocalRecipes()
         {
+            // KRİTİK ADIM 1: Yeni veri yüklenmeden önce mevcut seçimi ve indeksi temizle
+            if (lstLocalRecipes.Items.Count > 0)
+            {
+                lstLocalRecipes.SelectedIndex = -1;
+                lstLocalRecipes.ClearSelected();
+            }
+
             // Reçeteleri seçilen makine tipine göre filtrele
             lstLocalRecipes.DataSource = _recipeRepository.GetAllRecipes()
                 .Where(r => r.TargetMachineType == _targetMachineType)
                 .ToList();
             lstLocalRecipes.DisplayMember = "RecipeName";
             lstLocalRecipes.ValueMember = "Id";
+
+            // KRİTİK ADIM 2: DataSource atandıktan sonra seçimi tekrar sıfırla
+            lstLocalRecipes.SelectedIndex = -1;
         }
 
         // FtpSync_Form.cs
@@ -163,31 +173,39 @@ namespace TekstilScada.UI
 
         private void btnSend_Click(object sender, EventArgs e)
         {
-            var selectedRecipes = lstLocalRecipes.SelectedItems.Cast<ScadaRecipe>().ToList();
-            var selectedMachines = clbMachines.CheckedItems.Cast<Machine>().ToList();
-
-            if (!selectedRecipes.Any() || !selectedMachines.Any())
+            try
             {
-                MessageBox.Show("Please select at least one recipe and one target machine.", "Warning");
-                return;
-            }
+                var selectedRecipes = lstLocalRecipes.SelectedItems.OfType<ScadaRecipe>().ToList();
+                var selectedMachines = clbMachines.CheckedItems.Cast<Machine>().ToList();
 
-            // Kullanıcıdan başlangıç numarasını al
-            string startNumberStr = ProsesKontrol_Control.ShowInputDialog("Enter the first prescription number to be sent (1-98):", true);
-            if (string.IsNullOrEmpty(startNumberStr) || !int.TryParse(startNumberStr, out int startNumber))
+                if (!selectedRecipes.Any() || !selectedMachines.Any())
+                {
+                    MessageBox.Show("Please select at least one recipe and one target machine.", "Warning");
+                    return;
+                }
+
+                // Kullanıcıdan başlangıç numarasını al
+                string startNumberStr = ProsesKontrol_Control.ShowInputDialog("Enter the first prescription number to be sent (1-98):", true);
+                if (string.IsNullOrEmpty(startNumberStr) || !int.TryParse(startNumberStr, out int startNumber))
+                {
+                    return; // Kullanıcı iptal etti veya geçersiz giriş yaptı
+                }
+
+                // Seçilen reçete sayısı, kalan numaralara sığıyor mu kontrol et
+                if (startNumber + selectedRecipes.Count - 1 > 98)
+                {
+                    MessageBox.Show($"The {selectedRecipes.Count} number of recipes you selected exceeds the limit of 98 with a starting number of {startNumber}. Please select a lower starting number.", "Error");
+                    return;
+                }
+
+                // Yeni servis metodunu çağır
+                _transferService.QueueSequentiallyNamedSendJobs(selectedRecipes, selectedMachines, startNumber);
+            }
+            catch (Exception ex)
             {
-                return; // Kullanıcı iptal etti veya geçersiz giriş yaptı
+                // Gönderim veya UI işleme sırasında oluşan diğer hataları yakalar
+                MessageBox.Show($"Gönderim sırasında beklenmeyen bir hata oluştu: {ex.Message}", "Kritik Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            // Seçilen reçete sayısı, kalan numaralara sığıyor mu kontrol et
-            if (startNumber + selectedRecipes.Count - 1 > 98)
-            {
-                MessageBox.Show($"The {selectedRecipes.Count} number of recipes you selected exceeds the limit of 98 with a starting number of {startNumber}. Please select a lower starting number.", "Error");
-                return;
-            }
-
-            // Yeni servis metodunu çağır
-            _transferService.QueueSequentiallyNamedSendJobs(selectedRecipes, selectedMachines, startNumber);
         }
 
         private void btnReceive_Click(object sender, EventArgs e)
@@ -235,25 +253,32 @@ namespace TekstilScada.UI
 
         private void Jobs_ListChanged(object sender, ListChangedEventArgs e)
         {
+            // Hata oluşma potansiyeli olan kısmı ana UI thread'ine yönlendiriyoruz
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => Jobs_ListChanged(sender, e)));
+                return;
+            }
+
+            // --- Bu noktadan sonrası artık UI Thread'de çalışır ---
+
             if (e.ListChangedType == ListChangedType.ItemChanged)
             {
                 var job = _transferService.Jobs[e.NewIndex] as TransferJob;
                 if (job != null && job.OperationType == TransferType.Send && job.Status == TransferStatus.Successful)
                 {
+                    // LoadLocalRecipes() UI kontrolünü güncellediği için artık güvenli
                     LoadLocalRecipes();
                 }
             }
 
             if (this.IsDisposed || !this.IsHandleCreated) return;
 
-            if (dgvTransfers.InvokeRequired)
-            {
-                dgvTransfers.Invoke(new Action(() => dgvTransfers.Refresh()));
-            }
-            else
-            {
-                dgvTransfers.Refresh();
-            }
+            // dgvTransfers.Refresh() işlemi de UI Thread'de olmalıdır, ancak Jobs_ListChanged
+            // metodunun başında Invoke kontrolü eklendiği için aşağıdaki özel Invoke kontrolü gereksiz hale gelir.
+
+            // DÜZELTME: Güvenli olması için InvokeRequired kontrolü kaldırıldı, en yukarıdaki Invoke kontrolü yeterlidir.
+            dgvTransfers.Refresh();
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

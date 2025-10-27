@@ -29,10 +29,10 @@ builder.Services.AddSingleton<UserRepository>();
 builder.Services.AddSingleton<DashboardRepository>();
 builder.Services.AddSingleton<PlcPollingService>();
 builder.Services.AddSingleton<SignalRBridgeService>();
-
+builder.Services.AddSingleton<FtpTransferService>();
 // PLC Polling servisini arka planda çalýþacak bir hizmet olarak ekliyoruz.
 builder.Services.AddHostedService<PlcPollingBackgroundService>();
-
+//builder.Services.AddScoped<FtpService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",

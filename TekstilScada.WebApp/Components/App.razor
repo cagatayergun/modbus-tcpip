@@ -269,52 +269,7 @@
         plotConsumption('steamChartContainer', 'toplamBuhar', '', 'kg', '#9b59b6');
         plotTopAlarms();
     }
-        function plotTemperatureSparkline(containerId, dataPoints) {
-        const container = document.getElementById(containerId);
-        if (!container || !dataPoints || dataPoints.length === 0) {
-            Plotly.purge(containerId);
-            return;
-        }
-
-        // Veri dönüşümü: Sadece TimestampOADate ve Temperature kullanıyoruz
-        const xTime = dataPoints.map(d => oaDateToDate(d.timestampOADate));
-        const yTemp = dataPoints.map(d => d.temperature);
-
-        const trace = {
-            x: xTime,
-            y: yTemp,
-            mode: 'lines',
-            type: 'scatter',
-            line: { color: 'orange', width: 2.5 },
-            hoverinfo: 'x+y' // Sadece değerleri göster
-        };
-
-        const layout = {
-            // Sparkline özellikleri:
-            xaxis: {
-                visible: false, // Eksen etiketlerini gizle
-                showgrid: false,
-                zeroline: false,
-                type: 'date'
-            },
-            yaxis: {
-                visible: false, // Eksen etiketlerini gizle
-                showgrid: false,
-                zeroline: false,
-                range: [Math.min(...yTemp) * 0.95, Math.max(...yTemp) * 1.05] // Değerlere göre küçük bir tamponla ölçeklendir
-            },
-            margin: { t: 0, b: 0, l: 0, r: 0 }, // Kenar boşluklarını kaldır (KRİTİK)
-            height: 80, // Sparkline için düşük yükseklik
-            showlegend: false
-        };
-
-        const config = {
-            displayModeBar: false, // Menü çubuğunu gizle
-            responsive: true
-        };
-
-        Plotly.newPlot(containerId, [trace], layout, config);
-    }
+       
 </script>
 
 <body>

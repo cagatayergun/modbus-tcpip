@@ -1,0 +1,10 @@
+﻿@* /Components/Shared/DetailItem.razor *@
+<div class="col-md-4 mb-2">
+    <div class="fw-bold">@Label:</div>
+    <div>@Value</div>
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; } = string.Empty;
+    [Parameter] public string Value { get; set; } = string.Empty;
+}

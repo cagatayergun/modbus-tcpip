@@ -8,7 +8,42 @@ using TekstilScada.Repositories;
 using System;
 using System.Threading.Tasks;
 
-// DTO'lar, global namespace'de kalmalı
+// DTO'lar, global namespace'de kalmalı4
+// 1. TrendDataPoint (CS0234 hatasını çözmek için)
+public class TrendDataPoint
+{
+    public DateTime Timestamp { get; set; }
+    public double Temperature { get; set; }
+    public double Rpm { get; set; }
+    public double WaterLevel { get; set; }
+}
+
+// 2. Zenginleştirilmiş ProductionStepDetail DTO (CS1061 hatalarını çözer)
+public class ProductionStepDetailDto : TekstilScada.Models.ProductionStepDetail
+{
+    public double TheoreticalDurationSeconds { get; set; } = 0; // Hesaplanan teorik süre
+    public double Temperature { get; set; } = 0; // Adıma ait sıcaklık (eğri için değil, o anki)
+    public string StepDescription => StepName; // UI için takma ad
+}
+
+// 3. Zenginleştirilmiş AlarmDetail DTO (CS1061 hatalarını çözer)
+public class AlarmDetailDto
+{
+    public DateTime AlarmTime { get; set; } = DateTime.MinValue;
+    public string AlarmType { get; set; } = string.Empty;
+    public string AlarmDescription { get; set; } = string.Empty;
+    public TimeSpan Duration { get; set; } = TimeSpan.Zero;
+}
+
+// 4. Ana API Yanıt Modeli
+public class ProductionDetailDto
+{
+    public TekstilScada.Models.ProductionReportItem Header { get; set; } = new();
+    public List<ProductionStepDetailDto> Steps { get; set; } = new();
+    public List<AlarmDetailDto> Alarms { get; set; } = new();
+    public List<TrendDataPoint> LogData { get; set; } = new();
+    public List<TrendDataPoint> TheoreticalData { get; set; } = new();
+}
 public class GeneralDetailedConsumptionFilters
 {
     public DateTime StartTime { get; set; }
@@ -380,30 +415,118 @@ namespace TekstilScada.WebApp.Services
                 return null;
             }
         }
-        public async Task<List<object>?> GetTemperatureSparklineAsync(TimeSpan duration)
+      
+        // Varsayım: ScadaDataService sınıfınızın içine eklenmiştir.
+        // Varsayım: ScadaRecipe, Machine, HmiRecipeInfo ve API'dan beklenen dönüş tiplerine erişiminiz var.
+
+        // WinForms: LoadHmiRecipes -> plcManager.ReadRecipeNamesFromPlcAsync() mantığına karşılık gelir
+        // Beklenen API Dönüşü: Dictionary<int, string> { SlotNumber: RecipeName }
+        public async Task<Dictionary<int, string>?> GetHmiRecipeNamesAsync(int machineId)
         {
-            // Tüm makinelerin ortalama trend verisini almak için tüm MachineId'leri kullan.
-            var allMachineIds = MachineDetailsCache.Keys.ToList();
-
-            var filters = new ReportFilters1
+            try
             {
-                StartTime = DateTime.Now.Subtract(duration),
-                EndTime = DateTime.Now.AddMinutes(1),
-
-            };
-            
-            // Mevcut Trend API'sini kullanıyoruz. API'nin ortalama/birleşik veriyi döndürmesi beklenir.
-            var response = await _httpClient.PostAsJsonAsync("api/reports/trend", filters);
-
-            if (!response.IsSuccessStatusCode)
+                // Örnek API yolu: /api/ftp/hmi-recipe-names/{machineId}
+                var response = await _httpClient.GetFromJsonAsync<Dictionary<int, string>>($"api/ftp/hmi-recipe-names/{machineId}");
+                return response;
+            }
+            catch (HttpRequestException ex)
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"API Hatası (Sparkline Trend Raporu): {response.StatusCode}");
+                // Loglama veya hata yönetimi eklenebilir
+                Console.WriteLine($"API çağrısı sırasında hata: {ex.Message}");
                 return null;
             }
+        }
 
-            // Gelen ham veriyi (List<object>) döndür, dönüşümü Dashboard.razor'da yapacağız.
-            return await response.Content.ReadFromJsonAsync<List<object>>();
+        // WinForms: lstHmiRecipes_SelectedIndexChanged -> FtpService.DownloadFileAsync & RecipeCsvConverter.ToRecipe mantığına karşılık gelir
+        // Beklenen API Dönüşü: ScadaRecipe (Adımları içerir)
+        public async Task<ScadaRecipe?> GetHmiRecipePreviewAsync(int machineId, string remoteFileName)
+        {
+            try
+            {
+                // API'ya dosya adını sorgu parametresi veya gövde olarak gönderin
+                // Örnek API yolu: /api/ftp/hmi-recipe-preview/{machineId}?fileName={remoteFileName}
+                var response = await _httpClient.GetFromJsonAsync<ScadaRecipe>($"api/ftp/hmi-recipe-preview/{machineId}?fileName={remoteFileName}");
+                return response;
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"API çağrısı sırasında hata: {ex.Message}");
+                return null;
+            }
+        }
+
+        // WinForms: btnSend_Click -> _transferService.QueueSequentiallyNamedSendJobs mantığına karşılık gelir
+        public async Task<bool> QueueSequentiallyNamedSendJobsAsync(List<int> recipeIds, List<int> machineIds, int startNumber)
+        {
+            try
+            {
+                var payload = new
+                {
+                    RecipeIds = recipeIds,
+                    MachineIds = machineIds,
+                    StartNumber = startNumber
+                };
+
+                // Örnek API yolu: /api/ftp/queue-send-jobs
+                var response = await _httpClient.PostAsJsonAsync("api/ftp/queue-send-jobs", payload);
+
+                return response.IsSuccessStatusCode;
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"API çağrısı sırasında hata: {ex.Message}");
+                return false;
+            }
+        }
+
+        // WinForms: btnReceive_Click -> _transferService.QueueReceiveJobs mantığına karşılık gelir
+        public async Task<bool> QueueReceiveJobsAsync(List<string> fileNames, int machineId)
+        {
+            try
+            {
+                var payload = new
+                {
+                    FileNames = fileNames,
+                    MachineId = machineId
+                };
+
+                // Örnek API yolu: /api/ftp/queue-receive-jobs
+                var response = await _httpClient.PostAsJsonAsync("api/ftp/queue-receive-jobs", payload);
+
+                return response.IsSuccessStatusCode;
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"API çağrısı sırasında hata: {ex.Message}");
+                return false;
+            }
+        }
+        public async Task<ProductionDetailDto?> GetProductionDetailAsync(int machineId, string batchId)
+        {
+            try
+            {
+                var url = $"api/reports/production-detail/{machineId}/{batchId}";
+                return await _httpClient.GetFromJsonAsync<ProductionDetailDto>(url);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Üretim detayı alınamadı: {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task<bool> ExportProductionDetailAsync(int machineId, string batchId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"api/reports/export-production-detail/{machineId}/{batchId}");
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Excel dışa aktarımı başarısız: {ex.Message}");
+                return false;
+            }
         }
     }
 }

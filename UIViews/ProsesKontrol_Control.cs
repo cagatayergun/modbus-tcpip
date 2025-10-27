@@ -52,7 +52,7 @@ namespace TekstilScada.UI.Views
             _recipeRepository = recipeRepo;
             _machineRepository = machineRepo;
             _plcManagers = plcManagers;
-           _plcPollingService = plcPollingService;
+            _plcPollingService = plcPollingService;
             _ftpTransferService = ftpTransferService; // YENİ: Alanı atayın
         }
 
@@ -99,7 +99,7 @@ namespace TekstilScada.UI.Views
         private void ApplyRolePermissions()
         {
             // Sadece Admin ve Muhendis (Mühendis) rolleri kaydedebilir.
-          //  btnSaveRecipe.Enabled = CurrentUser.HasRole("Admin") || CurrentUser.HasRole("Muhendis");
+            //  btnSaveRecipe.Enabled = CurrentUser.HasRole("Admin") || CurrentUser.HasRole("Muhendis");
 
 
         }
@@ -116,8 +116,8 @@ namespace TekstilScada.UI.Views
                 LoadRecipeList();
             }
         }
-         
-             
+
+
         private void LoadMachineList()
         {
             var machines = _machineRepository.GetAllEnabledMachines();
@@ -400,7 +400,8 @@ namespace TekstilScada.UI.Views
                 var mainEditor = new StepEditor_Control();
                 mainEditor.LoadStep(selectedStep, selectedMachine);
 
-                mainEditor.StepDataChanged += (s, ev) => {
+                mainEditor.StepDataChanged += (s, ev) =>
+                {
                     // Tıklanan görsel satırı güncellemek için e.RowIndex kullanımı burada doğrudur.
                     if (dgvRecipeSteps.Rows.Count > e.RowIndex)
                     {
@@ -472,106 +473,106 @@ namespace TekstilScada.UI.Views
             {
                 // --- YENİ MANTIK: MAKİNE TİPİNE GÖRE İŞLEM SEÇİMİ ---
                 if (selectedMachine.MachineType == "BYMakinesi")
-            {
-                // 1. FTP bilgileri kontrolü
-                if (string.IsNullOrEmpty(selectedMachine.FtpUsername) || string.IsNullOrEmpty(selectedMachine.IpAddress))
                 {
-                    MessageBox.Show("FTP information (IP Address, Username) is missing for this machine. Please enter the information from the Settings > Machine Management screen.", "Missing Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                // 2. Yeni numaratik giriş panelini kullanarak kullanıcıdan numara al
-                string recipeNumberStr = ShowFtpRecipeNumberDialog();
-                if (string.IsNullOrEmpty(recipeNumberStr))
-                {
-                    return; // Kullanıcı iptal etti
-                }
-
-                if (!int.TryParse(recipeNumberStr, out int recipeNumber) || recipeNumber < 1 || recipeNumber > 99)
-                {
-                    MessageBox.Show("Invalid prescription number. Please enter a number between 1-99.", "Error");
-                    return;
-                }
-
-                // 3. Dosya adını otomatik olarak XPR0000.csv formatına çevir
-                string remoteFileName = string.Format("XPR{0:D5}.csv", recipeNumber);
-
-                btnSendToPlc.Enabled = false;
-                this.Cursor = Cursors.WaitCursor;
-                try
-                {
-                    // 4. Reçeteyi CSV'ye çevir
-                    string csvContent = RecipeCsvConverter.ToCsv(_currentRecipe);
-
-                    // 5. FTP servisi ile dosyayı gönder
-                    var ftpService = new FtpService(selectedMachine.IpAddress, selectedMachine.FtpUsername, selectedMachine.FtpPassword);
-                    await ftpService.UploadFileAsync($"/{remoteFileName}", csvContent);
-
-                    MessageBox.Show($"'Recipe '{_currentRecipe.RecipeName}' was successfully sent to machine '{selectedMachine.MachineName}' with name '{remoteFileName}'.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error sending recipe via FTP: {ex.Message}", "FTP Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                finally
-                {
-                    this.Cursor = Cursors.Default;
-                    btnSendToPlc.Enabled = true;
-                }
-            }
-            else // Kurutma Makinesi gibi diğer makineler için eski, doğrudan PLC'ye yazma yöntemi devam eder
-            {
-                if (_plcManagers == null || !_plcManagers.TryGetValue(selectedMachine.Id, out var plcManager))
-                {
-                    MessageBox.Show($"'{selectedMachine.MachineName}' No active PLC connection found for .", "Connection Error");
-                    return;
-                }
-
-                int? recipeSlot = null;
-                if (selectedMachine.MachineType == "Kurutma Makinesi")
-                {
-                    // Güncellenmiş ShowInputDialog metodunu kullanıyoruz (isNumeric = true)
-                    string input = ShowInputDialog("Please enter the recipe number to be registered in the PLC (1-20):", true);
-                    if (int.TryParse(input, out int slot) && slot >= 1 && slot <= 20)
+                    // 1. FTP bilgileri kontrolü
+                    if (string.IsNullOrEmpty(selectedMachine.FtpUsername) || string.IsNullOrEmpty(selectedMachine.IpAddress))
                     {
-                        recipeSlot = slot;
-                    }
-                    else
-                    {
-                        if (!string.IsNullOrEmpty(input))
-                        {
-                            MessageBox.Show("You have entered an invalid prescription number.", "Error");
-                        }
+                        MessageBox.Show("FTP information (IP Address, Username) is missing for this machine. Please enter the information from the Settings > Machine Management screen.", "Missing Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
                     }
-                }
 
-                btnSendToPlc.Enabled = false;
-                this.Cursor = Cursors.WaitCursor;
-                try
-                {
-                    var result = await plcManager.WriteRecipeToPlcAsync(_currentRecipe, recipeSlot);
-
-                    if (result.IsSuccess)
+                    // 2. Yeni numaratik giriş panelini kullanarak kullanıcıdan numara al
+                    string recipeNumberStr = ShowFtpRecipeNumberDialog();
+                    if (string.IsNullOrEmpty(recipeNumberStr))
                     {
-                        MessageBox.Show($"'Recipe '{_currentRecipe.RecipeName}' was successfully sent to machine '{selectedMachine.MachineName}'.", "Success");
+                        return; // Kullanıcı iptal etti
                     }
-                    else
-                    {
-                        MessageBox.Show($"Error while sending prescription: {result.Message}", "Error");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"An unexpected error occurred: {ex.Message}", "System Error");
-                }
-                finally
-                {
-                    this.Cursor = Cursors.Default;
-                    btnSendToPlc.Enabled = true;
-                }
 
-            }
+                    if (!int.TryParse(recipeNumberStr, out int recipeNumber) || recipeNumber < 1 || recipeNumber > 99)
+                    {
+                        MessageBox.Show("Invalid prescription number. Please enter a number between 1-99.", "Error");
+                        return;
+                    }
+
+                    // 3. Dosya adını otomatik olarak XPR0000.csv formatına çevir
+                    string remoteFileName = string.Format("XPR{0:D5}.csv", recipeNumber);
+
+                    btnSendToPlc.Enabled = false;
+                    this.Cursor = Cursors.WaitCursor;
+                    try
+                    {
+                        // 4. Reçeteyi CSV'ye çevir
+                        string csvContent = RecipeCsvConverter.ToCsv(_currentRecipe);
+
+                        // 5. FTP servisi ile dosyayı gönder
+                        var ftpService = new FtpService(selectedMachine.IpAddress, selectedMachine.FtpUsername, selectedMachine.FtpPassword);
+                        await ftpService.UploadFileAsync($"/{remoteFileName}", csvContent);
+
+                        MessageBox.Show($"'Recipe '{_currentRecipe.RecipeName}' was successfully sent to machine '{selectedMachine.MachineName}' with name '{remoteFileName}'.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error sending recipe via FTP: {ex.Message}", "FTP Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    finally
+                    {
+                        this.Cursor = Cursors.Default;
+                        btnSendToPlc.Enabled = true;
+                    }
+                }
+                else // Kurutma Makinesi gibi diğer makineler için eski, doğrudan PLC'ye yazma yöntemi devam eder
+                {
+                    if (_plcManagers == null || !_plcManagers.TryGetValue(selectedMachine.Id, out var plcManager))
+                    {
+                        MessageBox.Show($"'{selectedMachine.MachineName}' No active PLC connection found for .", "Connection Error");
+                        return;
+                    }
+
+                    int? recipeSlot = null;
+                    if (selectedMachine.MachineType == "Kurutma Makinesi")
+                    {
+                        // Güncellenmiş ShowInputDialog metodunu kullanıyoruz (isNumeric = true)
+                        string input = ShowInputDialog("Please enter the recipe number to be registered in the PLC (1-20):", true);
+                        if (int.TryParse(input, out int slot) && slot >= 1 && slot <= 20)
+                        {
+                            recipeSlot = slot;
+                        }
+                        else
+                        {
+                            if (!string.IsNullOrEmpty(input))
+                            {
+                                MessageBox.Show("You have entered an invalid prescription number.", "Error");
+                            }
+                            return;
+                        }
+                    }
+
+                    btnSendToPlc.Enabled = false;
+                    this.Cursor = Cursors.WaitCursor;
+                    try
+                    {
+                        var result = await plcManager.WriteRecipeToPlcAsync(_currentRecipe, recipeSlot);
+
+                        if (result.IsSuccess)
+                        {
+                            MessageBox.Show($"'Recipe '{_currentRecipe.RecipeName}' was successfully sent to machine '{selectedMachine.MachineName}'.", "Success");
+                        }
+                        else
+                        {
+                            MessageBox.Show($"Error while sending prescription: {result.Message}", "Error");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"An unexpected error occurred: {ex.Message}", "System Error");
+                    }
+                    finally
+                    {
+                        this.Cursor = Cursors.Default;
+                        btnSendToPlc.Enabled = true;
+                    }
+
+                }
             }
             catch (Exception ex)
             {
@@ -584,7 +585,7 @@ namespace TekstilScada.UI.Views
                 btnSendToPlc.Enabled = true;
             }
         }
-    
+
 
 
         public static string ShowInputDialog(string text, bool isNumeric = false)
@@ -794,6 +795,11 @@ namespace TekstilScada.UI.Views
                 _currentRecipe = null;
                 DisplayCurrentRecipe();
             }
+        }
+
+        private void yenile_Click(object sender, EventArgs e)
+        {
+            LoadRecipeList();
         }
     }
 }

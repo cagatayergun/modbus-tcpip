@@ -125,7 +125,7 @@
     private List<HourlyConsumptionData> HourlyConsumptionData = new();
     private List<HourlyOeeData> HourlyOeeData = new();
     private List<TopAlarmData> TopAlarms = new();
-    private List<JsReadyTrendDataPoint> SparklineData = new();
+
     // KPI Alanları
     private int TotalMachines = 0;
     private int RunningMachines = 0;
@@ -162,28 +162,21 @@
 
         await base.OnInitializedAsync();
     }
-    
+
     // KRİTİK: OnAfterRenderAsync metodu eklendi
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (_shouldRenderCharts)
         {
             _shouldRenderCharts = false; // Tekrar çizimi engelle
-            
+
             // Tüm grafik verilerini tek bir çağrıda gönderiyoruz.
             try
             {
-                await JSRuntime.InvokeVoidAsync("plotDashboardCharts", 
-                    HourlyOeeData, 
-                    HourlyConsumptionData, 
+                await JSRuntime.InvokeVoidAsync("plotDashboardCharts",
+                    HourlyOeeData,
+                    HourlyConsumptionData,
                     TopAlarms);
-                // YENİ: Sparkline grafiğini çağır
-                if (SparklineData.Any())
-                {
-                    await JSRuntime.InvokeVoidAsync("plotTemperatureSparkline",
-                        "tempSparklineContainer",
-                        SparklineData);
-                }
             }
             catch (Exception ex)
             {
@@ -199,50 +192,9 @@
         HourlyConsumptionData = await ScadaService.GetHourlyConsumptionAsync() ?? new();
         HourlyOeeData = await ScadaService.GetHourlyOeeAsync() ?? new();
         TopAlarms = await ScadaService.GetTopAlarmsAsync() ?? new();
-        // YENİ: Sparkline verisini çekme (Son 15 dakikalık ortalama sıcaklık trendi)
-        // NOT: Bu metodun ScadaDataService'de tanımlı ve TrendDataPointRich tipinde veri döndürdüğü varsayılır.
-        var rawSparklineData = await ScadaService.GetTemperatureSparklineAsync(TimeSpan.FromMinutes(15));
 
-        if (rawSparklineData != null)
-        {
-            try
-            {
-                // API'den List<object> geldiği için, önce JSON'a çevirip sonra hedef DTO'ya dönüştürüyoruz
-                var jsonString = System.Text.Json.JsonSerializer.Serialize(rawSparklineData);
-                var intermediateData = System.Text.Json.JsonSerializer.Deserialize<List<JsReadyTrendDataPoint>>(
-                    jsonString,
-                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-                );
-
-                if (intermediateData != null)
-                {
-                    // Son DTO oluşumu: Sıcaklık bölmesi ve OADate hesaplaması
-                    SparklineData = intermediateData.Select(d => new JsReadyTrendDataPoint
-                    {
-                        Timestamp = d.Timestamp,
-                        TimestampOADate = d.Timestamp.ToOADate(),
-                        Temperature = (double)d.Temperature / 10.0, // KRİTİK: Sıcaklık dönüşümü
-                        Rpm = (double)d.Rpm,
-                        WaterLevel = (double)d.WaterLevel
-                    }).ToList();
-                }
-                else
-                {
-                    SparklineData = new List<JsReadyTrendDataPoint>();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Sparkline verisi dönüşüm hatası: {ex.Message}");
-                SparklineData = new List<JsReadyTrendDataPoint>();
-            }
-        }
-        else
-        {
-            SparklineData = new List<JsReadyTrendDataPoint>();
-        }
         // Veri yüklendi, artık çizim sinyali verilebilir.
-        _shouldRenderCharts = true; 
+        _shouldRenderCharts = true;
     }
 
     // WinForms'taki BuildMachineCards ve UpdateKpiCards mantıklarını birleştirir
@@ -256,7 +208,7 @@
                 status.MakineTipi = machineDetails.MachineSubType;
             }
         }
-        
+
         // --- KPI Hesaplamaları ---
         TotalMachines = allStatuses.Count;
         RunningMachines = allStatuses.Count(s => s.IsInRecipeMode && !s.HasActiveAlarm);

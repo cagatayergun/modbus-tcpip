@@ -43,6 +43,7 @@ namespace TekstilScada.UI.Views
             pnlCost = new Panel();
             lblTotalCost = new Label();
             lblCostTitle = new Label();
+            yenile = new Button();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -87,6 +88,7 @@ namespace TekstilScada.UI.Views
             // 
             // panel1
             // 
+            panel1.Controls.Add(yenile);
             panel1.Controls.Add(btnDeleteRecipe);
             panel1.Controls.Add(btnNewRecipe);
             panel1.Dock = DockStyle.Bottom;
@@ -98,20 +100,22 @@ namespace TekstilScada.UI.Views
             // 
             // btnDeleteRecipe
             // 
-            btnDeleteRecipe.Location = new Point(114, 8);
+            btnDeleteRecipe.Dock = DockStyle.Left;
+            btnDeleteRecipe.Location = new Point(82, 0);
             btnDeleteRecipe.Margin = new Padding(3, 2, 3, 2);
             btnDeleteRecipe.Name = "btnDeleteRecipe";
-            btnDeleteRecipe.Size = new Size(82, 22);
+            btnDeleteRecipe.Size = new Size(82, 38);
             btnDeleteRecipe.TabIndex = 1;
             btnDeleteRecipe.Text = "Delete";
             btnDeleteRecipe.UseVisualStyleBackColor = true;
             // 
             // btnNewRecipe
             // 
-            btnNewRecipe.Location = new Point(18, 8);
+            btnNewRecipe.Dock = DockStyle.Left;
+            btnNewRecipe.Location = new Point(0, 0);
             btnNewRecipe.Margin = new Padding(3, 2, 3, 2);
             btnNewRecipe.Name = "btnNewRecipe";
-            btnNewRecipe.Size = new Size(82, 22);
+            btnNewRecipe.Size = new Size(82, 38);
             btnNewRecipe.TabIndex = 0;
             btnNewRecipe.Text = "New";
             btnNewRecipe.UseVisualStyleBackColor = true;
@@ -282,6 +286,18 @@ namespace TekstilScada.UI.Views
             lblCostTitle.Text = "Estimated Cost";
             lblCostTitle.TextAlign = ContentAlignment.MiddleCenter;
             // 
+            // yenile
+            // 
+            yenile.Dock = DockStyle.Left;
+            yenile.Location = new Point(164, 0);
+            yenile.Margin = new Padding(3, 2, 3, 2);
+            yenile.Name = "yenile";
+            yenile.Size = new Size(82, 38);
+            yenile.TabIndex = 2;
+            yenile.Text = "Refresh";
+            yenile.UseVisualStyleBackColor = true;
+            yenile.Click += yenile_Click;
+            // 
             // ProsesKontrol_Control
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -322,5 +338,6 @@ namespace TekstilScada.UI.Views
         private System.Windows.Forms.Label lblTotalCost;
         private System.Windows.Forms.Label lblCostTitle;
         private System.Windows.Forms.Button btnCalculateCost;
+        private Button yenile;
     }
 }

@@ -191,7 +191,7 @@
         await LoadMachines();
 
         // 2. Reçeteler yükleniyor
-        await LoadRecipes();
+       await LoadRecipes();
         isBusy = false;
 
         // 3. İlk filtrelemeyi yap. Sayfa boş açılsın diye selectedRecipe = null
@@ -222,7 +222,10 @@
     private async Task LoadRecipes()
     {
         isBusy = true;
+
         recipes = await ScadaDataService.GetRecipesAsync();
+        StateHasChanged();
+        FilterRecipesByMachine(autoSelectFirst: false);
         isBusy = false;
     }
 
@@ -233,12 +236,12 @@
         selectedStep = null;
 
         // 0. Hiç makine seçilmediyse, tüm reçeteleri göster (filtresiz)
-        if (SelectedMachineId == 0 || machines == null || recipes == null)
-        {
-            filteredRecipes = recipes ?? new List<ScadaRecipe>();
-            StateHasChanged();
-            return;
-        }
+       if (SelectedMachineId == 0 || machines == null || recipes == null)
+       {
+           filteredRecipes = new List<ScadaRecipe>();
+           StateHasChanged();
+           return;
+      }
 
         var machine = machines.FirstOrDefault(m => m.Id == SelectedMachineId);
         if (machine == null)

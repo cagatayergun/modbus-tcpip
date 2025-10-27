@@ -74,96 +74,11 @@
     private string SparklineContainerId => $"sparkline-chart-{MachineStatus.MachineId}";
     private bool _isDisposed = false;
 
-    protected override async Task OnInitializedAsync()
-    {
-        // 1. Veri çekme
-        await LoadSparklineDataAsync();
+ 
 
-        // 2. Data Güncellemelerine abone ol (Canlı mod)
-        ScadaService.OnDataUpdated += HandleDataUpdate;
-    }
-    private async Task LoadSparklineDataAsync()
-    {
-        // 15 dakikalık filtreyi oluştur
-        var trendFilter = new ReportFilters
-        {
-            StartTime = DateTime.Now.AddMinutes(-1500),
-            EndTime = DateTime.Now.AddMinutes(1),
-            MachineId = MachineStatus.MachineId // Sadece bu makineyi filtrele
-        };
+ 
 
-        // ScadaService'de GetTrendDataAsync metodunu kullanıyoruz.
-        var rawData = await ScadaService.GetTrendDataAsync(trendFilter);
-        _dataLoaded = true; // Yükleme tamamlandı say
-
-        if (rawData != null && rawData.Any())
-        {
-            try
-            {
-                // JSON Serileştirme/Deserializasyon ve DTO dönüşümü
-                var jsonString = System.Text.Json.JsonSerializer.Serialize(rawData);
-                var intermediateData = System.Text.Json.JsonSerializer.Deserialize<List<JsReadyTrendDataPoint>>(
-                    jsonString,
-                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-                );
-
-                if (intermediateData != null)
-                {
-                    // Sıcaklık bölmesi ve OADate hesaplaması
-                    SparklineData = intermediateData.Select(d => new JsReadyTrendDataPoint
-                    {
-                        Timestamp = d.Timestamp,
-                        TimestampOADate = d.Timestamp.ToOADate(),
-                        Temperature = (double)d.Temperature / 10.0,
-                      
-                    }).ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Makine {MachineStatus.MachineId} Sparkline dönüşüm hatası: {ex.Message}");
-                SparklineData.Clear();
-            }
-        }
-    }
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        // Yalnızca veri yüklendiğinde ve veri varsa çizimi tetikle
-        if (_dataLoaded && SparklineData.Any())
-        {
-            try
-            {
-                // Veri yüklendi, artık çizim sinyali gönderilir.
-               await JSRuntime.InvokeVoidAsync("plotTemperatureSparkline", // Hata bu satırda çözüldü
-                    SparklineContainerId, 
-                    SparklineData);
-
-                // Çizim tetiklendikten sonra bayrağı sıfırla (tekrar çizimi engelle)
-                _dataLoaded = false;
-            }
-            catch (Exception ex)
-            {
-                // Grafiğin çizilememesi durumunda hata loglanır
-                Console.WriteLine($"Makine {MachineStatus.MachineId} JS Çizim Hatası: {ex.Message}");
-            }
-        }
-    }
-
-    private void HandleDataUpdate()
-    {
-        if (_isDisposed) return;
-
-        // Sadece ilgili makinenin durumu değişirse yeniden yükle
-        if (ScadaService.MachineData.TryGetValue(MachineStatus.MachineId, out var status) && status.MachineId == MachineStatus.MachineId)
-        {
-            InvokeAsync(async () =>
-            {
-                // Canlı veri güncellendiğinde Sparkline trend verisini yeniden çek
-                await LoadSparklineDataAsync();
-                StateHasChanged();
-            });
-        }
-    }
+   
     private string GetStatusText()
     {
         if (MachineStatus.ConnectionState != ConnectionStatus.Connected) return "BAĞLANTI YOK";
@@ -184,9 +99,5 @@
     {
         return (MachineStatus.AnlikSicaklik / 10.0m).ToString("F1");
     }
-    public void Dispose()
-    {
-        _isDisposed = true;
-        ScadaService.OnDataUpdated -= HandleDataUpdate;
-    }
+   
 }

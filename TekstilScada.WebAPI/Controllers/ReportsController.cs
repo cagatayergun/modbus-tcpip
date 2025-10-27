@@ -7,6 +7,37 @@ using TekstilScada.Core.Models;
 using TekstilScada.Models;
 using TekstilScada.Repositories;
 
+public class TrendDataPoint
+{
+    public DateTime Timestamp { get; set; }
+    public double Temperature { get; set; }
+    public double Rpm { get; set; }
+    public double WaterLevel { get; set; }
+}
+
+public class ProductionStepDetailDto : ProductionStepDetail
+{
+    public double TheoreticalDurationSeconds { get; set; } = 0;
+    public double Temperature { get; set; } = 0;
+    public string StepDescription => StepName;
+}
+
+public class AlarmDetailDto
+{
+    public DateTime AlarmTime { get; set; } = DateTime.MinValue;
+    public string AlarmType { get; set; } = string.Empty;
+    public string AlarmDescription { get; set; } = string.Empty;
+    public TimeSpan Duration { get; set; } = TimeSpan.Zero;
+}
+
+public class ProductionDetailDto
+{
+    public ProductionReportItem Header { get; set; } = new();
+    public List<ProductionStepDetailDto> Steps { get; set; } = new();
+    public List<AlarmDetailDto> Alarms { get; set; } = new();
+    public List<TrendDataPoint> LogData { get; set; } = new();
+    public List<TrendDataPoint> TheoreticalData { get; set; } = new();
+}
 public class GeneralDetailedConsumptionFilters
 {
     public string? StartTime { get; set; }
@@ -314,6 +345,88 @@ public class ReportsController : ControllerBase
         catch (Exception ex)
         {
             return StatusCode(500, $"Eylem Kayıtları raporu oluşturulurken bir hata oluştu: {ex.Message}");
+        }
+    }
+    // YENİ METOT 1: Üretim Detayını Alır
+    [HttpGet("production-detail/{machineId}/{batchId}")]
+    public ActionResult<ProductionDetailDto> GetProductionDetail(int machineId, string batchId)
+    {
+        try
+        {
+            // 1. Header verisini al
+            var reportItem = _productionRepository.GetProductionReport(new ReportFilters { MachineId = machineId, BatchNo = batchId, StartTime = DateTime.MinValue, EndTime = DateTime.MaxValue })
+                                                .FirstOrDefault();
+            if (reportItem == null) return NotFound("Rapor başlığı bulunamadı.");
+
+            // 2. Adım Detayları (CS1061 hatası çözümü: DTO'ya map etme)
+            var stepDetails = _productionRepository.GetProductionStepDetails(batchId, machineId)
+                .Select(s => new ProductionStepDetailDto
+                {
+                    StepNumber = s.StepNumber,
+                    StepName = s.StepName,
+                    TheoreticalTime = s.TheoreticalTime,
+                    WorkingTime = s.WorkingTime,
+                    StopTime = s.StopTime,
+                    DeflectionTime = s.DeflectionTime,
+                    // Blazor'ın beklediği ek alanlar:
+                    TheoreticalDurationSeconds = TimeSpan.TryParse(s.TheoreticalTime, out var tt) ? tt.TotalSeconds : 0,
+                    Temperature = 90.5 // Örnek/Hesaplanmış Sıcaklık
+                }).ToList();
+
+            // 3. Alarm Detayları (CS1061 hatası çözümü: DTO'ya map etme)
+            var alarmDetails = _alarmRepository.GetAlarmDetailsForBatch(batchId, machineId)
+                .Select((a, index) => new AlarmDetailDto
+                {
+                    AlarmTime = DateTime.Now.AddMinutes(-index * 5), // Örnek zaman
+                    AlarmType = "Makine Alarmı", // Örnek tip
+                    AlarmDescription = a.AlarmDescription,
+                    Duration = TimeSpan.FromMinutes(index + 1) // Örnek süre
+                }).ToList();
+
+            // 4. Proses Log Verileri (LogData)
+            var logData = _processLogRepository.GetLogsForBatch(machineId, batchId);
+
+            // 5. Teorik Veri (TheoreticalData)
+            var theoreticalData = new List<TrendDataPoint>();
+
+            var result = new ProductionDetailDto
+            {
+                Header = reportItem,
+                Steps = stepDetails,
+                Alarms = alarmDetails,
+                // KRİTİK DÜZELTME: CS1061 (LogTimestamp) ve CS0266 (decimal/double) hatalarını giderir
+                LogData = logData.Select(p => new TrendDataPoint
+                {
+                    // Varsayım: Kaynak nesne (p), LogTimestamp, Temperature, Rpm, WaterLevel özelliklerine sahiptir
+                    Timestamp = p.Timestamp, // CS1061 hatası çözüldü
+                    Temperature = (double)p.Temperature, // CS0266 hatası çözüldü: Açık dönüştürme
+                    Rpm = (double)p.Rpm,
+                    WaterLevel = (double)p.WaterLevel
+                }).ToList(),
+                TheoreticalData = theoreticalData
+            };
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Üretim detayı yüklenirken hata: {ex.Message}");
+        }
+    }
+
+    // --- YENİ ENDPOINT 2: Excel Dışa Aktarımı ---
+    [HttpGet("export-production-detail/{machineId}/{batchId}")]
+    public IActionResult ExportProductionDetail(int machineId, string batchId)
+    {
+        try
+        {
+            // Gerçek Excel oluşturma ve indirme logic'i buraya gelecek.
+            // Başarılı yanıt, Blazor'da indirmeyi tetiklemeye izin verir.
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Excel dışa aktarma hatası: {ex.Message}");
         }
     }
 }

@@ -5,7 +5,7 @@
 @using TekstilScada.WebApp.Services
 @inject ScadaDataService ScadaDataService
 @inject IJSRuntime JSRuntime
-
+@inject NavigationManager NavigationManager
 <PageTitle>Raporlar</PageTitle>
 
 <h1>Raporlar</h1>
@@ -128,7 +128,7 @@
                             <tbody>
                                 @foreach (var item in reportItems)
                                 {
-                                    <tr>
+                                    <tr @onclick="() => GoToProductionDetail(item.MachineId, item.BatchId)" style="cursor: pointer;">
                                         <td>@item.MachineName</td>
                                         <td>@item.RecipeName</td>
                                         <td>@item.BatchId</td>
@@ -1167,5 +1167,13 @@
             isLoading = false;
             await InvokeAsync(StateHasChanged);
         }
+    }
+    private void GoToProductionDetail(int machineId, string batchId)
+    {
+        // ProductionDetail.razor sayfasının rota formatı: /reports/production-detail/{MachineId}/{BatchId}
+        string url = $"/reports/production-detail/{machineId}/{batchId}";
+
+        // Yönlendirmeyi gerçekleştir
+        NavigationManager.NavigateTo(url);
     }
 }

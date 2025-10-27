@@ -1,72 +1,372 @@
 ﻿@using TekstilScada.Models
 @using TekstilScada.WebApp.Services
+@using System.Text
 @inject ScadaDataService ScadaDataService
+@inject IJSRuntime JSRuntime
+@if (Machine == null) { return; }
 
-<div class="modal fade show" style="display:block" role="dialog">
-    <div class="modal-dialog modal-xl">
+<div class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,.5);">
+    <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">FTP Senkronizasyon (@Machine.MachineName)</h5>
-                <button type="button" class="btn-close" @onclick="Close"></button>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">FTP Senkronizasyon | Hedef Makine: @Machine.MachineName (@GetMachineFilterType(Machine))</h5>
+                <button type="button" class="btn-close" @onclick="() => OnClose.InvokeAsync()" disabled="@isBusy"></button>
             </div>
             <div class="modal-body">
-                @if (isLoading)
-                {
-                    <p><em>HMI reçeteleri okunuyor...</em></p>
-                }
-                else
-                {
-                    <div class="row">
-                        <div class="col-md-5">
-                            <h6>SCADA Reçeteleri</h6>
-                            <ul class="list-group">
-                                @foreach (var recipe in LocalRecipes)
-                                {
-                                    <li class="list-group-item">@recipe.RecipeName</li>
-                                }
-                            </ul>
-                        </div>
-                        <div class="col-md-2 text-center align-self-center">
-                            <button class="btn btn-primary mb-2 w-100" disabled> &gt;&gt; Gönder</button>
-                            <button class="btn btn-primary w-100" disabled> &lt;&lt; Al</button>
-                        </div>
-                        <div class="col-md-5">
-                            <h6>HMI Reçeteleri</h6>
-                            @if (hmiRecipes == null || hmiRecipes.Any(r => r.StartsWith("Hata:")))
+                <div class="row">
+                    
+                    @* 1. Yerel Reçeteler (lstLocalRecipes) *@
+                    <div class="col-md-4">
+                        <h6 class="text-center">Yerel Reçeteler (@filteredLocalRecipes.Count)</h6>
+                        <div class="list-group recipe-list-height">
+                            @foreach (var recipe in filteredLocalRecipes)
                             {
-                                <div class="alert alert-danger">@hmiRecipes?.FirstOrDefault() ?? "HMI reçeteleri okunamadı."</div>
-                            }
-                            else
-                            {
-                                <ul class="list-group">
-                                    @foreach (var file in hmiRecipes)
-                                    {
-                                        <li class="list-group-item">@file</li>
-                                    }
-                                </ul>
+                                <button type="button" class="list-group-item list-group-item-action @(selectedLocalRecipe?.Id == recipe.Id ? "active" : "")"
+                                        @onclick="() => selectedLocalRecipe = recipe">
+                                    @recipe.RecipeName
+                                </button>
                             }
                         </div>
                     </div>
-                }
+
+                   
+                    <div class="col-md-4 d-flex flex-column justify-content-between">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Gönderim Başlangıç No (1-98):</label>
+                            <input type="number" class="form-control" @bind-value="startRecipeNumber" min="1" max="98" disabled="@isBusy" />
+                            <div class="form-text text-muted">Çoklu gönderimde reçeteler sırayla atanır.</div>
+                        </div>
+
+                        <div class="d-grid gap-2 mb-3">
+                            <button class="btn btn-success" @onclick="SendSelectedRecipes" disabled="@(isBusy || selectedLocalRecipe == null)">
+                                <i class="oi oi-arrow-right"></i> Seçiliyi HMI'a Gönder
+                            </button>
+                            <button class="btn btn-info" @onclick="ReceiveSelectedRecipes" disabled="@(isBusy || selectedHmiRecipe == null)">
+                                <i class="oi oi-arrow-left"></i> Seçiliyi Yerel'e İndir
+                            </button>
+                            <button class="btn btn-secondary" @onclick="LoadHmiRecipes" disabled="@isBusy">
+                                <i class="oi oi-reload"></i> HMI Listesini Yenile
+                            </button>
+                        </div>
+                        
+                        <div class="alert @(isBusy ? "alert-info" : "alert-secondary") mt-auto">
+                            @statusMessage
+                        </div>
+                    </div>
+
+                
+                    <div class="col-md-4">
+                        <h6 class="text-center">HMI/PLC Reçeteleri (@hmiRecipeNames.Count)</h6>
+                        <div class="list-group recipe-list-height">
+                            @foreach (var recipe in hmiRecipeNames)
+                            {
+                                <button type="button" class="list-group-item list-group-item-action @(selectedHmiRecipe?.SlotNumber == recipe.SlotNumber ? "active" : "")"
+                                        @onclick="() => SelectHmiRecipe(recipe)">
+                                    @recipe.DisplayName
+                                </button>
+                            }
+                            @if (!hmiRecipeNames.Any() && !isBusy)
+                            {
+                                <p class="p-2 text-muted text-center">Makine bağlı değil veya reçete bulunamadı.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <hr />
+
+            
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                Reçete Ön İzleme: @(previewRecipe?.RecipeName ?? "Seçim Yapılmadı")
+                            </div>
+                            <div class="card-body preview-area-height" style="max-height: 400px; overflow-y: auto;">
+                                @if (isBusy)
+                                {
+                                    <p class="text-center">@statusMessage</p>
+                                }
+                                else if (previewRecipe == null)
+                                {
+                                    <p class="text-center text-muted">Ön izleme için HMI listesinden bir reçete seçin.</p>
+                                }
+                                else
+                                {
+                                    <h6>Adım Detayları (Sadece Okunur)</h6>
+                                    @foreach (var step in previewRecipe.Steps.OrderBy(s => s.StepNumber))
+                                    {
+                                        <div class="p-1 mb-1 border rounded">
+                                            Adım @step.StepNumber: @GetStepTypeName(step)
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+         
         </div>
     </div>
 </div>
-<div class="modal-backdrop fade show"></div>
+
+<style>
+    .recipe-list-height {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+</style>
+
 
 @code {
     [Parameter] public Machine Machine { get; set; }
-    [Parameter] public List<ScadaRecipe> LocalRecipes { get; set; }
+    [Parameter] public List<ScadaRecipe>? LocalRecipes { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
 
-    private List<string>? hmiRecipes;
-    private bool isLoading = true;
+    private List<ScadaRecipe> filteredLocalRecipes = new();
+    private List<HmiRecipeInfo> hmiRecipeNames = new();
+    private HmiRecipeInfo? selectedHmiRecipe;
+    private ScadaRecipe? selectedLocalRecipe;
+    private ScadaRecipe? previewRecipe; // Ön izleme için indirilen reçete
+    private bool isBusy = false;
+    private string statusMessage = string.Empty;
+    private int startRecipeNumber = 1;
 
-    protected override async Task OnInitializedAsync()
+    // WinForms'taki LoadHmiRecipes çıktısını tutmak için model
+    public class HmiRecipeInfo
     {
-        hmiRecipes = await ScadaDataService.GetHmiRecipesAsync(Machine.Id);
-        isLoading = false;
+        public int SlotNumber { get; set; }
+        public string DisplayName { get; set; }
+        public string RemoteFileName => $"XPR{SlotNumber:D5}.csv";
     }
 
-    private async Task Close() => await OnClose.InvokeAsync();
+    protected override void OnInitialized()
+    {
+        // WinForms'taki LoadLocalRecipes mantığı: Makine tipine göre filtrele
+        string filterType = GetMachineFilterType(Machine);
+        filteredLocalRecipes = LocalRecipes?.Where(r => r.TargetMachineType == filterType).ToList() ?? new();
+
+        // WinForms'taki FtpSync_Form_Load içinde LoadMachines çağrılıp HMI listesi yükleniyordu.
+        InvokeAsync(LoadHmiRecipes);
+    }
+    
+    // WinForms'taki GetMachineFilterType mantığı
+    private string GetMachineFilterType(Machine machine)
+    {
+        return string.IsNullOrEmpty(machine.MachineSubType) ? machine.MachineType : machine.MachineSubType;
+    }
+
+    // WinForms'taki LoadHmiRecipes metodunun karşılığı
+    private async Task LoadHmiRecipes()
+    {
+        if (Machine == null || isBusy) return;
+
+        isBusy = true;
+        hmiRecipeNames.Clear();
+        selectedHmiRecipe = null;
+        previewRecipe = null;
+        statusMessage = "HMI reçete isimleri okunuyor (PLC/FTP üzerinden)...";
+        StateHasChanged();
+        
+        try
+        {
+            // WebAPI çağrısı: plcManager.ReadRecipeNamesFromPlcAsync() mantığını taklit eder
+            // Makinenin bağlantı durumu kontrolü (WinForms'taki LoadMachines içindeki Cache kontrolü) API tarafında yapılır.
+            var recipeNamesFromPlc = await ScadaDataService.GetHmiRecipeNamesAsync(Machine.Id); // Dictionary<int, string> beklenir
+
+            if (recipeNamesFromPlc != null && recipeNamesFromPlc.Any())
+            {
+                hmiRecipeNames = recipeNamesFromPlc
+                    .Select(kvp => new HmiRecipeInfo 
+                    { 
+                     
+                        SlotNumber = kvp.Key, 
+                        // WinForms'taki gibi Key (Slot) ve Value (Name) birleştirilir.
+                        DisplayName = $"{kvp.Key:D2} - {kvp.Value.Replace('\0', ' ').Trim()}"
+                    })
+                    .OrderBy(r => r.SlotNumber)
+                    .ToList();
+                
+                statusMessage = $"{hmiRecipeNames.Count} adet HMI reçetesi bulundu.";
+            }
+            else
+            {
+                statusMessage = "PLC'de kayıtlı reçete adı bulunamadı veya makine bağlantısı yok.";
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"HMI reçeteleri okunurken hata oluştu: {ex.Message}";
+        }
+        finally
+        {
+            isBusy = false;
+            StateHasChanged();
+        }
+    }
+    
+    // WinForms'taki lstHmiRecipes_SelectedIndexChanged mantığının iki aşaması: 1. Seçim 2. Önizleme
+    private async Task SelectHmiRecipe(HmiRecipeInfo recipe)
+    {
+        selectedHmiRecipe = recipe;
+        await LoadHmiRecipePreview(recipe);
+    }
+    
+    private async Task LoadHmiRecipePreview(HmiRecipeInfo recipe)
+    {
+        if (Machine == null) return;
+
+        isBusy = true;
+        previewRecipe = null;
+        statusMessage = $"'{recipe.RemoteFileName}' dosyasının ön izlemesi yükleniyor...";
+        StateHasChanged();
+
+        try
+        {
+            // WebAPI çağrısı: WinForms'taki FtpService.DownloadFileAsync() ve RecipeCsvConverter.ToRecipe() işlemlerini soyutlar.
+            // API, FTP üzerinden CSV'yi indirir, reçeteye çevirir ve geri döndürür.
+            previewRecipe = await ScadaDataService.GetHmiRecipePreviewAsync(Machine.Id, recipe.RemoteFileName);
+
+            if (previewRecipe != null)
+            {
+                // WinForms'ta GeneratePreviewRecipeName metodu karmaşık bir isim oluşturuyordu.
+                // Burada basitçe HMI'dan okunan adı kullanıyoruz.
+                previewRecipe.RecipeName = recipe.DisplayName;
+                statusMessage = "Ön izleme başarıyla yüklendi.";
+            }
+            else
+            {
+                statusMessage = "Ön izleme yüklenirken hata: Reçete boş döndü.";
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Ön izleme yüklenemedi: {ex.Message}";
+        }
+        finally
+        {
+            isBusy = false;
+            StateHasChanged();
+        }
+    }
+
+
+    // WinForms'taki btnSend_Click metodunun karşılığı
+    public async Task SendSelectedRecipes()
+    {
+        if (selectedLocalRecipe == null || Machine == null)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Lütfen en az bir yerel reçete ve hedef makine seçin.");
+            return;
+        }
+
+        // WinForms'taki slot limit kontrolü
+        if (startRecipeNumber < 1 || startRecipeNumber > 98)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Başlangıç reçete numarası 1 ile 98 arasında olmalıdır.");
+            return;
+        }
+        
+        // WinForms çoklu seçime izin verdiği için burada sadece tek seçili reçete üzerinden kontrol yapıyoruz.
+        if (startRecipeNumber > 98) 
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Başlangıç numarası ({startRecipeNumber}) 98 limitini aşıyor.");
+            return;
+        }
+
+        isBusy = true;
+        statusMessage = "Gönderim kuyruğa alınıyor...";
+        StateHasChanged();
+
+        try
+        {
+            // WebAPI çağrısı: WinForms'taki _transferService.QueueSequentiallyNamedSendJobs yerine geçer
+            // Tek bir reçete için:
+            bool success = await ScadaDataService.QueueSequentiallyNamedSendJobsAsync(
+                new List<int> { selectedLocalRecipe.Id }, 
+                new List<int> { Machine.Id }, 
+                startRecipeNumber
+            );
+
+            if (success)
+            {
+                statusMessage = "Gönderim işi başarıyla kuyruğa alındı.";
+                await JSRuntime.InvokeVoidAsync("alert", statusMessage);
+            }
+            else
+            {
+                statusMessage = "Gönderim işi kuyruğa alınamadı.";
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Gönderme sırasında hata: {ex.Message}";
+        }
+        finally
+        {
+            isBusy = false;
+            StateHasChanged();
+        }
+    }
+
+    // WinForms'taki btnReceive_Click metodunun karşılığı
+    public async Task ReceiveSelectedRecipes()
+    {
+        if (selectedHmiRecipe == null || Machine == null)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Lütfen indirilecek bir HMI reçetesi seçin.");
+            return;
+        }
+
+        // WinForms'ta çoklu alma destekleniyordu, burada tek seçime göre devam ediyoruz.
+        var filesToReceive = new List<string> { selectedHmiRecipe.RemoteFileName };
+        
+        isBusy = true;
+        statusMessage = "Alma işi kuyruğa alınıyor...";
+        StateHasChanged();
+        
+        try
+        {
+            // WebAPI çağrısı: WinForms'taki _transferService.QueueReceiveJobs yerine geçer
+            bool success = await ScadaDataService.QueueReceiveJobsAsync(filesToReceive, Machine.Id);
+            
+            if (success)
+            {
+                // WinForms'ta LoadLocalRecipes çağrılıyordu. Başarılı olursa listeyi yenile.
+                await OnClose.InvokeAsync(); // Modalı kapat ve ana sayfayı yenile (ProsesKontrol'de bu beklenir)
+                statusMessage = "Alma işi başarıyla kuyruğa alındı ve ana listeye yansıtılacak.";
+            }
+            else
+            {
+                statusMessage = "Alma işi kuyruğa alınamadı.";
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Alma sırasında hata: {ex.Message}";
+        }
+        finally
+        {
+            isBusy = false;
+            StateHasChanged();
+        }
+    }
+    
+    // WinForms'taki GetStepTypeName mantığı
+    private string GetStepTypeName(ScadaRecipeStep step)
+    {
+        var stepTypes = new List<string>();
+        if (step.StepDataWords.Length > 24)
+        {
+            short controlWord = step.StepDataWords[24];
+            if ((controlWord & 1) != 0) stepTypes.Add("Su Alma");
+            if ((controlWord & 2) != 0) stepTypes.Add("Isıtma");
+            if ((controlWord & 4) != 0) stepTypes.Add("Çalışma");
+            if ((controlWord & 8) != 0) stepTypes.Add("Dozaj");
+            if ((controlWord & 16) != 0) stepTypes.Add("Boşaltma");
+            if ((controlWord & 32) != 0) stepTypes.Add("Sıkma");
+        }
+        return stepTypes.Any() ? string.Join(" + ", stepTypes) : "Tanımsız Adım";
+    }
 }
