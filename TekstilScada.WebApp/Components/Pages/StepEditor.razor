@@ -4,18 +4,25 @@
 @using TekstilScada.Models
 @using TekstilScada.Repositories
 @inject IJSRuntime JSRuntime
-@inject RecipeConfigurationRepository ConfigRepo
+@* --- DEĞİŞİKLİK 1: ESKİSİNİ SİLİN --- *@
+@* @inject RecipeConfigurationRepository ConfigRepo *@
+
+@* --- DEĞİŞİKLİK 2: API SERVİSİNİ EKLEYİN --- *@
+@* (Servisinizin adı farklıysa burada düzeltin. Bu servis WebApp/Program.cs içinde kayıtlı olmalı) *@
+@inject TekstilScada.WebApp.Services.ScadaDataService ScadaService 
 
 <div class="step-editor-container">
 
     @if (!string.IsNullOrEmpty(errorMessage))
     {
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <strong>Kural İhlali:</strong> @errorMessage
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Hata Oluştu:</strong>
+            <pre style="white-space: pre-wrap; word-break: break-all;">@errorMessage</pre>
             <button type="button" class="btn-close" @onclick="() => errorMessage = null" aria-label="Close"></button>
         </div>
     }
-
+    
+    @* ... (HTML'in geri kalanı aynı kalır) ... *@
     @if (MachineSubType == "Kurutma Makinesi")
     {
         <div class="alert alert-info">
@@ -64,17 +71,15 @@
 </div>
 
 @code {
-    // --- PARAMETRELER ---
     [Parameter] public ScadaRecipeStep Step { get; set; }
-    [Parameter] public string MachineSubType { get; set; } = "DEFAULT"; 
+    [Parameter] public string MachineSubType { get; set; } = "DEFAULT";
     [Parameter] public EventCallback OnChanged { get; set; }
 
-    // --- YENİ EKLENEN/DEĞİŞTİRİLEN ALANLAR ---
     private bool _isUpdating = false;
     private List<StepControlMetadata> _activeControlsMetadata = new();
     private string? errorMessage; 
 
-    // --- YARDIMCI SINIFLAR ---
+    // ... (Yardımcı sınıflar ve Veriler aynı kalır: StepControlMetadata, StepTypeInfo, StepTypes, StepColorMap) ...
 
     private class StepControlMetadata : ControlMetadata
     {
@@ -90,7 +95,6 @@
         public StepTypeInfo(int id, string name, short bitValue, int plcWordIndex) { Id = id; Name = name; BitValue = bitValue; PLC_WordIndex = plcWordIndex; }
     }
 
-    // --- VERİLER ---
     private List<StepTypeInfo> StepTypes = new()
     {
         new StepTypeInfo(1, "Su Alma", 1, 0),    
@@ -100,7 +104,6 @@
         new StepTypeInfo(5, "Boşaltma", 16, 10), 
         new StepTypeInfo(6, "Sıkma", 32, 8)      
     };
-    
     private List<StepTypeInfo> ActiveStepInfos => StepTypes.Where(s => IsStepTypeChecked(s.BitValue)).ToList();
     
     private readonly Dictionary<int, string> StepColorMap = new()
@@ -110,99 +113,135 @@
         { 5, "rgba(173, 216, 230, 0.7)" }, { 6, "rgba(213, 213, 211, 0.7)" }
     };
 
-    // --- LIFE CYCLE ---
+
+    // --- LIFE CYCLE (GÜNCELLENDİ: HATA YAKALAMA EKLENDİ) ---
     protected override async Task OnInitializedAsync()
     {
-        if (Step == null)
+        try
         {
-            Step = new ScadaRecipeStep(); 
+            if (ScadaService == null)
+            {
+                errorMessage = "Kritik Hata: ScadaDataService servisi 'Program.cs' içinde kayıtlı değil (Dependency Injection hatası).";
+                return; 
+            }
+
+            if (Step == null)
+            {
+                Step = new ScadaRecipeStep();
+            }
+            
+            if (Step.StepDataWords == null || Step.StepDataWords.Length < 25)
+            {
+                Step.StepDataWords = new short[25];
+            }
+            
+            if (MachineSubType != "Kurutma Makinesi")
+            {
+                await LoadControlsData();
+            }
         }
-        // StepDataWords dizisinin varlığını garanti altına al (Boş reçete yüklenmesi durumunda)
-        if (Step.StepDataWords == null || Step.StepDataWords.Length < 25)
+        catch (Exception ex)
         {
-            Step.StepDataWords = new short[25];
-        }
-        
-        if (MachineSubType != "Kurutma Makinesi")
-        {
-            await LoadControlsData();
+            errorMessage = $"Bileşen yüklenirken kritik bir hata oluştu: {ex.Message}\n--- STACK TRACE ---\n{ex.StackTrace}";
         }
     }
     
-    // --- ADIM TİPİ KONTROLÜ VE YÜKLEME ---
-
+    // ... (OnStepTypeChanged metodu aynı kalır, LoadControlsData'yı çağırdığı için o da hata yakalamış olur) ...
     private bool IsStepTypeChecked(short bit) => (Step != null && Step.StepDataWords.Length > 24 && (Step.StepDataWords[24] & bit) != 0);
-
+    
     private async Task OnStepTypeChanged(StepTypeInfo changedStep, bool isChecked)
     {
         if (_isUpdating || Step == null) return;
         errorMessage = null; 
 
-        short newControlWord = Step.StepDataWords[24];
-        if (isChecked) newControlWord |= changedStep.BitValue;
-        else newControlWord &= (short)~changedStep.BitValue;
-
-        if (!IsSelectionValid(newControlWord))
+        try
         {
-            errorMessage = "En fazla 2 farklı işlem türü seçilebilir veya Sıkma/Boşaltma adımları diğer standart adımlarla bir arada seçilemez.";
-            return;
-        }
+            short newControlWord = Step.StepDataWords[24];
+            if (isChecked) newControlWord |= changedStep.BitValue;
+            else newControlWord &= (short)~changedStep.BitValue;
 
-        Step.StepDataWords[24] = newControlWord;
-        
-        await LoadControlsData();
-        
-        await OnChanged.InvokeAsync(null);
+            if (!IsSelectionValid(newControlWord))
+            {
+                errorMessage = "En fazla 2 farklı işlem türü seçilebilir veya Sıkma/Boşaltma adımları diğer standart adımlarla bir arada seçilemez.";
+                return;
+            }
+
+            Step.StepDataWords[24] = newControlWord;
+            
+            await LoadControlsData();
+            
+            await OnChanged.InvokeAsync(null);
+        }
+        catch (Exception ex)
+        {
+             errorMessage = $"Adım tipi değiştirilirken hata oluştu: {ex.Message}\n--- STACK TRACE ---\n{ex.StackTrace}";
+        }
     }
-    
+
+    // --- GÜNCELLENMİŞ METOT (API SERVİSİ KULLANIYOR) ---
     private async Task LoadControlsData()
     {
-        _activeControlsMetadata.Clear();
-        
-        var activeStepIds = ActiveStepInfos.Select(s => s.Id).ToList();
-
-        foreach(var stepId in activeStepIds)
+        try
         {
-            string layoutJson = GetSimulatedLayoutJson(stepId); 
+            _activeControlsMetadata.Clear();
+            var activeStepIds = ActiveStepInfos.Select(s => s.Id).ToList();
 
-            if (!string.IsNullOrEmpty(layoutJson))
+            foreach(var stepId in activeStepIds)
             {
-                try
+                // --- DEĞİŞİKLİK 3: ConfigRepo yerine API servisi çağrılır ---
+                // (Metot adı ScadaDataService içinde farklı olabilir, varsayılan olarak GetLayoutJsonAsync kullanıldı)
+                string layoutJson = await ScadaService.GetLayoutJsonAsync(MachineSubType, stepId);
+                
+                // API "DEFAULT" mantığını kendi içinde halletmiyorsa, onu burada tekrar deneyebiliriz.
+                if (string.IsNullOrEmpty(layoutJson) && MachineSubType != "DEFAULT")
                 {
-                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                    var controls = JsonSerializer.Deserialize<List<ControlMetadata>>(layoutJson, options);
-                    
-                    if (controls != null)
+                     layoutJson = await ScadaService.GetLayoutJsonAsync("DEFAULT", stepId);
+                }
+                                    
+                if (!string.IsNullOrEmpty(layoutJson))
+                {
+                    try
                     {
-                        foreach(var control in controls)
+                        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                        var controls = JsonSerializer.Deserialize<List<ControlMetadata>>(layoutJson, options);
+                        
+                        if (controls != null)
                         {
-                            _activeControlsMetadata.Add(new StepControlMetadata
+                            foreach(var control in controls)
                             {
-                                ParentStepId = stepId,
-                                ControlType = control.ControlType,
-                                Name = control.Name,
-                                Text = control.Text,
-                                PLC_WordIndex = control.PLC_WordIndex,
-                                PLC_BitIndex = control.PLC_BitIndex,
-                                DecimalPlaces = control.DecimalPlaces,
-                                Maximum = control.Maximum,
-                                StringWordLength = control.StringWordLength
-                            });
+                                _activeControlsMetadata.Add(new StepControlMetadata
+                                {
+                                    ParentStepId = stepId,
+                                    ControlType = control.ControlType,
+                                    Name = control.Name,
+                                    Text = control.Text,
+                                    PLC_WordIndex = control.PLC_WordIndex,
+                                    PLC_BitIndex = control.PLC_BitIndex,
+                                    DecimalPlaces = control.DecimalPlaces,
+                                    Maximum = control.Maximum,
+                                    StringWordLength = control.StringWordLength
+                                });
+                            }
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    // Circuit termination hatasını yakalar ve çöküşü engeller
-                    Console.WriteLine($"FATAL JSON PROCESSING ERROR for Step ID {stepId}: {ex.Message}");
+                    catch (JsonException jsonEx)
+                    {
+                        errorMessage = $"API'den gelen JSON işlenemedi (Step ID {stepId}): {jsonEx.Message}. Gelen JSON: {layoutJson.Substring(0, Math.Min(layoutJson.Length, 100))}...";
+                    }
                 }
             }
         }
+        catch (Exception ex)
+        {
+            // Bu, ScadaService.GetLayoutJsonAsync() API çağrısı sırasındaki hatayı yakalar
+            errorMessage = $"Kontrol verisi API'den yüklenirken hata oluştu: {ex.Message}\n--- STACK TRACE ---\n{ex.StackTrace}";
+        }
         
-        StateHasChanged(); 
+        await InvokeAsync(StateHasChanged);
     }
     
-    // --- KURAL KONTROLÜ ---
+    // ... (Kural Kontrolü, PLC Veri Yönetimi ve RenderControl metotları aynı kalır) ...
+    
     private bool IsSelectionValid(short controlWord)
     {
         var checkedSteps = StepTypes.Where(s => (controlWord & s.BitValue) != 0).ToList();
@@ -210,7 +249,7 @@
 
         if (checkedCount > 2) return false;
 
-        var specialStepIds = new List<int> { 5, 6 }; 
+        var specialStepIds = new List<int> { 5, 6 };
         var standardStepIds = new List<int> { 1, 2, 3, 4 };
 
         bool isAnySpecialChecked = checkedSteps.Any(c => specialStepIds.Contains(c.Id));
@@ -221,12 +260,9 @@
         return true;
     }
 
-    // --- PLC VERİ YÖNETİMİ ---
-
     private string GetStringValue(int wordIndex, int length)
     {
         if (Step == null || wordIndex + length > Step.StepDataWords.Length) return string.Empty;
-        
         char[] chars = new char[length * 2];
         for (int i = 0; i < length; i++)
         {
@@ -240,7 +276,6 @@
     private void SetStringValue(int wordIndex, int length, string value)
     {
         if (Step == null || wordIndex + length > Step.StepDataWords.Length) return;
-        
         string paddedValue = value.PadRight(length * 2, '\0');
         for (int i = 0; i < length; i++)
         {
@@ -250,7 +285,6 @@
                 word |= (short)paddedValue[charIndex];
             if (charIndex + 1 < paddedValue.Length)
                 word |= (short)(paddedValue[charIndex + 1] << 8);
-                
             Step.StepDataWords[wordIndex + i] = word;
         }
     }
@@ -274,34 +308,41 @@
     private async Task OnDynamicControlValueChanged(ChangeEventArgs e, ControlMetadata data)
     {
         if (_isUpdating || Step == null || data.PLC_WordIndex >= Step.StepDataWords.Length) return;
+        
+        try
+        {
+            if (data.ControlType.Contains("NumericUpDown") || data.ControlType == "InputNumber")
+            {
+                if (decimal.TryParse(e.Value?.ToString(), out decimal newValue))
+                {
+                    if (data.DecimalPlaces > 0)
+                        Step.StepDataWords[data.PLC_WordIndex] = (short)(newValue * (decimal)Math.Pow(10, data.DecimalPlaces));
+                    else
+                        Step.StepDataWords[data.PLC_WordIndex] = (short)Math.Round(newValue);
+                }
+            }
+            else if (data.ControlType.Contains("CheckBox") || data.ControlType == "InputCheckbox")
+            {
+                if (bool.TryParse(e.Value?.ToString(), out bool isChecked))
+                {
+                    SetBit(Step.StepDataWords, data.PLC_WordIndex, data.PLC_BitIndex, isChecked);
+                }
+            }
+            else if (data.ControlType.Contains("TextBox") || data.ControlType == "InputText")
+            {
+                string newValue = e.Value?.ToString() ?? string.Empty;
+                if (data.StringWordLength > 0)
+                {
+                    SetStringValue(data.PLC_WordIndex, data.StringWordLength, newValue);
+                }
+            }
 
-        if (data.ControlType.Contains("NumericUpDown") || data.ControlType == "InputNumber")
-        {
-            if (decimal.TryParse(e.Value?.ToString(), out decimal newValue))
-            {
-                if (data.DecimalPlaces > 0)
-                    Step.StepDataWords[data.PLC_WordIndex] = (short)(newValue * (decimal)Math.Pow(10, data.DecimalPlaces));
-                else
-                    Step.StepDataWords[data.PLC_WordIndex] = (short)Math.Round(newValue);
-            }
+            await OnChanged.InvokeAsync(null);
         }
-        else if (data.ControlType.Contains("CheckBox") || data.ControlType == "InputCheckbox")
+        catch (Exception ex)
         {
-            if (bool.TryParse(e.Value?.ToString(), out bool isChecked))
-            {
-                SetBit(Step.StepDataWords, data.PLC_WordIndex, data.PLC_BitIndex, isChecked);
-            }
+            errorMessage = $"Değer değiştirilirken hata oluştu: {ex.Message}";
         }
-        else if (data.ControlType.Contains("TextBox") || data.ControlType == "InputText")
-        {
-            string newValue = e.Value?.ToString() ?? string.Empty;
-            if (data.StringWordLength > 0)
-            {
-                SetStringValue(data.PLC_WordIndex, data.StringWordLength, newValue);
-            }
-        }
-
-        await OnChanged.InvokeAsync(null);
     }
 
     private void SetBit(short[] data, int wordIndex, int bitIndex, bool value)
@@ -310,70 +351,57 @@
         else data[wordIndex] = (short)(data[wordIndex] & ~(1 << bitIndex));
     }
 
-    // --- DİNAMİK KONTROL RENDER METOTLARI (CS1061 Hatası Çözümü) ---
-
     private RenderFragment RenderControl(ControlMetadata data, int stepId)
     {
         return builder =>
         {
-            if (data.ControlType.Contains("NumericUpDown") || data.ControlType == "InputNumber")
+            try
             {
-                decimal currentValue = GetNumericValue(data.PLC_WordIndex, data.DecimalPlaces);
+                if (data.ControlType.Contains("NumericUpDown") || data.ControlType == "InputNumber")
+                {
+                    decimal currentValue = GetNumericValue(data.PLC_WordIndex, data.DecimalPlaces);
 
-                builder.OpenElement(0, "input");
-                builder.AddAttribute(1, "type", "number");
-                builder.AddAttribute(2, "class", "form-control");
-                builder.AddAttribute(3, "max", data.Maximum);
-                builder.AddAttribute(4, "step", data.DecimalPlaces > 0 ? (1m / (decimal)Math.Pow(10, data.DecimalPlaces)).ToString() : "1");
-                builder.AddAttribute(5, "value", currentValue);
-                builder.AddAttribute(6, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e => OnDynamicControlValueChanged(e, data)));
-                builder.CloseElement();
+                    builder.OpenElement(0, "input");
+                    builder.AddAttribute(1, "type", "number");
+                    builder.AddAttribute(2, "class", "form-control");
+                    builder.AddAttribute(3, "max", data.Maximum);
+                    builder.AddAttribute(4, "step", data.DecimalPlaces > 0 ? (1m / (decimal)Math.Pow(10, data.DecimalPlaces)).ToString() : "1");
+                    builder.AddAttribute(5, "value", currentValue);
+                    builder.AddAttribute(6, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e => OnDynamicControlValueChanged(e, data)));
+                    builder.CloseElement();
+                }
+                else if (data.ControlType.Contains("CheckBox") || data.ControlType == "InputCheckbox")
+                {
+                    bool isChecked = GetBitValue(data.PLC_WordIndex, data.PLC_BitIndex);
+                    
+                    builder.OpenElement(0, "input");
+                    builder.AddAttribute(1, "type", "checkbox");
+                    builder.AddAttribute(2, "class", "form-check-input");
+                    builder.AddAttribute(3, "checked", isChecked);
+                    builder.AddAttribute(4, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e => OnDynamicControlValueChanged(e, data)));
+                    builder.CloseElement();
+                }
+                else if (data.ControlType.Contains("TextBox") || data.ControlType == "InputText")
+                {
+                    string currentValue = GetStringValue(data.PLC_WordIndex, data.StringWordLength);
+                    
+                    builder.OpenElement(0, "input");
+                    builder.AddAttribute(1, "type", "text");
+                    builder.AddAttribute(2, "class", "form-control");
+                    builder.AddAttribute(3, "maxlength", data.StringWordLength * 2); 
+                    builder.AddAttribute(4, "value", currentValue);
+                    builder.AddAttribute(5, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e => OnDynamicControlValueChanged(e, data)));
+                    builder.CloseElement();
+                }
             }
-            else if (data.ControlType.Contains("CheckBox") || data.ControlType == "InputCheckbox")
+            catch (Exception ex)
             {
-                bool isChecked = GetBitValue(data.PLC_WordIndex, data.PLC_BitIndex);
-
-                builder.OpenElement(0, "input");
-                builder.AddAttribute(1, "type", "checkbox");
-                builder.AddAttribute(2, "class", "form-check-input");
-                builder.AddAttribute(3, "checked", isChecked);
-                builder.AddAttribute(4, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e => OnDynamicControlValueChanged(e, data)));
-                builder.CloseElement();
-            }
-            else if (data.ControlType.Contains("TextBox") || data.ControlType == "InputText")
-            {
-                string currentValue = GetStringValue(data.PLC_WordIndex, data.StringWordLength);
-
-                builder.OpenElement(0, "input");
-                builder.AddAttribute(1, "type", "text");
-                builder.AddAttribute(2, "class", "form-control");
-                builder.AddAttribute(3, "maxlength", data.StringWordLength * 2); 
-                builder.AddAttribute(4, "value", currentValue);
-                builder.AddAttribute(5, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e => OnDynamicControlValueChanged(e, data)));
+                errorMessage = $"Kontrol '{data.Text}' render edilirken hata oluştu: {ex.Message}";
+                builder.OpenElement(0, "div");
+                builder.AddAttribute(1, "class", "text-danger");
+                builder.AddContent(2, $"Kontrol yüklenemedi: {ex.Message}");
                 builder.CloseElement();
             }
         };
-    }
-
-    // --- JSON SIMÜLASYONU (RecipeStepParams.cs ile tam uyumlu hale getirildi) ---
-    private string GetSimulatedLayoutJson(int stepId)
-    {
-        switch (stepId)
-        {
-            case 1: // Su Alma (MiktarLitre: Word 1, Kontrol Bitleri: Word 0)
-                return @"[{ ""ControlType"": ""InputNumber"", ""Text"": ""Miktar (Litre)"", ""PLC_WordIndex"": 1, ""DecimalPlaces"": 0, ""Maximum"": 5000.0 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Sıcak Su"", ""PLC_WordIndex"": 0, ""PLC_BitIndex"": 0 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Soğuk Su"", ""PLC_WordIndex"": 0, ""PLC_BitIndex"": 1 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Yumuşak Su"", ""PLC_WordIndex"": 0, ""PLC_BitIndex"": 2 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Tambur Durdur"", ""PLC_WordIndex"": 0, ""PLC_BitIndex"": 3 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Alarm"", ""PLC_WordIndex"": 0, ""PLC_BitIndex"": 4 }]";
-            case 2: // Isıtma (Isi: Word 3, Süre: Word 4, Kontrol Bitleri: Word 2)
-                return @"[{ ""ControlType"": ""InputNumber"", ""Text"": ""Hedef Sıcaklık (°C)"", ""PLC_WordIndex"": 3, ""DecimalPlaces"": 1, ""Maximum"": 150.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Süre (dk)"", ""PLC_WordIndex"": 4, ""DecimalPlaces"": 0, ""Maximum"": 600.0 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Direk Buhar"", ""PLC_WordIndex"": 2, ""PLC_BitIndex"": 0 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Dolaylı Buhar"", ""PLC_WordIndex"": 2, ""PLC_BitIndex"": 1 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Tambur Durdur"", ""PLC_WordIndex"": 2, ""PLC_BitIndex"": 2 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Alarm"", ""PLC_WordIndex"": 2, ""PLC_BitIndex"": 3 }]";
-            case 3: // Çalışma (Word 14, 15, 16, 18 Veri; Word 17 Kontrol Bitleri)
-                return @"[{ ""ControlType"": ""InputNumber"", ""Text"": ""Sağ/Sol Süre (sn)"", ""PLC_WordIndex"": 14, ""DecimalPlaces"": 0, ""Maximum"": 10.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Bekleme Süresi (sn)"", ""PLC_WordIndex"": 15, ""DecimalPlaces"": 0, ""Maximum"": 60.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Çalışma Devri (RPM)"", ""PLC_WordIndex"": 16, ""DecimalPlaces"": 0, ""Maximum"": 100.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Çalışma Süresi (dk)"", ""PLC_WordIndex"": 18, ""DecimalPlaces"": 0, ""Maximum"": 600.0 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Isı Kontrol"", ""PLC_WordIndex"": 17, ""PLC_BitIndex"": 0 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Alarm"", ""PLC_WordIndex"": 17, ""PLC_BitIndex"": 1 }]";
-            case 4: // Dozaj (Kimyasal: Word 21-23 (3 Word, 6 char), Kontrol Bitleri: Word 5)
-                return @"[{ ""ControlType"": ""InputText"", ""Text"": ""Kimyasal Adı"", ""PLC_WordIndex"": 21, ""StringWordLength"": 3 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Tank Su Seviyesi"", ""PLC_WordIndex"": 20, ""DecimalPlaces"": 0, ""Maximum"": 500.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Çözme Süresi (sn)"", ""PLC_WordIndex"": 6, ""DecimalPlaces"": 0, ""Maximum"": 600.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Dozaj Süresi (sn)"", ""PLC_WordIndex"": 7, ""DecimalPlaces"": 0, ""Maximum"": 600.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Dozaj Miktarı (Litre)"", ""PLC_WordIndex"": 11, ""DecimalPlaces"": 0, ""Maximum"": 1000.0 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Ana Tank Mak. Su"", ""PLC_WordIndex"": 5, ""PLC_BitIndex"": 1 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Ana Tank Temiz Su"", ""PLC_WordIndex"": 5, ""PLC_BitIndex"": 2 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Tambur Durdur"", ""PLC_WordIndex"": 5, ""PLC_BitIndex"": 3 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Alarm"", ""PLC_WordIndex"": 5, ""PLC_BitIndex"": 4 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Tank 1 Su"", ""PLC_WordIndex"": 5, ""PLC_BitIndex"": 5 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Tank 1 Dozaj"", ""PLC_WordIndex"": 5, ""PLC_BitIndex"": 9 }]";
-            case 5: // Boşaltma (Word 10, 15, 12 Veri; Word 13 Kontrol Bitleri)
-                return @"[{ ""ControlType"": ""InputNumber"", ""Text"": ""Sağ/Sol Süre (sn)"", ""PLC_WordIndex"": 10, ""DecimalPlaces"": 0, ""Maximum"": 10.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Bekleme Süresi (sn)"", ""PLC_WordIndex"": 15, ""DecimalPlaces"": 0, ""Maximum"": 60.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Çalışma Devri (RPM)"", ""PLC_WordIndex"": 12, ""DecimalPlaces"": 0, ""Maximum"": 100.0 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Tambur Durdur"", ""PLC_WordIndex"": 13, ""PLC_BitIndex"": 0 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Alarm"", ""PLC_WordIndex"": 13, ""PLC_BitIndex"": 1 }]";
-            case 6: // Sıkma (SikmaDevri: Word 8, SikmaSure: Word 9)
-                return @"[{ ""ControlType"": ""InputNumber"", ""Text"": ""Sıkma Devri (RPM)"", ""PLC_WordIndex"": 8, ""DecimalPlaces"": 0, ""Maximum"": 150.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Sıkma Süresi (dk)"", ""PLC_WordIndex"": 9, ""DecimalPlaces"": 0, ""Maximum"": 60.0 }]";
-            default:
-                return @"[]";
-        }
     }
 }
