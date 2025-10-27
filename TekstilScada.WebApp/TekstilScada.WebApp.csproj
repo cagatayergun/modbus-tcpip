@@ -6,8 +6,10 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.21" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.21" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.7" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\TekstilScada.Core\TekstilScada.Core.csproj" />

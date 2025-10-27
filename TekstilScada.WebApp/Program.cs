@@ -1,46 +1,57 @@
-// Dosya: TekstilScada.WebApp/Program.cs
+// Dosya: TekstilScada.WebApp/Program.cs (HATA CS1061 DÜZELTÝLDÝ)
 
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using TekstilScada.WebApp.Components;
 using TekstilScada.WebApp.Services;
-using Microsoft.AspNetCore.Components.Authorization; // Bunu ekleyin
-using Blazored.LocalStorage; // Bunu ekleyin
-using TekstilScada.WebApp.Services; // Bunu ekleyin
+using Microsoft.AspNetCore.Components.Authorization;
+using Blazored.LocalStorage;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+
+
 var builder = WebApplication.CreateBuilder(args);
+
+// KRÝTÝK DÜZELTME: UseAuthentication'ý desteklemek için boþ bir þema ekliyoruz.
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+    .AddInteractiveServerComponents()
+    // HATA ÇÖZÜMÜ: .AddServerComponents() ve .AddServerSideBlazor() çaðrýlarý kaldýrýldý.
+    .AddCircuitOptions(options => { options.DetailedErrors = true; }); // Detaylý hatalar için
+
+
 // 1. Blazored Local Storage'ý ekle
-// 1. Blazored Local Storage
 builder.Services.AddBlazoredLocalStorage();
 
-// 2. Blazor Yetkilendirme
-builder.Services.AddAuthorizationCore();
+// 2. Blazor Yetkilendirme (AuthorizationCore yerine, full yetkilendirme servislerini kullan)
+builder.Services.AddAuthorization(options =>
+{
+    // FallbackPolicy tüm sayfalarýn yetkilendirme gerektirmesini saðlar
+    options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
-// 3. (ÖNEMLÝ) CustomAuthStateProvider'ý doðru HttpClient ile kaydetme
+// 3. CustomAuthStateProvider kaydý
 builder.Services.AddScoped<CustomAuthStateProvider>(sp =>
 {
     var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
-    // "WebApiClient" adýný ScadaDataService ile ayný kullandýðýnýzdan emin olun
     var httpClient = httpClientFactory.CreateClient("WebApiClient");
     var localStorage = sp.GetRequiredService<ILocalStorageService>();
     return new CustomAuthStateProvider(httpClient, localStorage);
 });
 
-// 4. (ÖNEMLÝ) Arayüzü (interface) somut sýnýfa (concrete class) yönlendirme
+// 4. CustomAuthStateProvider'ý ana kimlik doðrulama saðlayýcýsý olarak ata
 builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
     provider.GetRequiredService<CustomAuthStateProvider>());
-
-// Arayüz (interface) kaydýný, yukarýdaki somut (concrete) sýnýfa yönlendir
-// Bu, Blazor'un temel sisteminin arayüzü kullanmasýný saðlar.
 
 
 // 1. "WebApiClient" adýyla özel bir HttpClient yapýlandýrýyoruz.
 builder.Services.AddHttpClient("WebApiClient", client =>
 {
-    // LÜTFEN WebAPI projenizin çalýþtýðý PORT numarasýný burada kontrol edin!
-    // Genellikle 7000'li bir sayýdýr.
     client.BaseAddress = new Uri("http://192.168.1.28:7039");
 })
 .ConfigurePrimaryHttpMessageHandler(() =>
@@ -56,13 +67,13 @@ builder.Services.AddHttpClient("WebApiClient", client =>
 builder.Services.AddSingleton(sp =>
 {
     var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
-    var httpClient = httpClientFactory.CreateClient("WebApiClient"); // Ýsmine göre doðru istemciyi istiyoruz.
+    var httpClient = httpClientFactory.CreateClient("WebApiClient");
     return new ScadaDataService(httpClient);
 });
 
 // --- YAPILANDIRMA SONU ---
 builder.Services.AddScoped<CircuitHandler, UnhandledCircuitExceptionHandler>();
-builder.Services.AddLogging(); // Logger kullanmak için gerekli (zaten olabilir)
+builder.Services.AddLogging();
 
 var app = builder.Build();
 
@@ -77,8 +88,14 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
+// KRÝTÝK: UseAuthentication ve UseAuthorization, MapRazorComponents'tan ÖNCE OLMALIDIR.
+app.UseAuthentication();
+app.UseAuthorization();
+
+// KRÝTÝK: Yetkilendirme artýk FallbackPolicy ve Routes.razor tarafýndan yönetilecek
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
 
 // Uygulama baþlarken ScadaDataService'i baþlatýyoruz.
 var scadaDataService = app.Services.GetRequiredService<ScadaDataService>();
@@ -98,7 +115,7 @@ app.Use(async (context, next) =>
     }
     catch (Exception ex)
     {
-        // Yalnýzca /_blazor (Blazor Circuit) yolunda oluþan hatalarý yakalamaya odaklan
+        // Yalnýzca /_blazor (Blazor Circuit) yolunda oluþan hatalara odaklan
         if (context.Request.Path.StartsWithSegments("/_blazor"))
         {
             // Detaylý hatayý sunucu konsoluna yazdýr

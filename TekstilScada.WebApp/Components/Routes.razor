@@ -4,38 +4,20 @@
 @* (RedirectToLogin.razor'u 'Shared' klasörüne koyduğumuzu varsayarak) *@
 
 <CascadingAuthenticationState>
-    <Router AppAssembly="typeof(Program).Assembly">
+    <Router AppAssembly="@typeof(Program).Assembly">
         <Found Context="routeData">
-
-            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)">
-
-                @* GİRİŞ YAPMAMIŞ KULLANCIYI YAKALA *@
+            @* DefaultLayout olarak MainLayout'u kullan, ancak yetkisiz ise RedirectToLogin'a yönlendir. *@
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
                 <NotAuthorized>
-                    @if (context.User.Identity?.IsAuthenticated != true)
-                    {
-                        @* Login sayfasına GÖNDER *@
-                        <RedirectToLogin />
-                    }
-                    else
-                    {
-                        <p>Bu sayfayı görüntülemek için yetkiniz bulunmamaktadır.</p>
-                    }
+                    @* Kullanıcı yetkili değilse, onu oturum açma sayfasına yönlendir. *@
+                    <RedirectToLogin />
                 </NotAuthorized>
-
-                @* (Opsiyonel) Yükleniyor ekranı *@
-                <Authorizing>
-                    <p>Yetki kontrol ediliyor...</p>
-                </Authorizing>
-
             </AuthorizeRouteView>
-
-            <FocusOnNavigate RouteData="routeData" Selector="h1" />
-
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
         </Found>
         <NotFound>
-            <PageTitle>Bulunamadı</PageTitle>
-            <LayoutView Layout="typeof(MainLayout)">
-                <p role="alert">Üzgünüz, bu adreste bir şey yok.</p>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <p role="alert">Üzgünüz, böyle bir sayfa bulunamadı.</p>
             </LayoutView>
         </NotFound>
     </Router>

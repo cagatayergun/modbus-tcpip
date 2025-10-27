@@ -1,87 +1,101 @@
 ﻿@page "/login"
-@attribute [AllowAnonymous] 
-
-
-@using Microsoft.AspNetCore.Authorization 
-@using TekstilScada.WebApp.Components.Layout
-@using TekstilScada.WebApp.Services
-@inject CustomAuthStateProvider AuthProvider
+@layout EmptyLayout
+@attribute [AllowAnonymous]
 @inject NavigationManager NavigationManager
+@inject CustomAuthStateProvider AuthStateProvider
+@using TekstilScada.Core.Models
+@using System.Text.Json
+@using Blazored.LocalStorage
+@using Microsoft.AspNetCore.Authorization
+@using TekstilScada.WebApp.Services
+@using Microsoft.AspNetCore.Components.Forms
+@using TekstilScada.WebApp.Components.Layout
 
-@layout EmptyLayout 
-
-
-
-<h3>Giriş Yap</h3>
-
-@if (!string.IsNullOrEmpty(errorMessage))
-{
-    <div class="alert alert-danger">@errorMessage</div>
-}
-
-<div class="card">
-    <div class="card-body">
-        <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+<div class="login-container">
+    <div class="card p-4 shadow-lg">
+        <h3 class="card-title text-center mb-4">Giriş Yap</h3>
+        @* KRİTİK DÜZELTME: Benzersiz bir FormName atıyoruz *@
+        <EditForm Model="loginModel" OnValidSubmit="HandleLogin" FormName="loginForm">
             <DataAnnotationsValidator />
+            <div class="mb-3">
+                <label for="username" class="form-label">Kullanıcı Adı</label>
+                <InputText id="username" class="form-control" @bind-Value="loginModel.Username" />
+                <ValidationMessage For="@(() => loginModel.Username)" />
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Şifre</label>
+                <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />
+                <ValidationMessage For="@(() => loginModel.Password)" />
+            </div>
 
-            <div class="mb-3">
-                <label>Kullanıcı Adı</label>
-                <InputText class="form-control" @bind-Value="loginModel.Username" />
-                <ValidationMessage For="() => loginModel.Username" />
-            </div>
-            <div class="mb-3">
-                <label>Şifre</label>
-                <InputText type="password" class="form-control" @bind-Value="loginModel.Password" />
-                <ValidationMessage For="() => loginModel.Password" />
-            </div>
-            <button type="submit" class="btn btn-primary" disabled="@isBusy">
-                @if (isBusy)
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger" role="alert">
+                    @errorMessage
+                </div>
+            }
+
+            <button type="submit" class="btn btn-primary w-100" disabled="@isProcessing">
+                @if (isProcessing)
                 {
-                    <span class="spinner-border spinner-border-sm"></span>
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+
                 }
-                Giriş Yap
+                else
+                {
+                    <span>Giriş Yap</span>
+                }
             </button>
         </EditForm>
     </div>
 </div>
 
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-color: #f8f9fa;
+    }
+
+    .card {
+        width: 100%;
+        max-width: 400px;
+        border-radius: 10px;
+    }
+</style>
+
 @code {
-    private LoginRequest loginModel = new();
-    private string? errorMessage;
-    private bool isBusy = false;
+    private LoginModel loginModel = new LoginModel();
+    private string errorMessage = string.Empty;
+    private bool isProcessing = false;
+
+    private class LoginModel
+    {
+        // DataAnnotations eklemedim, ancak production ortamı için eklemenizi öneririm (örneğin [Required])
+        public string Username { get; set; }
+        public string Password { get; set; }
+    }
 
     private async Task HandleLogin()
     {
-        isBusy = true;
-        errorMessage = null;
-        try
-        {
-            var success = await AuthProvider.LoginAsync(loginModel.Username, loginModel.Password);
-            if (success)
-            {
-                NavigationManager.NavigateTo("/"); // Ana sayfaya yönlendir
-            }
-            else
-            {
-                errorMessage = "Kullanıcı adı veya şifre hatalı.";
-            }
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"Giriş yapılamadı: {ex.Message}";
-        }
-        finally
-        {
-            isBusy = false;
-        }
-    }
+        isProcessing = true;
+        errorMessage = string.Empty;
 
-    public class LoginRequest
-    {
-        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Kullanıcı adı zorunludur.")]
-        public string Username { get; set; } = string.Empty;
+        // CustomAuthStateProvider'daki LoginAsync metodunu çağırıyoruz.
+        bool loginSuccess = await AuthStateProvider.LoginAsync(loginModel.Username, loginModel.Password);
 
-        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Şifre zorunludur.")]
-        public string Password { get; set; } = string.Empty;
+        if (loginSuccess)
+        {
+            // Giriş başarılıysa ana sayfaya yönlendir
+            NavigationManager.NavigateTo("/", true);
+        }
+        else
+        {
+            errorMessage = "Giriş başarısız. Lütfen kullanıcı adı ve şifrenizi kontrol edin.";
+        }
+
+        isProcessing = false;
     }
 }

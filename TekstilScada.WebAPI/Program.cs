@@ -4,6 +4,10 @@ using TekstilScada.Repositories;
 using TekstilScada.Services;
 using TekstilScada.WebAPI.Hubs;
 using TekstilScada.WebAPI.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer; // Eklendi
+using Microsoft.IdentityModel.Tokens; // Eklendi
+using System.Text; // Eklendi
+using Microsoft.AspNetCore.Authorization; // Eklendi
 
 var builder = WebApplication.CreateBuilder(args);
 // 1. Configuration'dan (appsettings.json) veritabaný baðlantý dizesini oku.
@@ -16,6 +20,35 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
+
+// === JWT Yapýlandýrmasý BAÞLANGIÇ ===
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is missing");
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+    };
+});
+
+builder.Services.AddAuthorization(); // Yetkilendirme servisini ekle
+// === JWT Yapýlandýrmasý SONU ===
+
 
 // === TekstilScada Servislerini Buraya Ekliyoruz ===
 // Proje boyunca tek bir örneði olacak tüm servisleri Singleton olarak kaydediyoruz.
@@ -56,7 +89,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
-app.UseAuthorization();
+// KRÝTÝK SIRALAMA: Kimlik doðrulama, Yetkilendirmeden önce gelmelidir.
+app.UseAuthentication(); // JWT doðrulamasýný etkinleþtir
+app.UseAuthorization(); // Yetkilendirme kurallarýný etkinleþtir
 app.MapControllers();
 app.MapHub<ScadaHub>("/scadaHub");
 

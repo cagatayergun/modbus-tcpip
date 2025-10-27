@@ -5,11 +5,11 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using TekstilScada.Models;
-using System.Collections.Generic; // List<T> için
-using System.Linq; // Split için
-using System; // Convert için
-using System.Text.Json; // JsonSerializer için
+using TekstilScada.Models; // Bu using TekstilScada.Core.Models ise düzeltilmeli
+using System.Collections.Generic;
+using System.Linq;
+using System;
+using System.Text.Json;
 
 namespace TekstilScada.WebApp.Services
 {
@@ -17,7 +17,8 @@ namespace TekstilScada.WebApp.Services
     public class LoginResponseModel
     {
         public string Token { get; set; }
-        public User UserInfo { get; set; }
+        public object UserInfo { get; set; } // User yerine daha genel bir tip kullanıldı
+        public string Message { get; set; } // API'den gelen hata mesajını yakalamak için eklendi
     }
 
     public class CustomAuthStateProvider : AuthenticationStateProvider
@@ -35,15 +36,12 @@ namespace TekstilScada.WebApp.Services
         }
 
         // --- ADIM 1: PRERENDERING GÜVENLİĞİ ---
-        // Burası ASLA localStorage'a (JavaScript'e) dokunmamalı.
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             if (_hasCheckedLocalStorage)
             {
                 return new AuthenticationState(_currentUser);
             }
-
-            // Prerendering sırasında "anonim" dön, JS hatası alma.
             return await Task.FromResult(new AuthenticationState(_anonymous));
         }
 
@@ -68,36 +66,53 @@ namespace TekstilScada.WebApp.Services
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_currentUser)));
         }
 
-        // --- ADIM 3: GİRİŞ HATASININ ÇÖZÜMÜ (PascalCase JSON) ---
+        // --- ADIM 3: GİRİŞ İŞLEMİ (Hata Ayıklama Eklendi) ---
         public async Task<bool> LoginAsync(string username, string password)
         {
             var loginPayload = new { Username = username, Password = password };
 
-            // --- *** KODUNUZDAKİ EKSİK KISIM BURASI *** ---
-            // API'nin PascalCase {"Username": ...} beklediğini söylüyoruz.
             var serializerOptions = new JsonSerializerOptions
             {
-                PropertyNamingPolicy = null
+                PropertyNamingPolicy = null // PascalCase API için uyumlu
             };
-            // ---------------------------------------------
 
-            // API'ye 'serializerOptions' ile istek atıyoruz
+            // API'ye istek atıyoruz
             var response = await _httpClient.PostAsJsonAsync("api/auth/login", loginPayload, serializerOptions);
 
             if (!response.IsSuccessStatusCode)
             {
+                // HATA DURUMU: 401, 500 vb. durum kodları
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"[API HATA] HTTP Status: {response.StatusCode}. Yanıt İçeriği: {errorContent}");
+
+                // Login.razor'da gösterilen hata mesajını tetikler
                 return false;
             }
 
-            var loginResult = await response.Content.ReadFromJsonAsync<LoginResponseModel>();
+            // BAŞARILI HTTP DURUMU (200 OK)
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"[API BAŞARILI] Gelen JSON: {jsonResponse}");
 
-            // API 200 OK dönse bile, TOKEN gelmediyse (giriş hatalıysa) false dön
-            if (loginResult == null || string.IsNullOrEmpty(loginResult.Token))
+            LoginResponseModel loginResult;
+            try
             {
-                return false; // "Kullanıcı adı yanlış" hatasını bu tetikler
+                // JSON'u okurken büyük/küçük harf duyarsızlığı eklendi
+                loginResult = JsonSerializer.Deserialize<LoginResponseModel>(jsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[JSON HATA] API yanıtı LoginResponseModel'e dönüştürülemedi: {ex.Message}");
+                return false;
             }
 
-            // --- BAŞARILI GİRİŞ ---
+            if (loginResult == null || string.IsNullOrEmpty(loginResult.Token))
+            {
+                // API 200 OK dönse bile, TOKEN gelmediyse (en olası Web API hatası)
+                Console.WriteLine($"[TOKEN HATA] API'den token gelmedi. Muhtemel neden: AuthController'da JWT üretimi başarısız.");
+                return false;
+            }
+
+            // --- BAŞARILI GİRİŞ VE TOKEN İŞLEME ---
             await _localStorage.SetItemAsync("authToken", loginResult.Token);
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", loginResult.Token);
 
