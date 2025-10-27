@@ -52,7 +52,7 @@ builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
 // 1. "WebApiClient" adýyla özel bir HttpClient yapýlandýrýyoruz.
 builder.Services.AddHttpClient("WebApiClient", client =>
 {
-    client.BaseAddress = new Uri("http://192.168.1.28:7039");
+    client.BaseAddress = new Uri("http://192.168.1.101:7039");
 })
 .ConfigurePrimaryHttpMessageHandler(() =>
 {

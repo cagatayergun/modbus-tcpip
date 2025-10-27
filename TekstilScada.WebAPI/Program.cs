@@ -16,7 +16,13 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // 2. Okunan baðlantý dizesini Core katmanýndaki statik AppConfig sýnýfýna ata.
 // Bu sayede projedeki tüm Repository sýnýflarý doðru baðlantý dizesini kullanabilir.
 TekstilScada.Core.AppConfig.SetConnectionString(connectionString);
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Gelen ve giden JSON verilerinde C# modelindeki 'PascalCase' (Büyük Harf Baþlangýçlý) formatý korur.
+        // Bu, Blazor istemcisinin gönderdiði JSON'un API'deki LoginModel'e doðru baðlanmasýný saðlar.
+        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();

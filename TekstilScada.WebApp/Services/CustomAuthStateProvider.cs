@@ -67,21 +67,28 @@ namespace TekstilScada.WebApp.Services
         }
 
         // --- ADIM 3: GİRİŞ İŞLEMİ (Hata Ayıklama Eklendi) ---
+        // --- ADIM 3: GİRİŞ İŞLEMİ (DÜZELTİLDİ: JSON Serileştirme Kontrolü) ---
         public async Task<bool> LoginAsync(string username, string password)
         {
+            // 1. DÜZELTME: API'deki modelle eşleşen 'PascalCase' özellikleri kullanarak anonim nesneyi oluşturun.
             var loginPayload = new { Username = username, Password = password };
 
+            // 2. JSON'u elle serileştirin ve PropertyNamingPolicy = null ile 'PascalCase' formatını ZORLAYIN.
             var serializerOptions = new JsonSerializerOptions
             {
-                PropertyNamingPolicy = null // PascalCase API için uyumlu
+                PropertyNamingPolicy = null // Bu ayar, PascalCase C# özellik adlarını korur.
             };
+            var jsonContent = JsonSerializer.Serialize(loginPayload, serializerOptions);
 
-            // API'ye istek atıyoruz
-            var response = await _httpClient.PostAsJsonAsync("api/auth/login", loginPayload, serializerOptions);
+            // 3. StringContent kullanarak JSON'u HTTP isteğine dönüştürün.
+            var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+
+            // 4. PostAsJsonAsync yerine PostAsync kullanın.
+            var response = await _httpClient.PostAsync("api/auth/login", httpContent);
 
             if (!response.IsSuccessStatusCode)
             {
-                // HATA DURUMU: 401, 500 vb. durum kodları
+                // HATA DURUMU: 400, 401, 500 vb. durum kodları
                 var errorContent = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"[API HATA] HTTP Status: {response.StatusCode}. Yanıt İçeriği: {errorContent}");
 
@@ -96,7 +103,7 @@ namespace TekstilScada.WebApp.Services
             LoginResponseModel loginResult;
             try
             {
-                // JSON'u okurken büyük/küçük harf duyarsızlığı eklendi
+                // Gelen JSON'u okurken, API'nin yanıt formatına karşı büyük/küçük harf duyarsızlığı ile okumaya devam edin.
                 loginResult = JsonSerializer.Deserialize<LoginResponseModel>(jsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             }
             catch (Exception ex)
@@ -107,8 +114,7 @@ namespace TekstilScada.WebApp.Services
 
             if (loginResult == null || string.IsNullOrEmpty(loginResult.Token))
             {
-                // API 200 OK dönse bile, TOKEN gelmediyse (en olası Web API hatası)
-                Console.WriteLine($"[TOKEN HATA] API'den token gelmedi. Muhtemel neden: AuthController'da JWT üretimi başarısız.");
+                Console.WriteLine($"[TOKEN HATA] API'den token gelmedi.");
                 return false;
             }
 

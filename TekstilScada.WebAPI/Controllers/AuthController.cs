@@ -107,7 +107,14 @@ namespace TekstilScada.WebAPI.Controllers
             {
                 // KRİTİK HATA YAKALANDI: Genellikle LiteDB erişimi veya eksik JWT anahtarı.
                 _logger.LogCritical(ex, $"[AUTH CRITICAL ERROR] Giriş sırasında beklenmedik bir hata oluştu. Kullanıcı: {model.Username}");
-                return StatusCode(500, new { message = "Sunucu hatası: Giriş yapılamadı." });
+
+                // TEST AMAÇLI GEÇİCİ DEĞİŞİKLİK:
+                return StatusCode(500, new
+                {
+                    message = "Sunucu hatası: Giriş yapılamadı.",
+                    // ex.Message'ı yanıt gövdesine ekle
+                    detailedError = ex.Message
+                });
             }
         }
     }
