@@ -17,8 +17,9 @@ namespace TekstilScada.WebApp.Services
     public class LoginResponseModel
     {
         public string Token { get; set; }
-        public object UserInfo { get; set; } // User yerine daha genel bir tip kullanıldı
-        public string Message { get; set; } // API'den gelen hata mesajını yakalamak için eklendi
+        public string Message { get; set; }
+        public string Username { get; set; } // Bu alanı ekleyin
+        public List<string> Roles { get; set; } // Bu alanı ekleyin
     }
 
     public class CustomAuthStateProvider : AuthenticationStateProvider
@@ -70,20 +71,23 @@ namespace TekstilScada.WebApp.Services
         // --- ADIM 3: GİRİŞ İŞLEMİ (DÜZELTİLDİ: JSON Serileştirme Kontrolü) ---
         public async Task<bool> LoginAsync(string username, string password)
         {
-            // 1. DÜZELTME: API'deki modelle eşleşen 'PascalCase' özellikleri kullanarak anonim nesneyi oluşturun.
+            // ...
+
+            // 1. Payload oluşturma
             var loginPayload = new { Username = username, Password = password };
 
-            // 2. JSON'u elle serileştirin ve PropertyNamingPolicy = null ile 'PascalCase' formatını ZORLAYIN.
+            // 2. KRİTİK DÜZELTME: JSON'u Web API standardı olan 'camelCase' formatında serileştirin.
             var serializerOptions = new JsonSerializerOptions
             {
-                PropertyNamingPolicy = null // Bu ayar, PascalCase C# özellik adlarını korur.
+                // DÜZELTME: C# özellik adlarını (PascalCase) korumak için 'null' kullanın
+                PropertyNamingPolicy = null
             };
             var jsonContent = JsonSerializer.Serialize(loginPayload, serializerOptions);
 
             // 3. StringContent kullanarak JSON'u HTTP isteğine dönüştürün.
             var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
 
-            // 4. PostAsJsonAsync yerine PostAsync kullanın.
+            // 4. İsteği gönder
             var response = await _httpClient.PostAsync("api/auth/login", httpContent);
 
             if (!response.IsSuccessStatusCode)
