@@ -1,82 +1,379 @@
-﻿@using TekstilScada.Models
+﻿@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using TekstilScada.Models
+@using TekstilScada.Repositories
 @inject IJSRuntime JSRuntime
+@inject RecipeConfigurationRepository ConfigRepo
 
 <div class="step-editor-container">
-    <div class="step-types">
-        <h6>Adım Tipleri</h6>
-        <div class="form-check"><input class="form-check-input" type="checkbox" @bind="isSuAlma" /> <label>Su Alma</label></div>
-        <div class="form-check"><input class="form-check-input" type="checkbox" @bind="isIsitma" /> <label>Isıtma</label></div>
-        <div class="form-check"><input class="form-check-input" type="checkbox" @bind="isCalisma" /> <label>Çalışma</label></div>
-        <div class="form-check"><input class="form-check-input" type="checkbox" @bind="isDozaj" /> <label>Dozaj</label></div>
-        <div class="form-check"><input class="form-check-input" type="checkbox" @bind="isBosaltma" /> <label>Boşaltma</label></div>
-        <div class="form-check"><input class="form-check-input" type="checkbox" @bind="isSikma" /> <label>Sıkma</label></div>
-    </div>
-    <div class="step-params">
-        @if (isSuAlma)
-        {
-            <SuAlmaEditor Step="Step" OnChanged="NotifyParent" />
-        }
-        @if (isIsitma)
-        {
-            <IsitmaEditor Step="Step" OnChanged="NotifyParent" />
-        }
-        @if (isCalisma)
-        {
-            <CalismaEditor Step="Step" OnChanged="NotifyParent" />
-        }
-        @if (isDozaj)
-        {
-            <DozajEditor Step="Step" OnChanged="NotifyParent" />
-        }
-        @if (isBosaltma)
-        {
-            <BosaltmaEditor Step="Step" OnChanged="NotifyParent" />
-        }
-        @if (isSikma)
-        {
-            <SikmaEditor Step="Step" OnChanged="NotifyParent" />
-        }
-    </div>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>Kural İhlali:</strong> @errorMessage
+            <button type="button" class="btn-close" @onclick="() => errorMessage = null" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (MachineSubType == "Kurutma Makinesi")
+    {
+        <div class="alert alert-info">
+            Bu adım kurutma makinesine aittir. Editör yapısı statiktir.
+        </div>
+        <KurutmaStepEditor Step="Step" OnChanged="OnChanged" />
+    }
+    else
+    {
+        <div class="step-types">
+            <h6>Adım Tipleri</h6>
+            <div class="pnlStepTypes">
+                @foreach (var stepType in StepTypes)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox"
+                               checked="@(IsStepTypeChecked(stepType.BitValue))"
+                               @onchange="e => OnStepTypeChanged(stepType, (bool)e.Value)" />
+                        <label>@stepType.Name</label>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="step-params">
+            <div class="flpParameters">
+                @foreach (var stepInfo in ActiveStepInfos)
+                {
+                    <div class="card mb-3" style="border: 1px solid #ccc; background-color: @StepColorMap[stepInfo.Id];">
+                        <div class="card-header" style="font-weight: bold;">@stepInfo.Name.ToUpper()</div>
+                        <div class="card-body">
+                            
+                            @* Adıma ait dinamik kontrolleri filtrele ve render et *@
+                            @foreach (var data in _activeControlsMetadata.Where(d => d.ParentStepId == stepInfo.Id))
+                            {
+                                <div class="mb-2">
+                                    <label class="form-label me-2">@data.Text</label>
+                                    @RenderControl(data, stepInfo.Id)
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
 </div>
 
 @code {
+    // --- PARAMETRELER ---
     [Parameter] public ScadaRecipeStep Step { get; set; }
+    [Parameter] public string MachineSubType { get; set; } = "DEFAULT"; 
     [Parameter] public EventCallback OnChanged { get; set; }
 
-    // Checkbox'lar için property'ler
-    private bool isSuAlma { get => GetBit(1); set => SetBit(1, value); }
-    private bool isIsitma { get => GetBit(2); set => SetBit(2, value); }
-    private bool isCalisma { get => GetBit(4); set => SetBit(4, value); }
-    private bool isDozaj { get => GetBit(8); set => SetBit(8, value); }
-    private bool isBosaltma { get => GetBit(16); set => SetBit(16, value); }
-    private bool isSikma { get => GetBit(32); set => SetBit(32, value); }
+    // --- YENİ EKLENEN/DEĞİŞTİRİLEN ALANLAR ---
+    private bool _isUpdating = false;
+    private List<StepControlMetadata> _activeControlsMetadata = new();
+    private string? errorMessage; 
 
-    // Kontrol kelimesindeki biti okuyan metot
-    private bool GetBit(short bit) => (Step.StepDataWords[24] & bit) != 0;
+    // --- YARDIMCI SINIFLAR ---
 
-    // Kontrol kelimesindeki biti güncelleyen ve KURAL KONTROLÜ yapan metot
-    private async Task SetBit(short bit, bool value)
+    private class StepControlMetadata : ControlMetadata
     {
-        var currentBits = new List<bool> { isSuAlma, isIsitma, isCalisma, isDozaj, isBosaltma, isSikma };
-        int checkedCount = currentBits.Count(c => c);
-
-        // Eğer yeni bir seçim yapılıyorsa ve zaten 2 tane seçiliyse, engelle.
-        if (value == true && checkedCount >= 2)
-        {
-            await JSRuntime.InvokeVoidAsync("alert", "Bir adımda en fazla 2 farklı işlem türü seçebilirsiniz.");
-            return; // Değişikliği yapma
-        }
-
-        if (value)
-        {
-            Step.StepDataWords[24] |= bit;
-        }
-        else
-        {
-            Step.StepDataWords[24] &= (short)~bit;
-        }
-        await NotifyParent();
+        public int ParentStepId { get; set; }
     }
 
-    private async Task NotifyParent() => await OnChanged.InvokeAsync();
+    private class StepTypeInfo
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public short BitValue { get; set; }
+        public int PLC_WordIndex { get; set; }
+        public StepTypeInfo(int id, string name, short bitValue, int plcWordIndex) { Id = id; Name = name; BitValue = bitValue; PLC_WordIndex = plcWordIndex; }
+    }
+
+    // --- VERİLER ---
+    private List<StepTypeInfo> StepTypes = new()
+    {
+        new StepTypeInfo(1, "Su Alma", 1, 0),    
+        new StepTypeInfo(2, "Isıtma", 2, 2),     
+        new StepTypeInfo(3, "Çalışma", 4, 14),   
+        new StepTypeInfo(4, "Dozaj", 8, 5),      
+        new StepTypeInfo(5, "Boşaltma", 16, 10), 
+        new StepTypeInfo(6, "Sıkma", 32, 8)      
+    };
+    
+    private List<StepTypeInfo> ActiveStepInfos => StepTypes.Where(s => IsStepTypeChecked(s.BitValue)).ToList();
+    
+    private readonly Dictionary<int, string> StepColorMap = new()
+    {
+        { 1, "rgba(204, 229, 255, 0.7)" }, { 2, "rgba(255, 204, 204, 0.7)" },
+        { 3, "rgba(204, 255, 204, 0.7)" }, { 4, "rgba(255, 211, 106, 0.7)" },
+        { 5, "rgba(173, 216, 230, 0.7)" }, { 6, "rgba(213, 213, 211, 0.7)" }
+    };
+
+    // --- LIFE CYCLE ---
+    protected override async Task OnInitializedAsync()
+    {
+        if (Step == null)
+        {
+            Step = new ScadaRecipeStep(); 
+        }
+        // StepDataWords dizisinin varlığını garanti altına al (Boş reçete yüklenmesi durumunda)
+        if (Step.StepDataWords == null || Step.StepDataWords.Length < 25)
+        {
+            Step.StepDataWords = new short[25];
+        }
+        
+        if (MachineSubType != "Kurutma Makinesi")
+        {
+            await LoadControlsData();
+        }
+    }
+    
+    // --- ADIM TİPİ KONTROLÜ VE YÜKLEME ---
+
+    private bool IsStepTypeChecked(short bit) => (Step != null && Step.StepDataWords.Length > 24 && (Step.StepDataWords[24] & bit) != 0);
+
+    private async Task OnStepTypeChanged(StepTypeInfo changedStep, bool isChecked)
+    {
+        if (_isUpdating || Step == null) return;
+        errorMessage = null; 
+
+        short newControlWord = Step.StepDataWords[24];
+        if (isChecked) newControlWord |= changedStep.BitValue;
+        else newControlWord &= (short)~changedStep.BitValue;
+
+        if (!IsSelectionValid(newControlWord))
+        {
+            errorMessage = "En fazla 2 farklı işlem türü seçilebilir veya Sıkma/Boşaltma adımları diğer standart adımlarla bir arada seçilemez.";
+            return;
+        }
+
+        Step.StepDataWords[24] = newControlWord;
+        
+        await LoadControlsData();
+        
+        await OnChanged.InvokeAsync(null);
+    }
+    
+    private async Task LoadControlsData()
+    {
+        _activeControlsMetadata.Clear();
+        
+        var activeStepIds = ActiveStepInfos.Select(s => s.Id).ToList();
+
+        foreach(var stepId in activeStepIds)
+        {
+            string layoutJson = GetSimulatedLayoutJson(stepId); 
+
+            if (!string.IsNullOrEmpty(layoutJson))
+            {
+                try
+                {
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    var controls = JsonSerializer.Deserialize<List<ControlMetadata>>(layoutJson, options);
+                    
+                    if (controls != null)
+                    {
+                        foreach(var control in controls)
+                        {
+                            _activeControlsMetadata.Add(new StepControlMetadata
+                            {
+                                ParentStepId = stepId,
+                                ControlType = control.ControlType,
+                                Name = control.Name,
+                                Text = control.Text,
+                                PLC_WordIndex = control.PLC_WordIndex,
+                                PLC_BitIndex = control.PLC_BitIndex,
+                                DecimalPlaces = control.DecimalPlaces,
+                                Maximum = control.Maximum,
+                                StringWordLength = control.StringWordLength
+                            });
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Circuit termination hatasını yakalar ve çöküşü engeller
+                    Console.WriteLine($"FATAL JSON PROCESSING ERROR for Step ID {stepId}: {ex.Message}");
+                }
+            }
+        }
+        
+        StateHasChanged(); 
+    }
+    
+    // --- KURAL KONTROLÜ ---
+    private bool IsSelectionValid(short controlWord)
+    {
+        var checkedSteps = StepTypes.Where(s => (controlWord & s.BitValue) != 0).ToList();
+        int checkedCount = checkedSteps.Count;
+
+        if (checkedCount > 2) return false;
+
+        var specialStepIds = new List<int> { 5, 6 }; 
+        var standardStepIds = new List<int> { 1, 2, 3, 4 };
+
+        bool isAnySpecialChecked = checkedSteps.Any(c => specialStepIds.Contains(c.Id));
+        bool isAnyStandardChecked = checkedSteps.Any(c => standardStepIds.Contains(c.Id));
+
+        if (isAnySpecialChecked && isAnyStandardChecked) return false;
+        
+        return true;
+    }
+
+    // --- PLC VERİ YÖNETİMİ ---
+
+    private string GetStringValue(int wordIndex, int length)
+    {
+        if (Step == null || wordIndex + length > Step.StepDataWords.Length) return string.Empty;
+        
+        char[] chars = new char[length * 2];
+        for (int i = 0; i < length; i++)
+        {
+            short word = Step.StepDataWords[wordIndex + i];
+            chars[i * 2] = (char)(word & 0xFF);
+            chars[i * 2 + 1] = (char)((word >> 8) & 0xFF);
+        }
+        return new string(chars).TrimEnd('\0');
+    }
+
+    private void SetStringValue(int wordIndex, int length, string value)
+    {
+        if (Step == null || wordIndex + length > Step.StepDataWords.Length) return;
+        
+        string paddedValue = value.PadRight(length * 2, '\0');
+        for (int i = 0; i < length; i++)
+        {
+            int charIndex = i * 2;
+            short word = 0;
+            if (charIndex < paddedValue.Length)
+                word |= (short)paddedValue[charIndex];
+            if (charIndex + 1 < paddedValue.Length)
+                word |= (short)(paddedValue[charIndex + 1] << 8);
+                
+            Step.StepDataWords[wordIndex + i] = word;
+        }
+    }
+
+    private decimal GetNumericValue(int wordIndex, int decimalPlaces)
+    {
+        if (Step == null || wordIndex >= Step.StepDataWords.Length) return 0;
+        decimal value = Step.StepDataWords[wordIndex];
+        if (decimalPlaces > 0) value /= (decimal)Math.Pow(10, decimalPlaces);
+        return value;
+    }
+
+    private bool GetBitValue(int wordIndex, int bitIndex)
+    {
+        if (Step == null || wordIndex >= Step.StepDataWords.Length) return false;
+        short word = Step.StepDataWords[wordIndex];
+        int bitMask = 1 << bitIndex;
+        return (word & bitMask) != 0;
+    }
+
+    private async Task OnDynamicControlValueChanged(ChangeEventArgs e, ControlMetadata data)
+    {
+        if (_isUpdating || Step == null || data.PLC_WordIndex >= Step.StepDataWords.Length) return;
+
+        if (data.ControlType.Contains("NumericUpDown") || data.ControlType == "InputNumber")
+        {
+            if (decimal.TryParse(e.Value?.ToString(), out decimal newValue))
+            {
+                if (data.DecimalPlaces > 0)
+                    Step.StepDataWords[data.PLC_WordIndex] = (short)(newValue * (decimal)Math.Pow(10, data.DecimalPlaces));
+                else
+                    Step.StepDataWords[data.PLC_WordIndex] = (short)Math.Round(newValue);
+            }
+        }
+        else if (data.ControlType.Contains("CheckBox") || data.ControlType == "InputCheckbox")
+        {
+            if (bool.TryParse(e.Value?.ToString(), out bool isChecked))
+            {
+                SetBit(Step.StepDataWords, data.PLC_WordIndex, data.PLC_BitIndex, isChecked);
+            }
+        }
+        else if (data.ControlType.Contains("TextBox") || data.ControlType == "InputText")
+        {
+            string newValue = e.Value?.ToString() ?? string.Empty;
+            if (data.StringWordLength > 0)
+            {
+                SetStringValue(data.PLC_WordIndex, data.StringWordLength, newValue);
+            }
+        }
+
+        await OnChanged.InvokeAsync(null);
+    }
+
+    private void SetBit(short[] data, int wordIndex, int bitIndex, bool value)
+    {
+        if (value) data[wordIndex] = (short)(data[wordIndex] | (1 << bitIndex));
+        else data[wordIndex] = (short)(data[wordIndex] & ~(1 << bitIndex));
+    }
+
+    // --- DİNAMİK KONTROL RENDER METOTLARI (CS1061 Hatası Çözümü) ---
+
+    private RenderFragment RenderControl(ControlMetadata data, int stepId)
+    {
+        return builder =>
+        {
+            if (data.ControlType.Contains("NumericUpDown") || data.ControlType == "InputNumber")
+            {
+                decimal currentValue = GetNumericValue(data.PLC_WordIndex, data.DecimalPlaces);
+
+                builder.OpenElement(0, "input");
+                builder.AddAttribute(1, "type", "number");
+                builder.AddAttribute(2, "class", "form-control");
+                builder.AddAttribute(3, "max", data.Maximum);
+                builder.AddAttribute(4, "step", data.DecimalPlaces > 0 ? (1m / (decimal)Math.Pow(10, data.DecimalPlaces)).ToString() : "1");
+                builder.AddAttribute(5, "value", currentValue);
+                builder.AddAttribute(6, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e => OnDynamicControlValueChanged(e, data)));
+                builder.CloseElement();
+            }
+            else if (data.ControlType.Contains("CheckBox") || data.ControlType == "InputCheckbox")
+            {
+                bool isChecked = GetBitValue(data.PLC_WordIndex, data.PLC_BitIndex);
+
+                builder.OpenElement(0, "input");
+                builder.AddAttribute(1, "type", "checkbox");
+                builder.AddAttribute(2, "class", "form-check-input");
+                builder.AddAttribute(3, "checked", isChecked);
+                builder.AddAttribute(4, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e => OnDynamicControlValueChanged(e, data)));
+                builder.CloseElement();
+            }
+            else if (data.ControlType.Contains("TextBox") || data.ControlType == "InputText")
+            {
+                string currentValue = GetStringValue(data.PLC_WordIndex, data.StringWordLength);
+
+                builder.OpenElement(0, "input");
+                builder.AddAttribute(1, "type", "text");
+                builder.AddAttribute(2, "class", "form-control");
+                builder.AddAttribute(3, "maxlength", data.StringWordLength * 2); 
+                builder.AddAttribute(4, "value", currentValue);
+                builder.AddAttribute(5, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e => OnDynamicControlValueChanged(e, data)));
+                builder.CloseElement();
+            }
+        };
+    }
+
+    // --- JSON SIMÜLASYONU (RecipeStepParams.cs ile tam uyumlu hale getirildi) ---
+    private string GetSimulatedLayoutJson(int stepId)
+    {
+        switch (stepId)
+        {
+            case 1: // Su Alma (MiktarLitre: Word 1, Kontrol Bitleri: Word 0)
+                return @"[{ ""ControlType"": ""InputNumber"", ""Text"": ""Miktar (Litre)"", ""PLC_WordIndex"": 1, ""DecimalPlaces"": 0, ""Maximum"": 5000.0 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Sıcak Su"", ""PLC_WordIndex"": 0, ""PLC_BitIndex"": 0 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Soğuk Su"", ""PLC_WordIndex"": 0, ""PLC_BitIndex"": 1 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Yumuşak Su"", ""PLC_WordIndex"": 0, ""PLC_BitIndex"": 2 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Tambur Durdur"", ""PLC_WordIndex"": 0, ""PLC_BitIndex"": 3 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Alarm"", ""PLC_WordIndex"": 0, ""PLC_BitIndex"": 4 }]";
+            case 2: // Isıtma (Isi: Word 3, Süre: Word 4, Kontrol Bitleri: Word 2)
+                return @"[{ ""ControlType"": ""InputNumber"", ""Text"": ""Hedef Sıcaklık (°C)"", ""PLC_WordIndex"": 3, ""DecimalPlaces"": 1, ""Maximum"": 150.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Süre (dk)"", ""PLC_WordIndex"": 4, ""DecimalPlaces"": 0, ""Maximum"": 600.0 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Direk Buhar"", ""PLC_WordIndex"": 2, ""PLC_BitIndex"": 0 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Dolaylı Buhar"", ""PLC_WordIndex"": 2, ""PLC_BitIndex"": 1 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Tambur Durdur"", ""PLC_WordIndex"": 2, ""PLC_BitIndex"": 2 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Alarm"", ""PLC_WordIndex"": 2, ""PLC_BitIndex"": 3 }]";
+            case 3: // Çalışma (Word 14, 15, 16, 18 Veri; Word 17 Kontrol Bitleri)
+                return @"[{ ""ControlType"": ""InputNumber"", ""Text"": ""Sağ/Sol Süre (sn)"", ""PLC_WordIndex"": 14, ""DecimalPlaces"": 0, ""Maximum"": 10.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Bekleme Süresi (sn)"", ""PLC_WordIndex"": 15, ""DecimalPlaces"": 0, ""Maximum"": 60.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Çalışma Devri (RPM)"", ""PLC_WordIndex"": 16, ""DecimalPlaces"": 0, ""Maximum"": 100.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Çalışma Süresi (dk)"", ""PLC_WordIndex"": 18, ""DecimalPlaces"": 0, ""Maximum"": 600.0 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Isı Kontrol"", ""PLC_WordIndex"": 17, ""PLC_BitIndex"": 0 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Alarm"", ""PLC_WordIndex"": 17, ""PLC_BitIndex"": 1 }]";
+            case 4: // Dozaj (Kimyasal: Word 21-23 (3 Word, 6 char), Kontrol Bitleri: Word 5)
+                return @"[{ ""ControlType"": ""InputText"", ""Text"": ""Kimyasal Adı"", ""PLC_WordIndex"": 21, ""StringWordLength"": 3 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Tank Su Seviyesi"", ""PLC_WordIndex"": 20, ""DecimalPlaces"": 0, ""Maximum"": 500.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Çözme Süresi (sn)"", ""PLC_WordIndex"": 6, ""DecimalPlaces"": 0, ""Maximum"": 600.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Dozaj Süresi (sn)"", ""PLC_WordIndex"": 7, ""DecimalPlaces"": 0, ""Maximum"": 600.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Dozaj Miktarı (Litre)"", ""PLC_WordIndex"": 11, ""DecimalPlaces"": 0, ""Maximum"": 1000.0 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Ana Tank Mak. Su"", ""PLC_WordIndex"": 5, ""PLC_BitIndex"": 1 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Ana Tank Temiz Su"", ""PLC_WordIndex"": 5, ""PLC_BitIndex"": 2 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Tambur Durdur"", ""PLC_WordIndex"": 5, ""PLC_BitIndex"": 3 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Alarm"", ""PLC_WordIndex"": 5, ""PLC_BitIndex"": 4 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Tank 1 Su"", ""PLC_WordIndex"": 5, ""PLC_BitIndex"": 5 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Tank 1 Dozaj"", ""PLC_WordIndex"": 5, ""PLC_BitIndex"": 9 }]";
+            case 5: // Boşaltma (Word 10, 15, 12 Veri; Word 13 Kontrol Bitleri)
+                return @"[{ ""ControlType"": ""InputNumber"", ""Text"": ""Sağ/Sol Süre (sn)"", ""PLC_WordIndex"": 10, ""DecimalPlaces"": 0, ""Maximum"": 10.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Bekleme Süresi (sn)"", ""PLC_WordIndex"": 15, ""DecimalPlaces"": 0, ""Maximum"": 60.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Çalışma Devri (RPM)"", ""PLC_WordIndex"": 12, ""DecimalPlaces"": 0, ""Maximum"": 100.0 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Tambur Durdur"", ""PLC_WordIndex"": 13, ""PLC_BitIndex"": 0 }, { ""ControlType"": ""InputCheckbox"", ""Text"": ""Alarm"", ""PLC_WordIndex"": 13, ""PLC_BitIndex"": 1 }]";
+            case 6: // Sıkma (SikmaDevri: Word 8, SikmaSure: Word 9)
+                return @"[{ ""ControlType"": ""InputNumber"", ""Text"": ""Sıkma Devri (RPM)"", ""PLC_WordIndex"": 8, ""DecimalPlaces"": 0, ""Maximum"": 150.0 }, { ""ControlType"": ""InputNumber"", ""Text"": ""Sıkma Süresi (dk)"", ""PLC_WordIndex"": 9, ""DecimalPlaces"": 0, ""Maximum"": 60.0 }]";
+            default:
+                return @"[]";
+        }
+    }
 }

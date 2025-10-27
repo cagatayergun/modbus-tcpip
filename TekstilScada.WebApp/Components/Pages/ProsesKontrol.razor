@@ -130,16 +130,19 @@
                         </ul>
                     </div>
 
-                    <div class="recipe-details-panel">
-                        @if (selectedStep == null)
-                        {
-                            <p>Detayları düzenlemek için bir adım seçin.</p>
-                        }
-                        else
-                        {
-                            <StepEditor Step="selectedStep" OnChanged="RefreshStepList" />
-                        }
-                    </div>
+                   <div class="recipe-details-panel">
+                        @if (selectedStep == null)
+                        {
+                            <p>Detayları düzenlemek için bir adım seçin.</p>
+                        }
+                        else
+                        {
+                            // KRİTİK DEĞİŞİKLİK: MachineSubType parametresi eklendi
+                            <StepEditor Step="selectedStep" 
+                                        MachineSubType="@(GetMachineFilterType(selectedMachine))" 
+                                        OnChanged="RefreshStepList" />
+                        }
+                    </div>
                 </div>
             }
         }
