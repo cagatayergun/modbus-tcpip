@@ -1,4 +1,6 @@
-﻿using Blazored.LocalStorage;
+﻿// TekstilScada.WebApp/Services/CustomAuthStateProvider.cs
+
+using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -27,8 +29,12 @@ namespace TekstilScada.WebApp.Services
         private readonly HttpClient _httpClient;
         private readonly ILocalStorageService _localStorage;
         private readonly ClaimsPrincipal _anonymous = new ClaimsPrincipal(new ClaimsIdentity());
-        private ClaimsPrincipal _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
-        private bool _hasCheckedLocalStorage = false;
+
+        // *** DEĞİŞİKLİK 1: Bu iki değişkeni (currentUser ve hasChecked) SİLEBİLİRSİN ***
+        // private ClaimsPrincipal _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
+        // private bool _hasCheckedLocalStorage = false;
+        // (LoginAsync ve LogoutAsync içinde _currentUser ve _hasCheckedLocalStorage kullanan satırları da silmen gerekecek)
+
 
         public CustomAuthStateProvider(HttpClient httpClient, ILocalStorageService localStorage)
         {
@@ -36,130 +42,116 @@ namespace TekstilScada.WebApp.Services
             _localStorage = localStorage;
         }
 
-        // --- ADIM 1: PRERENDERING GÜVENLİĞİ ---
+        // --- ADIM 1: GetAuthenticationStateAsync METODUNU TAMAMEN GÜNCELLE ---
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            if (_hasCheckedLocalStorage)
-            {
-                return new AuthenticationState(_currentUser);
-            }
-            return await Task.FromResult(new AuthenticationState(_anonymous));
-        }
-
-        // --- ADIM 2: GERÇEK KONTROL (MainLayout'tan çağrılır) ---
-        public async Task InitializeAuthenticationStateAsync()
-        {
-            if (_hasCheckedLocalStorage) return;
-
             var token = await _localStorage.GetItemAsync<string>("authToken");
 
             if (string.IsNullOrWhiteSpace(token))
             {
-                _currentUser = _anonymous;
+                // Token yoksa, anonim kullanıcı döndür
+                return new AuthenticationState(_anonymous);
             }
-            else
+
+            // Token varsa, geçerli mi diye kontrol et
+            try
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
-                _currentUser = new ClaimsPrincipal(ParseClaimsFromJwt(token));
-            }
+                var userClaims = ParseClaimsFromJwt(token);
+                var claimsPrincipal = new ClaimsPrincipal(userClaims);
 
-            _hasCheckedLocalStorage = true;
-            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_currentUser)));
+                // Geçerli token ile kullanıcı bilgisi döndür
+                return new AuthenticationState(claimsPrincipal);
+            }
+            catch (Exception ex)
+            {
+                // Token parse edilemedi (örn. süresi dolmuş veya geçersiz)
+                Console.WriteLine($"JWT Parse Hatası: {ex.Message}");
+                await _localStorage.RemoveItemAsync("authToken"); // Bozuk token'ı temizle
+                _httpClient.DefaultRequestHeaders.Authorization = null;
+
+                // Hata durumunda anonim kullanıcı döndür
+                return new AuthenticationState(_anonymous);
+            }
         }
 
-        // --- ADIM 3: GİRİŞ İŞLEMİ (Hata Ayıklama Eklendi) ---
-        // --- ADIM 3: GİRİŞ İŞLEMİ (DÜZELTİLDİ: JSON Serileştirme Kontrolü) ---
+        // --- ADIM 2: BU METODA ARTIK İHTİYAÇ YOK ---
+        /*
+        public async Task InitializeAuthenticationStateAsync()
+        {
+           // BU METODUN TAMAMINI SİLEBİLİRSİN
+           // VEYA MainLayout.razor içinden buna yapılan çağrıyı kaldırdığından emin ol.
+        }
+        */
+
+        // --- ADIM 3: LoginAsync METODUNU GÜNCELLE ---
         public async Task<bool> LoginAsync(string username, string password)
         {
-            // ...
-
-            // 1. Payload oluşturma
-            // 1. Payload oluşturma (Burası C# olduğu için PascalCase kalmalı, bu doğru)
             var loginPayload = new { Username = username, Password = password };
-
-            // 2. JSON'u API'nin beklediği 'camelCase' formatında serileştir.
             var serializerOptions = new JsonSerializerOptions
             {
-                // DÜZELTME: API'nin Program.cs'teki ayarıyla eşleşmesi için 'CamelCase' kullan
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
             var jsonContent = JsonSerializer.Serialize(loginPayload, serializerOptions);
-
-            // 3. StringContent kullanarak JSON'u HTTP isteğine dönüştürün.
             var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
 
-            // 4. İsteği gönder
             var response = await _httpClient.PostAsync("api/auth/login", httpContent);
 
             if (!response.IsSuccessStatusCode)
             {
-                // HATA DURUMU: 400, 401, 500 vb. durum kodları
-                var errorContent = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"[API HATA] HTTP Status: {response.StatusCode}. Yanıt İçeriği: {errorContent}");
-
-                // Login.razor'da gösterilen hata mesajını tetikler
-                return false;
+                return false; // Hata durumları
             }
 
-            // BAŞARILI HTTP DURUMU (200 OK)
             var jsonResponse = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"[API BAŞARILI] Gelen JSON: {jsonResponse}");
-
             LoginResponseModel loginResult;
             try
             {
-                // Gelen JSON'u okurken, API'nin yanıt formatına karşı büyük/küçük harf duyarsızlığı ile okumaya devam edin.
                 loginResult = JsonSerializer.Deserialize<LoginResponseModel>(jsonResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"[JSON HATA] API yanıtı LoginResponseModel'e dönüştürülemedi: {ex.Message}");
-                return false;
+                return false; // JSON parse hatası
             }
 
             if (loginResult == null || string.IsNullOrEmpty(loginResult.Token))
             {
-                Console.WriteLine($"[TOKEN HATA] API'den token gelmedi.");
-                return false;
+                return false; // Token gelmedi
             }
 
-            // --- BAŞARILI GİRİŞ VE TOKEN İŞLEME ---
+            // --- Başarılı Giriş ---
             await _localStorage.SetItemAsync("authToken", loginResult.Token);
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", loginResult.Token);
 
-            _currentUser = new ClaimsPrincipal(ParseClaimsFromJwt(loginResult.Token));
-            _hasCheckedLocalStorage = true;
+            // *** DEĞİŞİKLİK 2: Login olunca durumu Blazor'a bildir ***
+            var userClaims = ParseClaimsFromJwt(loginResult.Token);
+            var claimsPrincipal = new ClaimsPrincipal(userClaims);
+            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(claimsPrincipal)));
 
-            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_currentUser)));
             return true;
         }
 
+        // --- ADIM 4: LogoutAsync METODUNU GÜNCELLE ---
         public async Task LogoutAsync()
         {
             await _localStorage.RemoveItemAsync("authToken");
             _httpClient.DefaultRequestHeaders.Authorization = null;
-            _currentUser = _anonymous;
-            _hasCheckedLocalStorage = true;
-            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_currentUser)));
+
+            // *** DEĞİŞİKLİK 3: Çıkış yapınca durumu Blazor'a bildir ***
+            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_anonymous)));
         }
 
         // ... (ParseClaimsFromJwt metodu aynı kalır) ...
         private static ClaimsIdentity ParseClaimsFromJwt(string jwt)
         {
+            // (Bu metotta değişiklik yok)
             var claims = new List<Claim>();
             var payload = jwt.Split('.')[1];
-
-            // 1. Base64Url formatını standart Base64 formatına çevir
             payload = payload.Replace('-', '+').Replace('_', '/');
-
-            // 2. Eksik olan '=' dolgu karakterlerini ekle
             switch (payload.Length % 4)
             {
                 case 2: payload += "=="; break;
                 case 3: payload += "="; break;
             }
-
-            // 3. Artık standart Base64'e dönen string'i çöz
             var jsonBytes = Convert.FromBase64String(payload);
             var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
 
@@ -168,7 +160,6 @@ namespace TekstilScada.WebApp.Services
             {
                 claims.Add(new Claim(ClaimTypes.Name, username.ToString()));
             }
-
             keyValuePairs.TryGetValue(ClaimTypes.Role, out object roles);
             if (roles != null)
             {
@@ -185,7 +176,6 @@ namespace TekstilScada.WebApp.Services
                     claims.Add(new Claim(ClaimTypes.Role, roles.ToString()));
                 }
             }
-
             return new ClaimsIdentity(claims, "jwt");
         }
     }

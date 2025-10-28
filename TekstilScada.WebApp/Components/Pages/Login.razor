@@ -84,19 +84,19 @@
         isProcessing = true;
         errorMessage = string.Empty;
 
-        // CustomAuthStateProvider'daki LoginAsync metodunu çağırıyoruz.
         bool loginSuccess = await AuthStateProvider.LoginAsync(loginModel.Username, loginModel.Password);
 
         if (loginSuccess)
         {
-            // Giriş başarılıysa ana sayfaya yönlendir
-            NavigationManager.NavigateTo("/", true);
+            // DÜZELTME: forceLoad: true kaldırıldı
+            NavigationManager.NavigateTo("/");
         }
         else
         {
             errorMessage = "Giriş başarısız. Lütfen kullanıcı adı ve şifrenizi kontrol edin.";
+            isProcessing = false; // Sadece hata durumunda isProcessing'i false yap
+            StateHasChanged(); // Hata mesajının görünmesi için UI'yı güncelle
         }
-
-        isProcessing = false;
+        // Başarılı durumda isProcessing = false yapmaya gerek yok, yönlendirme sayfayı zaten değiştirecek.
     }
 }

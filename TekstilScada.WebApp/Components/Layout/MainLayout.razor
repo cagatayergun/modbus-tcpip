@@ -1,40 +1,42 @@
 ﻿@inherits LayoutComponentBase
-@attribute [Authorize]
-@using Microsoft.AspNetCore.Authorization
 @using TekstilScada.WebApp.Services
+@using Microsoft.AspNetCore.Components.Authorization @* <-- BU SATIRI EKLEYİN *@
 @inject CustomAuthStateProvider AuthProvider
-@inject NavigationManager NavigationManager 
+@inject NavigationManager NavigationManager
 
 <div class="page">
     <div class="sidebar">
         <NavMenu />
     </div>
-
     <main>
         <div class="top-row px-4">
-            
-            @* --- 2. ÇIKIŞ YAP BUTONUNU EKLE --- *@
+
+            <AuthorizeView>
+                <Authorized>
+                    @* Kullanıcı adını göstermek için span kullanın. Bootstrap'te mr-auto ile sağa kaydırılabilir. *@
+                    <a class="text-black-60 mr-auto">
+                        Hoş geldiniz, <strong>@context.User.Identity.Name</strong>
+                    </a>
+                </Authorized>
+            </AuthorizeView>
+
             <button class="btn btn-link nav-link" @onclick="HandleLogout">Çıkış Yap</button>
             
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">Hakkında</a>
         </div>
-
         <article class="content px-4">
             @Body
         </article>
     </main>
 </div>
-...
-@code {
-    protected override async Task OnInitializedAsync()
-    {
-        await AuthProvider.InitializeAuthenticationStateAsync();
-    }
 
-    // --- 3. BUTONUN METODUNU EKLE ---
+@code {
+    // Bu, kimlik durumunu yükler
+
+
+    // Bu, çıkış yap butonu için
     private async Task HandleLogout()
     {
         await AuthProvider.LogoutAsync();
-        NavigationManager.NavigateTo("/login", true); // Çıkış yapınca login'e zorla
+        NavigationManager.NavigateTo("/login");
     }
 }
