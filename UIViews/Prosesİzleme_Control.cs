@@ -33,7 +33,7 @@ namespace TekstilScada.UI.Views
             int displayCounter = 1;
             foreach (var machine in machines)
             {
-                var card = new MachineCard_Control(machine.Id, machine.MachineUserDefinedId, machine.MachineName, displayCounter++);
+                var card = new MachineCard_Control(machine.Id, machine.MachineUserDefinedId, machine.MachineName, machine.Id);
                 card.DetailsRequested += Card_DetailsRequested;
                 card.VncRequested += Card_VncRequested;
                 _machineCards.Add(machine.Id, card);

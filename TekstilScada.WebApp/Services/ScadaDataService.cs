@@ -1,13 +1,14 @@
 ﻿// Dosya: TekstilScada.WebApp/Services/ScadaDataService.cs (SON KARARLI SÜRÜM)
 
 using Microsoft.AspNetCore.SignalR.Client;
+using System;
 using System.Collections.Concurrent;
 using System.Net.Http.Json;
+using System.Text;
+using System.Threading.Tasks;
 using TekstilScada.Models;
 using TekstilScada.Repositories;
-using System;
-using System.Threading.Tasks;
-
+using System.Text.Json;
 // DTO'lar, global namespace'de kalmalı4
 // 1. TrendDataPoint (CS0234 hatasını çözmek için)
 public class TrendDataPoint
@@ -99,6 +100,11 @@ public class SaveLayoutRequest
     public int StepTypeId { get; set; }
     public string LayoutJson { get; set; }
 }
+public class GeneralConsumptionExportDto
+{
+    public List<ProductionReportItem>? Items { get; set; }
+    public string? ConsumptionType { get; set; }
+}
 namespace TekstilScada.WebApp.Services
 {
     // KRİTİK GÜNCELLEME: IAsyncDisposable arayüzünü uyguluyoruz
@@ -106,7 +112,7 @@ namespace TekstilScada.WebApp.Services
     {
         private HubConnection? _hubConnection;
         private readonly HttpClient _httpClient;
-
+        private readonly JsonSerializerOptions _serializerOptions;
         public ConcurrentDictionary<int, FullMachineStatus> MachineData { get; private set; } = new();
         // Dashboard için grup bilgisi önbelleği
         public ConcurrentDictionary<int, Machine> MachineDetailsCache { get; private set; } = new();
@@ -116,6 +122,7 @@ namespace TekstilScada.WebApp.Services
         public ScadaDataService(HttpClient httpClient)
         {
             _httpClient = httpClient;
+            _serializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
         }
 
         // KRİTİK GÜNCELLEME: InitializeAsync metodunda agresif temizlik
@@ -611,6 +618,124 @@ namespace TekstilScada.WebApp.Services
                 
                 return false;
             }
+        }
+        public async Task<byte[]> ExportProductionReportAsync(List<ProductionReportItem> reportItems)
+        {
+            // _serializerOptions artık tanımlı
+            var json = JsonSerializer.Serialize(reportItems, _serializerOptions);
+
+            // KRİTİK DÜZELTME 2 (404/Not Found HATASI ÇÖZÜMÜ: api/ ön eki eklendi)
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("api/reports/export/production", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new Exception($"Rapor dışa aktarma başarısız oldu: {response.ReasonPhrase}. Detay: {error}");
+            }
+
+            // Başarılı olursa, response'un içeriğini doğrudan byte dizisi olarak döndür
+            return await response.Content.ReadAsByteArrayAsync();
+        }
+        public async Task<byte[]> ExportAlarmReportAsync(List<AlarmReportItem> reportItems)
+        {
+            var json = JsonSerializer.Serialize(reportItems, _serializerOptions);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // API endpoint'ini çağır
+            var response = await _httpClient.PostAsync("api/reports/export/alarms", content); // YENİ ENDPOINT
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Alarm raporu dışa aktarma başarısız oldu: {response.ReasonPhrase}. Detay: {error}");
+            }
+
+            return await response.Content.ReadAsByteArrayAsync();
+        }
+        public async Task<byte[]> ExportOeeReportAsync(List<OeeData> reportItems)
+        {
+            var json = JsonSerializer.Serialize(reportItems, _serializerOptions);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // API endpoint'ini çağır
+            var response = await _httpClient.PostAsync("api/reports/export/oee", content); // YENİ ENDPOINT
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"OEE raporu dışa aktarma başarısız oldu: {response.ReasonPhrase}. Detay: {error}");
+            }
+
+            return await response.Content.ReadAsByteArrayAsync();
+        }
+        // YENİ METOT: Manuel Tüketim Raporunu Excel'e Aktarma API Çağrısı
+        public async Task<byte[]> ExportManualConsumptionReportAsync(ManualConsumptionSummary summary)
+        {
+            // API, bir ManualConsumptionSummary nesnesini bekler.
+            var json = JsonSerializer.Serialize(summary, _serializerOptions);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // API endpoint'ini çağır
+            var response = await _httpClient.PostAsync("api/reports/export/manual-consumption", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Manuel Tüketim raporu dışa aktarma başarısız oldu: {response.ReasonPhrase}. Detay: {error}");
+            }
+
+            return await response.Content.ReadAsByteArrayAsync();
+        }
+        public async Task<byte[]> ExportGeneralDetailedConsumptionReportAsync(GeneralConsumptionExportDto exportData)
+        {
+            // API, GeneralConsumptionExportDto nesnesini bekler.
+            var json = JsonSerializer.Serialize(exportData, _serializerOptions);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // API endpoint'ini çağır
+            var response = await _httpClient.PostAsync("api/reports/export/general-detailed", content); // YENİ ENDPOINT
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Genel Tüketim raporu dışa aktarma başarısız oldu: {response.ReasonPhrase}. Detay: {error}");
+            }
+
+            return await response.Content.ReadAsByteArrayAsync();
+        }
+        public async Task<byte[]> ExportActionLogsReportAsync(List<TekstilScada.Core.Models.ActionLogEntry> logs)
+        {
+            // API, ActionLogEntry listesini bekler.
+            var json = JsonSerializer.Serialize(logs, _serializerOptions);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // API endpoint'ini çağır
+            var response = await _httpClient.PostAsync("api/reports/export/action-logs", content); // YENİ ENDPOINT
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Eylem Kayıtları raporu dışa aktarma başarısız oldu: {response.ReasonPhrase}. Detay: {error}");
+            }
+
+            return await response.Content.ReadAsByteArrayAsync();
+        }
+        // YENİ METOT: Üretim Detayını Excel'e Aktarma API Çağrısı (Byte dizisi döner)
+        public async Task<byte[]> ExportProductionDetailFileAsync(int machineId, string batchId)
+        {
+            // API endpoint'ini çağır, GET request'i ile veriyi alıyoruz.
+            var response = await _httpClient.GetAsync($"api/reports/export/production-detail/{machineId}/{batchId}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Üretim detayı dışa aktarma başarısız oldu: {response.ReasonPhrase}. Detay: {error}");
+            }
+
+            return await response.Content.ReadAsByteArrayAsync();
         }
     }
 }

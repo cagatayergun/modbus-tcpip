@@ -269,7 +269,109 @@
         plotConsumption('steamChartContainer', 'toplamBuhar', '', 'kg', '#9b59b6');
         plotTopAlarms();
     }
-       
+       function drawPieChart(elementId, chartData) {
+        if (!chartData || chartData.length === 0) {
+            Plotly.purge(elementId);
+            return;
+        }
+
+        const labels = chartData.map(d => d.label);
+        const values = chartData.map(d => d.value);
+        const colors = chartData.map(d => d.color);
+
+        const data = [{
+            values: values,
+            labels: labels,
+            type: 'pie',
+            marker: {
+                colors: colors
+            },
+            hoverinfo: 'label+percent+text',
+            text: values.map(v => {
+                // Saniyeyi hh:mm:ss formatına çevir
+                const hours = Math.floor(v / 3600);
+                const minutes = Math.floor((v % 3600) / 60);
+                const seconds = Math.floor(v % 60);
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }),
+            textinfo: 'percent',
+            hole: .4
+        }];
+
+        const layout = {
+            height: 300,
+            showlegend: true,
+            margin: { t: 10, b: 10, l: 10, r: 10 }
+        };
+
+        Plotly.newPlot(elementId, data, layout, { responsive: true, displayModeBar: false });
+    }
+
+    // Production Detail - Zaman Çizgisi/Sıcaklık Grafiği
+    function drawTimelineChart(elementId, chartData) {
+        if (!chartData || chartData.length === 0) {
+            Plotly.purge(elementId);
+            return;
+        }
+
+        // X ekseninde Adım Numarası ve Açıklaması
+        const steps = chartData.map(d => `Adım ${d.stepNumber} - ${d.description}`);
+        // Y ekseninde Sıcaklık
+        const temperatures = chartData.map(d => d.temperature);
+
+        const trace = {
+            x: steps,
+            y: temperatures,
+            mode: 'lines+markers',
+            type: 'scatter',
+            name: 'Sıcaklık (°C)',
+            line: { color: '#e74c3c' } // Kırmızımsı renk
+        };
+
+        const layout = {
+            title: 'Adım Sıcaklık Trendi',
+            xaxis: {
+                title: 'Reçete Adımı',
+                automargin: true,
+                tickangle: 45 // X ekseni etiketlerini eğerek okunabilirliği artırır
+            },
+            yaxis: {
+                title: 'Sıcaklık (°C)'
+            },
+            margin: { t: 40, b: 120, l: 40, r: 20 }
+        };
+
+        Plotly.newPlot(elementId, [trace], layout, { responsive: true });
+    }
+    // 1. Base64 string'i Blob nesnesine dönüştüren yardımcı fonksiyon
+    window.base64ToBlob = function (base64) {
+        const binary = atob(base64);
+        const array = [];
+        for (let i = 0; i < binary.length; i++) {
+            array.push(binary.charCodeAt(i));
+        }
+        // XLSX dosyası için doğru MIME tipi
+        return new Blob([new Uint8Array(array)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    };
+
+    // 2. C# kodundan çağrılan ana indirme fonksiyonu
+    window.saveAsFile = function (filename, bytesBase64) {
+        const data = base64ToBlob(bytesBase64);
+
+        // Bir URL oluştur
+        const url = URL.createObjectURL(data);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+
+        // İndirme işlemini tetikle
+        document.body.appendChild(link);
+        link.click();
+
+        // Belleği temizle
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
 </script>
 
 <body>

@@ -98,7 +98,10 @@
                                             <span>RAPORLA</span>
                                         }
                                     </button>
-                                    <button class="btn btn-success w-100" disabled>Excel'e Aktar</button>
+                                    <button class="btn btn-success w-100" @onclick="ExportProductionToExcel"
+                                            disabled="@(isLoading || reportItems == null || !reportItems.Any())">
+                                        Excel'e Aktar
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -179,7 +182,11 @@
                                             <span>RAPORLA</span>
                                         }
                                     </button>
-                                    <button class="btn btn-success w-100" disabled>Excel'e Aktar</button>
+                                    <button class="btn btn-success w-100"
+                                            @onclick="ExportAlarmsToExcel"
+                                            disabled="@(isLoading || alarmReportItems == null || !alarmReportItems.Any())">
+                                        Excel'e Aktar
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -259,7 +266,11 @@
                                             <span>RAPORLA</span>
                                         }
                                     </button>
-                                    <button class="btn btn-success w-100" disabled>Excel'e Aktar</button>
+                                    <button class="btn btn-success w-100"
+                                            @onclick="ExportOeeToExcel"
+                                            disabled="@(isLoading || oeeReportItems == null || !oeeReportItems.Any())">
+                                        Excel'e Aktar
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -486,6 +497,11 @@
                                         <span>RAPORLA</span>
                                     }
                                 </button>
+                                <button class="btn btn-success w-100"
+                                        @onclick="ExportManualConsumptionToExcel"
+                                        disabled="@(isLoading || consumptionSummary == null)">
+                                    Excel'e Aktar
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -561,6 +577,11 @@
                                         <span>RAPORLA</span>
                                     }
                                 </button>
+                                <button class="btn btn-success w-100"
+                                        @onclick="ExportGeneralDetailedConsumptionToExcel"
+                                        disabled="@(isLoading || generalDetailedConsumptionReport == null || !generalDetailedConsumptionReport.Any())">
+                                    Excel'e Aktar
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -635,6 +656,11 @@
                                     {
                                         <span>RAPORLA</span>
                                     }
+                                </button>
+                                <button class="btn btn-success w-100"
+                                        @onclick="ExportActionLogsToExcel"
+                                        disabled="@(isLoading || actionLogs == null || !actionLogs.Any())">
+                                    Excel'e Aktar
                                 </button>
                             </div>
                         </div>
@@ -743,7 +769,7 @@
         public int Rpm { get; set; }
     }
 
-
+   
     // --- YAŞAM DÖNGÜSÜ METOTLARI ---
 
     protected override async Task OnInitializedAsync()
@@ -1175,5 +1201,206 @@
 
         // Yönlendirmeyi gerçekleştir
         NavigationManager.NavigateTo(url);
+    }
+    // YENİ METOT: Üretim Raporunu Excel'e Aktar
+    private async Task ExportProductionToExcel()
+    {
+        if (reportItems == null || !reportItems.Any())
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Aktarılacak rapor verisi bulunmamaktadır. Lütfen önce rapor oluşturun.");
+            return;
+        }
+
+        isLoading = true;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            // 1. Servisten Excel dosyasının bayt dizisini al.
+            var excelBytes = await ScadaDataService.ExportProductionReportAsync(reportItems);
+
+            // 2. JavaScript Interop ile dosyayı tarayıcıda indir.
+            // Bu, base64'e dönüştürülmüş bayt dizisini bekleyen bir JS fonksiyonunu çağırır.
+            await JSRuntime.InvokeVoidAsync("saveAsFile",
+                $"Uretim_Raporu_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+                Convert.ToBase64String(excelBytes));
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", "Excel'e aktarılırken hata oluştu:", ex.ToString());
+            await JSRuntime.InvokeVoidAsync("alert", "Excel raporu oluşturulurken bir hata oluştu: " + ex.Message);
+        }
+        finally
+        {
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    private async Task ExportAlarmsToExcel()
+    {
+        if (alarmReportItems == null || !alarmReportItems.Any())
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Aktarılacak alarm verisi bulunmamaktadır. Lütfen önce rapor oluşturun.");
+            return;
+        }
+
+        isLoading = true;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            // 1. Servisten Excel dosyasının bayt dizisini al.
+            var excelBytes = await ScadaDataService.ExportAlarmReportAsync(alarmReportItems);
+
+            // 2. JavaScript Interop ile dosyayı tarayıcıda indir.
+            await JSRuntime.InvokeVoidAsync("saveAsFile",
+                $"Alarm_Raporu_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+                Convert.ToBase64String(excelBytes));
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", "Alarm Raporu Excel'e aktarılırken hata oluştu:", ex.ToString());
+            await JSRuntime.InvokeVoidAsync("alert", $"Alarm raporu oluşturulurken bir hata oluştu: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+
+       }
+    private async Task ExportOeeToExcel()
+    {
+        if (oeeReportItems == null || !oeeReportItems.Any())
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Aktarılacak OEE verisi bulunmamaktadır. Lütfen önce rapor oluşturun.");
+            return;
+        }
+
+        isLoading = true;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            // 1. Servisten Excel dosyasının bayt dizisini al.
+            var excelBytes = await ScadaDataService.ExportOeeReportAsync(oeeReportItems);
+
+            // 2. JavaScript Interop ile dosyayı tarayıcıda indir.
+            await JSRuntime.InvokeVoidAsync("saveAsFile",
+                $"OEE_Raporu_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+                Convert.ToBase64String(excelBytes));
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", "OEE Raporu Excel'e aktarılırken hata oluştu:", ex.ToString());
+            await JSRuntime.InvokeVoidAsync("alert", $"OEE raporu oluşturulurken bir hata oluştu: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    private async Task ExportManualConsumptionToExcel()
+    {
+        if (consumptionSummary == null)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Aktarılacak manuel tüketim özeti bulunmamaktadır. Lütfen önce rapor oluşturun.");
+            return;
+        }
+
+        isLoading = true;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            // 1. Servis çağrısı için summary nesnesini direkt gönderiyoruz.
+            var excelBytes = await ScadaDataService.ExportManualConsumptionReportAsync(consumptionSummary);
+
+            // 2. JavaScript Interop ile dosyayı tarayıcıda indir.
+            await JSRuntime.InvokeVoidAsync("saveAsFile",
+                $"Manuel_Tuketim_Ozet_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+                Convert.ToBase64String(excelBytes));
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", "Manuel Tüketim Raporu Excel'e aktarılırken hata oluştu:", ex.ToString());
+            await JSRuntime.InvokeVoidAsync("alert", $"Manuel Tüketim raporu oluşturulurken bir hata oluştu: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    private async Task ExportGeneralDetailedConsumptionToExcel()
+    {
+        if (generalDetailedConsumptionReport == null || !generalDetailedConsumptionReport.Any())
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Aktarılacak detaylı tüketim verisi bulunmamaktadır. Lütfen önce rapor oluşturun.");
+            return;
+        }
+
+        isLoading = true;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            // 1. Servis çağrısı için rapor listesini ve seçilen tüketim tipini içeren DTO oluşturulur.
+            var exportData = new GeneralConsumptionExportDto
+            {
+                Items = generalDetailedConsumptionReport,
+                ConsumptionType = selectedConsumptionType
+            };
+
+            var excelBytes = await ScadaDataService.ExportGeneralDetailedConsumptionReportAsync(exportData);
+
+            // 2. JavaScript Interop ile dosyayı tarayıcıda indir.
+            await JSRuntime.InvokeVoidAsync("saveAsFile",
+                $"Genel_Tuketim_Detay_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+                Convert.ToBase64String(excelBytes));
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", "Genel Tüketim Raporu Excel'e aktarılırken hata oluştu:", ex.ToString());
+            await JSRuntime.InvokeVoidAsync("alert", $"Genel Tüketim raporu oluşturulurken bir hata oluştu: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    private async Task ExportActionLogsToExcel()
+    {
+        if (actionLogs == null || !actionLogs.Any())
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Aktarılacak eylem kaydı bulunmamaktadır. Lütfen önce rapor oluşturun.");
+            return;
+        }
+
+        isLoading = true;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            // 1. Servis çağrısı için eylem kaydı listesini göndeririz.
+            var excelBytes = await ScadaDataService.ExportActionLogsReportAsync(actionLogs);
+
+            // 2. JavaScript Interop ile dosyayı tarayıcıda indir.
+            await JSRuntime.InvokeVoidAsync("saveAsFile",
+                $"Eylem_Kayitlari_Raporu_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+                Convert.ToBase64String(excelBytes));
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", "Eylem Kayıtları Raporu Excel'e aktarılırken hata oluştu:", ex.ToString());
+            await JSRuntime.InvokeVoidAsync("alert", $"Eylem Kayıtları raporu oluşturulurken bir hata oluştu: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 }

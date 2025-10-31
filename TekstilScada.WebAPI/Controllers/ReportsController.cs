@@ -1,12 +1,14 @@
 ﻿// TekstilScada.WebAPI/Controllers/ReportsController.cs
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using System.Text.Json.Serialization;
+using TekstilScada.Core.Core;
 using TekstilScada.Core.Models;
 using TekstilScada.Models;
 using TekstilScada.Repositories;
-
+using TekstilScada.Core;
 public class TrendDataPoint
 {
     public DateTime Timestamp { get; set; }
@@ -87,7 +89,11 @@ public class ReportFiltersDto
     [JsonPropertyName("operatorName")]
     public string? OperatorName { get; set; }
 }
-
+public class GeneralConsumptionExportDto
+{
+    public List<ProductionReportItem>? Items { get; set; }
+    public string? ConsumptionType { get; set; }
+}
 [ApiController]
 [Route("api/[controller]")]
 public class ReportsController : ControllerBase
@@ -427,6 +433,240 @@ public class ReportsController : ControllerBase
         catch (Exception ex)
         {
             return StatusCode(500, $"Excel dışa aktarma hatası: {ex.Message}");
+        }
+    }
+
+    [HttpPost("export/production")]
+    public IActionResult ExportProductionReport([FromBody] List<ProductionReportItem> reportItems)
+    {
+        if (reportItems == null || !reportItems.Any())
+        {
+            return BadRequest("Rapor verisi bulunamadı.");
+        }
+
+        try
+        {
+            // Core katmanındaki helper metot ile Excel dosyasını oluştur
+            var excelBytes = ExcelExportHelper.ExportProductionReportToExcel(reportItems);
+
+            // Dosyayı tarayıcıya döndür
+            return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"Uretim_Raporu_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
+        }
+        catch (Exception ex)
+        {
+            // Loglama yapılabilir
+            return StatusCode(500, $"Excel raporu oluşturulurken bir hata oluştu: {ex.Message}");
+        }
+    }
+    [HttpPost("export/alarms")]
+    public IActionResult ExportAlarmReport([FromBody] List<AlarmReportItem> reportItems)
+    {
+        if (reportItems == null || !reportItems.Any())
+        {
+            return BadRequest("Dışa aktarılacak alarm verisi bulunamadı.");
+        }
+
+        try
+        {
+            // Core projesindeki helper sınıfı çağır
+            var excelBytes = ExcelExportHelper.ExportAlarmReportToExcel(reportItems);
+
+            if (excelBytes.Length == 0)
+            {
+                return NotFound("Excel dosyası boş oluşturuldu.");
+            }
+
+            string fileName = $"Alarm_Raporu_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+            // Excel dosyasını byte dizisi olarak döndürür
+            return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Alarm raporu oluşturulurken sunucuda bir hata oluştu: {ex.Message}");
+        }
+    }
+    [HttpPost("export/oee")]
+    public IActionResult ExportOeeReport([FromBody] List<OeeData> reportItems)
+    {
+        if (reportItems == null || !reportItems.Any())
+        {
+            return BadRequest("Dışa aktarılacak OEE verisi bulunamadı.");
+        }
+
+        try
+        {
+            // Core projesindeki helper sınıfı çağır
+            var excelBytes = ExcelExportHelper.ExportOeeReportToExcel(reportItems);
+
+            if (excelBytes.Length == 0)
+            {
+                return NotFound("Excel dosyası boş oluşturuldu.");
+            }
+
+            string fileName = $"OEE_Raporu_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+            // Excel dosyasını byte dizisi olarak döndürür
+            return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"OEE raporu oluşturulurken sunucuda bir hata oluştu: {ex.Message}");
+        }
+    }
+    [HttpPost("export/manual-consumption")]
+    public IActionResult ExportManualConsumptionReport([FromBody] ManualConsumptionSummary summary)
+    {
+        // Sadece Makine adının veya geçerli bir verinin olup olmadığını kontrol ederiz.
+        if (summary == null || string.IsNullOrEmpty(summary.Makine))
+        {
+            return BadRequest("Dışa aktarılacak manuel tüketim özeti bulunamadı.");
+        }
+
+        try
+        {
+            // Core projesindeki helper sınıfı çağır
+            var excelBytes = ExcelExportHelper.ExportManualConsumptionReportToExcel(summary);
+
+            if (excelBytes.Length == 0)
+            {
+                return NotFound("Excel dosyası boş oluşturuldu.");
+            }
+
+            string fileName = $"Manuel_Tuketim_Ozet_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+            // Excel dosyasını byte dizisi olarak döndürür
+            return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Manuel Tüketim raporu oluşturulurken sunucuda bir hata oluştu: {ex.Message}");
+        }
+
+    }
+    [HttpPost("export/general-detailed")]
+    public IActionResult ExportGeneralDetailedConsumptionReport([FromBody] GeneralConsumptionExportDto exportData)
+    {
+        if (exportData == null || exportData.Items == null || !exportData.Items.Any() || string.IsNullOrEmpty(exportData.ConsumptionType))
+        {
+            return BadRequest("Dışa aktarılacak detaylı tüketim verisi bulunamadı.");
+        }
+
+        try
+        {
+            // Core projesindeki helper sınıfı çağır
+            var excelBytes = ExcelExportHelper.ExportGeneralDetailedConsumptionReportToExcel(exportData.Items, exportData.ConsumptionType);
+
+            if (excelBytes.Length == 0)
+            {
+                return NotFound("Excel dosyası boş oluşturuldu.");
+            }
+
+            string consumptionType = exportData.ConsumptionType ?? "Tuketim";
+            string fileName = $"Genel_Tuketim_Detay_{consumptionType}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+            // Excel dosyasını byte dizisi olarak döndürür
+            return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Genel detaylı tüketim raporu oluşturulurken sunucuda bir hata oluştu: {ex.Message}");
+        }
+    }
+    // YENİ METOT: Eylem Kayıtları Raporunu Excel'e Aktarma
+    [HttpPost("export/action-logs")]
+    public IActionResult ExportActionLogsReport([FromBody] List<TekstilScada.Core.Models.ActionLogEntry> logs)
+    {
+        if (logs == null || !logs.Any())
+        {
+            return BadRequest("Dışa aktarılacak eylem kaydı verisi bulunamadı.");
+        }
+
+        try
+        {
+            // Core projesindeki helper sınıfı çağır
+            var excelBytes = ExcelExportHelper.ExportActionLogsReportToExcel(logs);
+
+            if (excelBytes.Length == 0)
+            {
+                return NotFound("Excel dosyası boş oluşturuldu.");
+            }
+
+            string fileName = $"Eylem_Kayitlari_Raporu_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+            // Excel dosyasını byte dizisi olarak döndürür
+            return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Eylem Kayıtları raporu oluşturulurken sunucuda bir hata oluştu: {ex.Message}");
+        }
+    }
+    [HttpGet("export/production-detail/{machineId}/{batchId}")]
+    public ActionResult ExportProductionDetailFile(int machineId, string batchId)
+    {
+        // Veri çekme mantığı, zaten var olan GetProductionDetail metodunun mantığını yansıtır.
+
+        // 1. DTO'yu çekmek için GetProductionDetail metodu çağrılmalıdır.
+        // Ancak bu metot bir ActionResult döndürdüğü için, çekirdek mantığını tekrarlıyoruz:
+
+        // 1. Header verisini al
+        var reportItem = _productionRepository.GetProductionReport(new ReportFilters { MachineId = machineId, BatchNo = batchId, StartTime = DateTime.MinValue, EndTime = DateTime.MaxValue })
+                                            .FirstOrDefault();
+        if (reportItem == null) return NotFound("Rapor başlığı bulunamadı.");
+
+        // 2. Adım Detayları (CS1061 hatası çözümü: DTO'ya map etme)
+        var stepDetails = _productionRepository.GetProductionStepDetails(batchId, machineId)
+            .Select(s => new ExcelExportHelper.ProductionStepDetailDto
+            {
+                StepNumber = s.StepNumber,
+                StepName = s.StepName,
+                TheoreticalTime = s.TheoreticalTime,
+                WorkingTime = s.WorkingTime,
+                StopTime = s.StopTime,
+                DeflectionTime = s.DeflectionTime,
+                TheoreticalDurationSeconds = TimeSpan.TryParse(s.TheoreticalTime, out var tt) ? tt.TotalSeconds : 0,
+                Temperature = 90.5 // Örnek/Hesaplanmış Sıcaklık (GetProductionDetail'deki placeholder)
+            }).ToList();
+
+        // 3. Alarm Detayları (CS1061 hatası çözümü: DTO'ya map etme)
+        var alarmDetails = _alarmRepository.GetAlarmDetailsForBatch(batchId, machineId)
+            .Select((a, index) => new ExcelExportHelper.AlarmDetailDto
+            {
+                AlarmTime = DateTime.Now.AddMinutes(-index * 5), // Örnek zaman
+                AlarmType = "Makine Alarmı", // Örnek tip
+                AlarmDescription = a.AlarmDescription,
+                Duration = TimeSpan.FromMinutes(index + 1) // Örnek süre
+            }).ToList();
+
+        // 4. DTO'yu oluştur
+        var detailData = new ExcelExportHelper.ProductionDetailDto
+        {
+            Header = reportItem,
+            Steps = stepDetails,
+            Alarms = alarmDetails,
+            LogData = new List<ExcelExportHelper.TrendDataPoint>(),
+            TheoreticalData = new List<ExcelExportHelper.TrendDataPoint>()
+        };
+
+        try
+        {
+            // 5. Excel'i oluştur
+            var excelBytes = ExcelExportHelper.ExportProductionDetailToExcel(detailData);
+
+            if (excelBytes.Length == 0)
+            {
+                return NotFound("Excel dosyası boş oluşturuldu.");
+            }
+
+            string fileName = $"Uretim_Detayi_{batchId}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+            // Excel dosyasını byte dizisi olarak döndürür
+            return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Üretim detayı Excel raporu oluşturulurken sunucuda bir hata oluştu: {ex.Message}");
         }
     }
 }

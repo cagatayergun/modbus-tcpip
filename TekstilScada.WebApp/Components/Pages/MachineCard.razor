@@ -9,18 +9,18 @@
         <span class="machine-number" style="color: black;">@MachineStatus.MachineId.</span>
         <span class="machine-name-web" style="color: black;">@MachineStatus.MachineName</span>
         <div class="icons">
-            <span class="icon vnc-icon" style="color: black;">V</span>
+           
 
             <button type="button"
                     class="btn btn-sm btn-link icon info-icon"
-                    style="color: black; text-decoration: none; padding: 0 5px;"
+                    style="color: black; text-decoration: none; padding: 0 10px;"
                     @onclick="HandleInfoButtonClick"
                     @onclick:stopPropagation="true">
                 i
             </button>
 
 
-            <span class="icon status-icon @GetConnectionCssClass()"></span>
+            <span class="icon status-icon @GetConnectionCssClass()">@GetConnectionStatusIconText()</span>
         </div>
     </div>
     <div class="card-body-web">
@@ -105,5 +105,14 @@
     {
         // Makine detay sayfasına yönlendirme
         NavigationManager.NavigateTo($"/makine-detay/{MachineStatus.MachineId}");
+    }
+    private string GetConnectionStatusIconText()
+    {
+        return MachineStatus.ConnectionState switch
+        {
+            ConnectionStatus.Connected => "C", // Bağlantı varsa
+            ConnectionStatus.Connecting => "R", // Deneniyorsa
+            ConnectionStatus.Disconnected => "D" // Bağlantı yoksa
+        };
     }
 }

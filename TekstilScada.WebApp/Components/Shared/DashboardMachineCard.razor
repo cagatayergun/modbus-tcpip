@@ -44,22 +44,7 @@
             </div>
         </div>
 
-     <div class="sparkline-container-card">
-            <div class="chart-title-sparkline">Sıcaklık Trendi (Son 15 dk)</div>
-            @if (!_dataLoaded)
-            {
-                <div class="loading-sparkline">Yükleniyor...</div>
-            }
-            else if (!SparklineData.Any())
-            {
-                <div class="no-data-sparkline">Veri yok.</div>
-            }
-            else
-            {
-               
-                <div id="@SparklineContainerId" class="sparkline-chart-area"></div>
-            }
-        </div>
+    
         </div>
 </div>
 

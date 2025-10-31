@@ -1,11 +1,11 @@
 ﻿@page "/reports/production-detail/{MachineId:int}/{BatchId}"
-
+@using TekstilScada.Repositories
 @using TekstilScada.Core.Models
 @using TekstilScada.Models
 @using TekstilScada.WebApp.Services
 @inject ScadaDataService ScadaDataService
 @inject IJSRuntime JSRuntime
-
+@inject NavigationManager NavigationManager
 <PageTitle>Üretim Detayı - @BatchId</PageTitle>
 
 @if (isLoading)
@@ -50,9 +50,9 @@ else
         <div class="row mb-4">
             <div class="col-md-8">
                 <div class="card h-100">
-                    <div class="card-header fw-bold">Proses Zaman Çizgisi (@detailData.Header.MachineName)</div>
+                    <div class="card-header fw-bold">Proses Zaman Çizgisi/Sıcaklık</div>
                     <div class="card-body">
-                        <div id="timeline-chart" style="height: 400px;">
+                        <div id="trendChart" style="height: 400px;">
                             <p class="text-center text-muted">Zaman Çizgisi Grafiği burada gösterilecektir.</p>
                         </div>
                     </div>
@@ -152,17 +152,27 @@ else
     private bool isLoading = true;
     private string statusMessage = "Üretim detayları yükleniyor...";
     private List<PieChartSegment> pieChartSegments = new();
-
+    private List<TrendDataPoint>? actualDataPoints;
     // API'dan gelen tüm veriyi tutacak DTO'lar (Tekrar tanımlanmıştır)
-   
-
-
+    private bool _chartsDrawn = false;
+    private List<TrendProcessDataPoint>? trendDataPoints;
+    private bool shouldRenderChart = false;
+    private bool shouldRenderChart2 = false;
     private class PieChartSegment
     {
         public string Label { get; set; } = string.Empty;
         public string Color { get; set; } = string.Empty;
         public TimeSpan DurationTimeSpan { get; set; }
         public string Duration => DurationTimeSpan.ToString(@"hh\:mm\:ss");
+        public double Value { get; set; } // Pasta grafiği için süre (saniye)
+    }
+    private class TrendProcessDataPoint
+    {
+        public int MachineId { get; set; }
+        public DateTime Timestamp { get; set; }
+        public decimal Temperature { get; set; }
+        public decimal WaterLevel { get; set; }
+        public int Rpm { get; set; }
     }
 
     protected override async Task OnInitializedAsync()
@@ -179,7 +189,7 @@ else
             // Tek bir API çağrısıyla tüm veriyi al (WinForms'taki birden çok Repository çağrısının karşılığı)
             // Bu metot ScadaDataService'e eklenmelidir.
             detailData = await ScadaDataService.GetProductionDetailAsync(MachineId, BatchId);
-
+            await GenerateTrendReport();
             if (detailData != null)
             {
                 CalculatePieChart(detailData.Header); // Pasta grafik verisini hesapla
@@ -199,7 +209,106 @@ else
             isLoading = false;
         }
     }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Yalnızca ilk render işleminden sonra (ve veriler yüklendiğinde) JS interop'u çağır.
+        if (shouldRenderChart2 && detailData != null && !_chartsDrawn)
+        {
+            await DrawPieChartAsync();
 
+            _chartsDrawn = true;
+            shouldRenderChart2 = false;
+        }
+        if (shouldRenderChart && trendDataPoints != null && trendDataPoints.Any())
+        {
+            shouldRenderChart = false; // Tekrar çizimi engelle
+
+            // CallPlotlyJS, DOM'a erişimin garanti olduğu bu noktada çağrılır.
+            await CallPlotlyJS();
+        }
+    }
+    private async Task DrawPieChartAsync()
+    {
+        if (pieChartSegments.Any())
+        {
+            // JS tarafına gönderilecek basit veri formatı
+            var chartData = pieChartSegments.Select(s => new
+            {
+                label = s.Label,
+                value = s.DurationTimeSpan.TotalSeconds, // Pasta için saniye değerini gönder
+                color = s.Color
+            }).ToList();
+
+            // JS interop çağrısı: 'window.drawPieChart' JS fonksiyonunu çağırır.
+            await JSRuntime.InvokeVoidAsync("drawPieChart", "pie-chart", chartData);
+        }
+    }
+    // Zaman Çizgisi / Sıcaklık Grafiği çizimini başlatan metot
+  
+    private async Task CallPlotlyJS()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("plotTrendChart",
+                "trendChart",
+                trendDataPoints,
+                "Temperature");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", "Plotly JS çağrısı başarısız oldu:", ex.Message);
+        }
+    }
+    private async Task GenerateTrendReport()
+    {
+        isLoading = true;
+        actualDataPoints = null;
+        // shouldRenderChart = false; // Temizle
+        await InvokeAsync(StateHasChanged);
+
+       
+
+        try
+        {
+            var effectiveFilters = new ReportFilters
+            {
+                StartTime = detailData.Header.StartTime,
+                EndTime = detailData.Header.EndTime,
+                MachineId = MachineId,
+            };
+
+            await JSRuntime.InvokeVoidAsync("console.log", "API'ye gönderilen Trend filtreleri:", effectiveFilters);
+
+            var rawData = await ScadaDataService.GetTrendDataAsync(effectiveFilters);
+
+            if (rawData != null)
+            {
+                var jsonString = System.Text.Json.JsonSerializer.Serialize(rawData);
+                var trendData = System.Text.Json.JsonSerializer.Deserialize<List<TrendProcessDataPoint>>(jsonString, new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+                trendDataPoints = trendData;
+
+                if (trendDataPoints.Any())
+                {
+                    shouldRenderChart = true; // DOM hazır olduğunda çizim yapsın diye flag'i true yaptık.
+                }
+                else
+                {
+                    shouldRenderChart = false;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            shouldRenderChart = false;
+            await JSRuntime.InvokeVoidAsync("console.error", "Trend Raporu oluşturulurken hata oluştu:", ex.ToString());
+        }
+        finally
+        {
+            isLoading = false;
+            // Bu StateHasChanged, OnAfterRenderAsync'i tetikler.
+            await InvokeAsync(StateHasChanged);
+        }
+    }
     // WinForms'taki LoadPieChart mantığının karşılığı
     private void CalculatePieChart(ProductionReportItem reportItem)
     {
@@ -221,7 +330,8 @@ else
             {
                 Label = "Aktif Çalışma",
                 Color = "DodgerBlue",
-                DurationTimeSpan = TimeSpan.FromSeconds(activeWorkingSeconds)
+                DurationTimeSpan = TimeSpan.FromSeconds(activeWorkingSeconds),
+                Value = activeWorkingSeconds // EKLENDİ
             });
         }
         if (totalMachineAlarmSeconds > 0)
@@ -230,7 +340,8 @@ else
             {
                 Label = "Makine Alarm",
                 Color = "Crimson",
-                DurationTimeSpan = TimeSpan.FromSeconds(totalMachineAlarmSeconds)
+                DurationTimeSpan = TimeSpan.FromSeconds(totalMachineAlarmSeconds),
+                Value = totalMachineAlarmSeconds // EKLENDİ
             });
         }
         if (totalOperatorPauseSeconds > 0)
@@ -239,7 +350,8 @@ else
             {
                 Label = "Operatör Duraklama",
                 Color = "Orange",
-                DurationTimeSpan = TimeSpan.FromSeconds(totalOperatorPauseSeconds)
+                DurationTimeSpan = TimeSpan.FromSeconds(totalOperatorPauseSeconds),
+                 Value = totalOperatorPauseSeconds // EKLENDİ
             });
         }
 
@@ -247,6 +359,14 @@ else
         {
             pieChartSegments.Add(new PieChartSegment { Label = "Veri Yok", Color = "Gray", DurationTimeSpan = TimeSpan.Zero });
         }
+         if (pieChartSegments.Any())
+                {
+                    shouldRenderChart2 = true; // DOM hazır olduğunda çizim yapsın diye flag'i true yaptık.
+                }
+                else
+                {
+                    shouldRenderChart2 = false;
+                }
     }
 
     // WinForms'taki dgvStepDetails_CellFormatting mantığının karşılığı (satır stili)
@@ -278,22 +398,27 @@ else
     {
         if (detailData == null) return;
 
-        // Bu, Excel dosyasını sunucuda oluşturup istemciye indirmek için bir API çağrısıdır.
-        // ScadaDataService'de ExportProductionDetailAsync(MachineId, BatchId) metodu olmalıdır.
         statusMessage = "Excel dosyası hazırlanıyor...";
         isLoading = true;
         StateHasChanged();
 
         try
         {
-            var success = await ScadaDataService.ExportProductionDetailAsync(MachineId, BatchId);
-            if (success)
+            // KRİTİK GÜNCELLEME: Yeni byte[] döndüren metodu çağır
+            var excelBytes = await ScadaDataService.ExportProductionDetailFileAsync(MachineId, BatchId);
+
+            if (excelBytes.Any())
             {
+                // JavaScript Interop ile dosyayı tarayıcıda indir.
+                await JSRuntime.InvokeVoidAsync("saveAsFile",
+                    $"Uretim_Detayi_{BatchId}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+                    Convert.ToBase64String(excelBytes));
+
                 await JSRuntime.InvokeVoidAsync("alert", "Rapor Excel olarak başarıyla dışa aktarıldı (İndirme başlatıldı).");
             }
             else
             {
-                await JSRuntime.InvokeVoidAsync("alert", "Excel dışa aktarma başarısız oldu.");
+                await JSRuntime.InvokeVoidAsync("alert", "Excel dosyası boş döndü. (Sunucu hatası)");
             }
         }
         catch (Exception ex)
@@ -303,6 +428,7 @@ else
         finally
         {
             isLoading = false;
+            StateHasChanged();
         }
     }
 }

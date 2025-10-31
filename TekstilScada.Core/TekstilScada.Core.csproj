@@ -8,6 +8,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="ClosedXML" Version="0.105.0" />
 		<PackageReference Include="HslCommunication" Version="12.3.2" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
