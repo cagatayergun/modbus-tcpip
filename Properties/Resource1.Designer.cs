@@ -8,10 +8,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Universal_Scada.Properties {
+namespace TekstilScada.Properties
+{
     using System;
-    
-    
+
+
     /// <summary>
     ///   Yerelleştirilmiş dizeleri aramak gibi işlemler için, türü kesin olarak belirtilmiş kaynak sınıfı.
     /// </summary>
@@ -22,149 +23,190 @@ namespace Universal_Scada.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resource1 {
-        
+    internal class Resource1
+    {
+
         private static global::System.Resources.ResourceManager resourceMan;
-        
+
         private static global::System.Globalization.CultureInfo resourceCulture;
-        
+
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resource1() {
+        internal Resource1()
+        {
         }
-        
+
         /// <summary>
         ///   Bu sınıf tarafından kullanılan, önbelleğe alınmış ResourceManager örneğini döndürür.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
-            get {
-                if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Universal_Scada.Properties.Resource1", typeof(Resource1).Assembly);
+        internal static global::System.Resources.ResourceManager ResourceManager
+        {
+            get
+            {
+                if (object.ReferenceEquals(resourceMan, null))
+                {
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TekstilScada.Properties.Resource1", typeof(Resource1).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
             }
         }
-        
+
         /// <summary>
         ///   Tümü için geçerli iş parçacığının CurrentUICulture özelliğini geçersiz kular
         ///   CurrentUICulture özelliğini tüm kaynak aramaları için geçersiz kılar.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
-            get {
+        internal static global::System.Globalization.CultureInfo Culture
+        {
+            get
+            {
                 return resourceCulture;
             }
-            set {
+            set
+            {
                 resourceCulture = value;
             }
         }
-        
+
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
-        internal static System.Drawing.Bitmap alarm {
-            get {
+        internal static System.Drawing.Bitmap alarm
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("alarm", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
-        internal static System.Drawing.Bitmap alarm_var {
-            get {
+        internal static System.Drawing.Bitmap alarm_var
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("alarm_var", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
-        internal static System.Drawing.Bitmap alarm_yok {
-            get {
+        internal static System.Drawing.Bitmap alarm_yok
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("alarm_yok", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
-        internal static System.Drawing.Bitmap pause {
-            get {
+        internal static System.Drawing.Bitmap pause
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("pause", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
-        internal static System.Drawing.Bitmap pause2 {
-            get {
+        internal static System.Drawing.Bitmap pause2
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("pause2", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
-        internal static System.Drawing.Bitmap play {
-            get {
+        internal static System.Drawing.Bitmap play
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("play", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
-        internal static System.Drawing.Bitmap play2 {
-            get {
+        internal static System.Drawing.Bitmap play2
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("play2", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
+        /// <summary>
+        ///    benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string String1
+        {
+            get
+            {
+                return ResourceManager.GetString("String1", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
-        internal static System.Drawing.Bitmap yilmak {
-            get {
+        internal static System.Drawing.Bitmap yilmak
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("yilmak", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
-        internal static System.Drawing.Bitmap yilmak_baglanti {
-            get {
+        internal static System.Drawing.Bitmap yilmak_baglanti
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("yilmak_baglanti", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
-        internal static System.Drawing.Bitmap yilmak_baglanti_2 {
-            get {
+        internal static System.Drawing.Bitmap yilmak_baglanti_2
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("yilmak_baglanti_2", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
-        internal static System.Drawing.Bitmap yilmak2___Kopya {
-            get {
+        internal static System.Drawing.Bitmap yilmak2___Kopya
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("yilmak2 - Kopya", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }

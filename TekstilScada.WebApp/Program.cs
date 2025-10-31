@@ -48,9 +48,13 @@ builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
 
 
 // HttpClient yapýlandýrmasý (Bu doðru)
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5000";
+
+// HttpClient yapýlandýrmasý (Bu doðru)
 builder.Services.AddHttpClient("WebApiClient", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:7039");
+    // client.BaseAddress = new Uri("http://localhost:5000"); // ESKÝ SATIR
+    client.BaseAddress = new Uri(apiBaseUrl); // YENÝ SATIR
 })
 .ConfigurePrimaryHttpMessageHandler(() =>
 {
@@ -78,10 +82,10 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    app.UseHsts();
+   // app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 

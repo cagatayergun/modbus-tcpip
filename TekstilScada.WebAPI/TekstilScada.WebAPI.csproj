@@ -19,6 +19,5 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\TekstilScada.Core\TekstilScada.Core.csproj" />
-	  <ProjectReference Include="..\TekstilScada.WebApp\TekstilScada.WebApp.csproj" />
 	</ItemGroup>
 </Project>

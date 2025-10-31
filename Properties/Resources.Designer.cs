@@ -8,10 +8,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Universal_Scada.Properties {
+namespace TekstilScada.Properties
+{
     using System;
-    
-    
+
+
     /// <summary>
     ///   Yerelleştirilmiş dizeleri aramak gibi işlemler için, türü kesin olarak belirtilmiş kaynak sınıfı.
     /// </summary>
@@ -22,1876 +23,2292 @@ namespace Universal_Scada.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class Resources {
-        
+    public class Resources
+    {
+
         private static global::System.Resources.ResourceManager resourceMan;
-        
+
         private static global::System.Globalization.CultureInfo resourceCulture;
-        
+
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resources() {
+        internal Resources()
+        {
         }
-        
+
         /// <summary>
         ///   Bu sınıf tarafından kullanılan, önbelleğe alınmış ResourceManager örneğini döndürür.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Resources.ResourceManager ResourceManager {
-            get {
-                if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Universal_Scada.Properties.Resources", typeof(Resources).Assembly);
+        public static global::System.Resources.ResourceManager ResourceManager
+        {
+            get
+            {
+                if (object.ReferenceEquals(resourceMan, null))
+                {
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TekstilScada.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
             }
         }
-        
+
         /// <summary>
         ///   Tümü için geçerli iş parçacığının CurrentUICulture özelliğini geçersiz kular
         ///   CurrentUICulture özelliğini tüm kaynak aramaları için geçersiz kılar.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Globalization.CultureInfo Culture {
-            get {
+        public static global::System.Globalization.CultureInfo Culture
+        {
+            get
+            {
                 return resourceCulture;
             }
-            set {
+            set
+            {
                 resourceCulture = value;
             }
         }
-        
+
         /// <summary>
         ///   Yetki Reddedildi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string AccessDenied {
-            get {
+        public static string AccessDenied
+        {
+            get
+            {
                 return ResourceManager.GetString("AccessDenied", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Aktif alarm yok . benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string aktifalarmyok {
-            get {
+        public static string aktifalarmyok
+        {
+            get
+            {
                 return ResourceManager.GetString("aktifalarmyok", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Aktif Üretim benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string aktifüretim {
-            get {
+        public static string aktifüretim
+        {
+            get
+            {
                 return ResourceManager.GetString("aktifüretim", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Alarm benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Alarm {
-            get {
+        public static string Alarm
+        {
+            get
+            {
                 return ResourceManager.GetString("Alarm", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Alarm Detayları benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string AlarmDetails {
-            get {
+        public static string AlarmDetails
+        {
+            get
+            {
                 return ResourceManager.GetString("AlarmDetails", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Alarm Durumu benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string alarmdurum {
-            get {
+        public static string alarmdurum
+        {
+            get
+            {
                 return ResourceManager.GetString("alarmdurum", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Geçmiş Alarmlar benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string AlarmHistory {
-            get {
+        public static string AlarmHistory
+        {
+            get
+            {
                 return ResourceManager.GetString("AlarmHistory", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Alarm No: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string AlarmNo {
-            get {
+        public static string AlarmNo
+        {
+            get
+            {
                 return ResourceManager.GetString("AlarmNo", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Alarm Numarası ve Alarm Metni zorunludur. benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string alarmnozorunlu {
-            get {
+        public static string alarmnozorunlu
+        {
+            get
+            {
                 return ResourceManager.GetString("alarmnozorunlu", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Geçmiş Alarmlar benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string alarmrapor {
-            get {
+        public static string alarmrapor
+        {
+            get
+            {
                 return ResourceManager.GetString("alarmrapor", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Alarm raporları oluşturulurken hata oluştu benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string alarmraporerror {
-            get {
+        public static string alarmraporerror
+        {
+            get
+            {
                 return ResourceManager.GetString("alarmraporerror", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Alarm Tanımlama benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string AlarmSettings {
-            get {
+        public static string AlarmSettings
+        {
+            get
+            {
                 return ResourceManager.GetString("AlarmSettings", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   alarm tanımını silmek istediğinizden emin misiniz? benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string alarmtanımısil {
-            get {
+        public static string alarmtanımısil
+        {
+            get
+            {
                 return ResourceManager.GetString("alarmtanımısil", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Alarm Metni: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string AlarmText {
-            get {
+        public static string AlarmText
+        {
+            get
+            {
                 return ResourceManager.GetString("AlarmText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Tüm Makineler benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string AllMachines {
-            get {
+        public static string AllMachines
+        {
+            get
+            {
                 return ResourceManager.GetString("AllMachines", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Anali Et benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string analizet {
-            get {
+        public static string analizet
+        {
+            get
+            {
                 return ResourceManager.GetString("analizet", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Ana Reçete: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string anarecete {
-            get {
+        public static string anarecete
+        {
+            get
+            {
                 return ResourceManager.GetString("anarecete", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Bağlantı bekleniyor... benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string baglantibekleniyro {
-            get {
+        public static string baglantibekleniyro
+        {
+            get
+            {
                 return ResourceManager.GetString("baglantibekleniyro", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Başlangıç Tarihi: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Baslangic_tarihi {
-            get {
+        public static string Baslangic_tarihi
+        {
+            get
+            {
                 return ResourceManager.GetString("Baslangic_tarihi", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Batch No: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string BatchNo {
-            get {
+        public static string BatchNo
+        {
+            get
+            {
                 return ResourceManager.GetString("BatchNo", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Bitiş Tarihi: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Bitis_tarihi {
-            get {
+        public static string Bitis_tarihi
+        {
+            get
+            {
                 return ResourceManager.GetString("Bitis_tarihi", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Boşaltma benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string bosaltma {
-            get {
+        public static string bosaltma
+        {
+            get
+            {
                 return ResourceManager.GetString("bosaltma", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Boşta Bekleyen benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string bosbekleyen {
-            get {
+        public static string bosbekleyen
+        {
+            get
+            {
                 return ResourceManager.GetString("bosbekleyen", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Buhar benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string buhar {
-            get {
+        public static string buhar
+        {
+            get
+            {
                 return ResourceManager.GetString("buhar", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Bu parti için henüz proses verisi kaydedilmemiş. benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string bupartihenüzkaydedilmemis {
-            get {
+        public static string bupartihenüzkaydedilmemis
+        {
+            get
+            {
                 return ResourceManager.GetString("bupartihenüzkaydedilmemis", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Bu parti için kayıtlı alarm yok. benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string bupartiicinalarmyok {
-            get {
+        public static string bupartiicinalarmyok
+        {
+            get
+            {
                 return ResourceManager.GetString("bupartiicinalarmyok", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   BY Makineleri benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string bymakinesi {
-            get {
+        public static string bymakinesi
+        {
+            get
+            {
                 return ResourceManager.GetString("bymakinesi", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Çalışma benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string calisma {
-            get {
+        public static string calisma
+        {
+            get
+            {
                 return ResourceManager.GetString("calisma", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   İptal benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Cancel {
-            get {
+        public static string Cancel
+        {
+            get
+            {
                 return ResourceManager.GetString("Cancel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Canlı veri akışı bekleniyor... benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string canlidata {
-            get {
+        public static string canlidata
+        {
+            get
+            {
                 return ResourceManager.GetString("canlidata", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Canlı Proses Verileri benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string canliprosesdata {
-            get {
+        public static string canliprosesdata
+        {
+            get
+            {
                 return ResourceManager.GetString("canliprosesdata", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Kategori: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Category {
-            get {
+        public static string Category
+        {
+            get
+            {
                 return ResourceManager.GetString("Category", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Kimyasal: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Chemical {
-            get {
+        public static string Chemical
+        {
+            get
+            {
                 return ResourceManager.GetString("Chemical", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Kimyasal Tüketimi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ChemicalConsumption {
-            get {
+        public static string ChemicalConsumption
+        {
+            get
+            {
                 return ResourceManager.GetString("ChemicalConsumption", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Çıkış yapmak istediğinize emin misiniz benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Cikiseminmisin {
-            get {
+        public static string Cikiseminmisin
+        {
+            get
+            {
                 return ResourceManager.GetString("Cikiseminmisin", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Kapat benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Close {
-            get {
+        public static string Close
+        {
+            get
+            {
                 return ResourceManager.GetString("Close", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Program kapanırken VNCViewer formunu kapatma hatası: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Closeandvnc {
-            get {
+        public static string Closeandvnc
+        {
+            get
+            {
                 return ResourceManager.GetString("Closeandvnc", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Soğuk Su benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ColdWater {
-            get {
+        public static string ColdWater
+        {
+            get
+            {
                 return ResourceManager.GetString("ColdWater", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Onay benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Confirim {
-            get {
+        public static string Confirim
+        {
+            get
+            {
                 return ResourceManager.GetString("Confirim", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Silme Onayı benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ConfirmDelete {
-            get {
+        public static string ConfirmDelete
+        {
+            get
+            {
                 return ResourceManager.GetString("ConfirmDelete", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Bağlantı Hatası benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ConnectionError {
-            get {
+        public static string ConnectionError
+        {
+            get
+            {
                 return ResourceManager.GetString("ConnectionError", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Bağlantı Kesildi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ConnectionLost {
-            get {
+        public static string ConnectionLost
+        {
+            get
+            {
                 return ResourceManager.GetString("ConnectionLost", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Soğutma Süresi (dk): benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string CoolingTime {
-            get {
+        public static string CoolingTime
+        {
+            get
+            {
                 return ResourceManager.GetString("CoolingTime", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Maliyet Parametreleri benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string cost {
-            get {
+        public static string cost
+        {
+            get
+            {
                 return ResourceManager.GetString("cost", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Kritik Hata benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string CriticalError {
-            get {
+        public static string CriticalError
+        {
+            get
+            {
                 return ResourceManager.GetString("CriticalError", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Müşteri No: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string CustomerNo {
-            get {
+        public static string CustomerNo
+        {
+            get
+            {
                 return ResourceManager.GetString("CustomerNo", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Veritabanı bağlantısı kurulamadı. benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string DatabaseConnectionFailed {
-            get {
+        public static string DatabaseConnectionFailed
+        {
+            get
+            {
                 return ResourceManager.GetString("DatabaseConnectionFailed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Veritabanı Hatası benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string DatabaseError {
-            get {
+        public static string DatabaseError
+        {
+            get
+            {
                 return ResourceManager.GetString("DatabaseError", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Tarih Aralığı benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string DateRange {
-            get {
+        public static string DateRange
+        {
+            get
+            {
                 return ResourceManager.GetString("DateRange", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Sil benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Delete {
-            get {
+        public static string Delete
+        {
+            get
+            {
                 return ResourceManager.GetString("Delete", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Devir benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string devir {
-            get {
+        public static string devir
+        {
+            get
+            {
                 return ResourceManager.GetString("devir", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Diğer benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string diger {
-            get {
+        public static string diger
+        {
+            get
+            {
                 return ResourceManager.GetString("diger", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Direk Buhar benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string DirectSteam {
-            get {
+        public static string DirectSteam
+        {
+            get
+            {
                 return ResourceManager.GetString("DirectSteam", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   DOZAJ benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Dosage {
-            get {
+        public static string Dosage
+        {
+            get
+            {
                 return ResourceManager.GetString("Dosage", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Dozajda Litre: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string DosageLiter {
-            get {
+        public static string DosageLiter
+        {
+            get
+            {
                 return ResourceManager.GetString("DosageLiter", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Kimyasal Dozaj Süresi: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string DosageTime {
-            get {
+        public static string DosageTime
+        {
+            get
+            {
                 return ResourceManager.GetString("DosageTime", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Dozaj benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string dozaj {
-            get {
+        public static string dozaj
+        {
+            get
+            {
                 return ResourceManager.GetString("dozaj", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   BOŞALTMA benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Drain {
-            get {
+        public static string Drain
+        {
+            get
+            {
                 return ResourceManager.GetString("Drain", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Tambur Dur benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string DrumStop {
-            get {
+        public static string DrumStop
+        {
+            get
+            {
                 return ResourceManager.GetString("DrumStop", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Kurutma Reçete Parametleri benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string DryingRecipeParameters {
-            get {
+        public static string DryingRecipeParameters
+        {
+            get
+            {
                 return ResourceManager.GetString("DryingRecipeParameters", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Süre (dk): benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Duration {
-            get {
+        public static string Duration
+        {
+            get
+            {
                 return ResourceManager.GetString("Duration", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Eksik Bilgi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string EksikBilgi {
-            get {
+        public static string EksikBilgi
+        {
+            get
+            {
                 return ResourceManager.GetString("EksikBilgi", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Elektrik benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string elk {
-            get {
+        public static string elk
+        {
+            get
+            {
                 return ResourceManager.GetString("elk", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Bitiş Tarihi: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string EndTime {
-            get {
+        public static string EndTime
+        {
+            get
+            {
                 return ResourceManager.GetString("EndTime", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   İngilizce benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string English {
-            get {
+        public static string English
+        {
+            get
+            {
                 return ResourceManager.GetString("English", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   En Sık 5 Alarm (Son 24 Saat) benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ensikalarm {
-            get {
+        public static string ensikalarm
+        {
+            get
+            {
                 return ResourceManager.GetString("ensikalarm", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Hata benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Error {
-            get {
+        public static string Error
+        {
+            get
+            {
                 return ResourceManager.GetString("Error", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Excel&apos;e Aktar benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ExportToExcel {
-            get {
+        public static string ExportToExcel
+        {
+            get
+            {
                 return ResourceManager.GetString("ExportToExcel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   FTP Şifre : benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ftppass {
-            get {
+        public static string ftppass
+        {
+            get
+            {
                 return ResourceManager.GetString("ftppass", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   FTP Kullanıcı : benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ftpuser {
-            get {
+        public static string ftpuser
+        {
+            get
+            {
                 return ResourceManager.GetString("ftpuser", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Geçmiş Üretimler benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string gecmisuretimler {
-            get {
+        public static string gecmisuretimler
+        {
+            get
+            {
                 return ResourceManager.GetString("gecmisuretimler", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Genel Tüketim Raporu benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string geneltüketim {
-            get {
+        public static string geneltüketim
+        {
+            get
+            {
                 return ResourceManager.GetString("geneltüketim", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Genel Tesis Dashboard&apos;u (KPI Ekranı) (Burası Geliştirilecek) benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string GeneralDashboard {
-            get {
+        public static string GeneralDashboard
+        {
+            get
+            {
                 return ResourceManager.GetString("GeneralDashboard", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Genel Bakış benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string GeneralOverview {
-            get {
+        public static string GeneralOverview
+        {
+            get
+            {
                 return ResourceManager.GetString("GeneralOverview", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Rapor Oluştur benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string GenerateReport {
-            get {
+        public static string GenerateReport
+        {
+            get
+            {
                 return ResourceManager.GetString("GenerateReport", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   &lt; GERİ benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string geri {
-            get {
+        public static string geri
+        {
+            get
+            {
                 return ResourceManager.GetString("geri", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Görüntülenecek veriler benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string görüntülenecek_veriler {
-            get {
+        public static string görüntülenecek_veriler
+        {
+            get
+            {
                 return ResourceManager.GetString("görüntülenecek_veriler", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Grafiği Oluştur benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string grafigiolustur {
-            get {
+        public static string grafigiolustur
+        {
+            get
+            {
                 return ResourceManager.GetString("grafigiolustur", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   ISITMA benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Heating {
-            get {
+        public static string Heating
+        {
+            get
+            {
                 return ResourceManager.GetString("Heating", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Sıcak Su benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string HotWater {
-            get {
+        public static string HotWater
+        {
+            get
+            {
                 return ResourceManager.GetString("HotWater", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Nem (%): benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Humidity {
-            get {
+        public static string Humidity
+        {
+            get
+            {
                 return ResourceManager.GetString("Humidity", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Dolaylı Buhar benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string IndirectSteam {
-            get {
+        public static string IndirectSteam
+        {
+            get
+            {
                 return ResourceManager.GetString("IndirectSteam", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Bilgi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Information {
-            get {
+        public static string Information
+        {
+            get
+            {
                 return ResourceManager.GetString("Information", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Giriş Gerekli benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string InputRequired {
-            get {
+        public static string InputRequired
+        {
+            get
+            {
                 return ResourceManager.GetString("InputRequired", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   IP Adresi : benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ipadres {
-            get {
+        public static string ipadres
+        {
+            get
+            {
                 return ResourceManager.GetString("ipadres", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Isıtma benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string isitma {
-            get {
+        public static string isitma
+        {
+            get
+            {
                 return ResourceManager.GetString("isitma", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   İzleme aktif mi ? benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string izlemeaktif {
-            get {
+        public static string izlemeaktif
+        {
+            get
+            {
                 return ResourceManager.GetString("izlemeaktif", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Karşılaştırılacak : benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string karsilastirilacak {
-            get {
+        public static string karsilastirilacak
+        {
+            get
+            {
                 return ResourceManager.GetString("karsilastirilacak", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Kayıt sırasında hata: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Kayıt_sırasında_hata_ {
-            get {
+        public static string Kayıt_sırasında_hata_
+        {
+            get
+            {
                 return ResourceManager.GetString("Kayıt sırasında hata:", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Kayıt sırasında bir hata oluştu: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string kayitsirasihatasi {
-            get {
+        public static string kayitsirasihatasi
+        {
+            get
+            {
                 return ResourceManager.GetString("kayitsirasihatasi", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   kullanıcısını silmek istediğinizden emin misiniz? benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string kullanıcısını_silmek_istediğinizden_emin_misiniz_ {
-            get {
+        public static string kullanıcısını_silmek_istediğinizden_emin_misiniz_
+        {
+            get
+            {
                 return ResourceManager.GetString("kullanıcısını silmek istediğinizden emin misiniz?", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Kurutma Makinesi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string kurutmamakinesi {
-            get {
+        public static string kurutmamakinesi
+        {
+            get
+            {
                 return ResourceManager.GetString("kurutmamakinesi", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Dil benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Language {
-            get {
+        public static string Language
+        {
+            get
+            {
                 return ResourceManager.GetString("Language", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Canlı Olay Akışı Göster benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Livelogsee {
-            get {
+        public static string Livelogsee
+        {
+            get
+            {
                 return ResourceManager.GetString("Livelogsee", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Giriş Yapan benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Loggedin {
-            get {
+        public static string Loggedin
+        {
+            get
+            {
                 return ResourceManager.GetString("Loggedin", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Giriş Yap benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Login {
-            get {
+        public static string Login
+        {
+            get
+            {
                 return ResourceManager.GetString("Login", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Kullanıcı adı veya şifre hatalı! benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string LoginFailed {
-            get {
+        public static string LoginFailed
+        {
+            get
+            {
                 return ResourceManager.GetString("LoginFailed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   SCADA Sistemi - Giriş benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string LoginScreen {
-            get {
+        public static string LoginScreen
+        {
+            get
+            {
                 return ResourceManager.GetString("LoginScreen", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Giriş/Çıkış benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Logout {
-            get {
+        public static string Logout
+        {
+            get
+            {
                 return ResourceManager.GetString("Logout", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Lütfen en az bir makine seçin. benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string lütfenbirmakinesec {
-            get {
+        public static string lütfenbirmakinesec
+        {
+            get
+            {
                 return ResourceManager.GetString("lütfenbirmakinesec", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Lütfen silmek için bir alarm tanımı seçin. benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string lütfendeleteuyarı {
-            get {
+        public static string lütfendeleteuyarı
+        {
+            get
+            {
                 return ResourceManager.GetString("lütfendeleteuyarı", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Lütfen silmek için bir makine seçin. benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string lütfensilmekicinmakinesec {
-            get {
+        public static string lütfensilmekicinmakinesec
+        {
+            get
+            {
                 return ResourceManager.GetString("lütfensilmekicinmakinesec", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Makine: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Machine {
-            get {
+        public static string Machine
+        {
+            get
+            {
                 return ResourceManager.GetString("Machine", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   MAKİNA ID: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string MachineID {
-            get {
+        public static string MachineID
+        {
+            get
+            {
                 return ResourceManager.GetString("MachineID", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Makine Yönetimi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string MachineManagement {
-            get {
+        public static string MachineManagement
+        {
+            get
+            {
                 return ResourceManager.GetString("MachineManagement", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   MAKİNA ADI: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string MachineName {
-            get {
+        public static string MachineName
+        {
+            get
+            {
                 return ResourceManager.GetString("MachineName", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Makine Seç benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string MachineSelect {
-            get {
+        public static string MachineSelect
+        {
+            get
+            {
                 return ResourceManager.GetString("MachineSelect", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Ana Tank Temiz Su Al benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string MainTankCleanWater {
-            get {
+        public static string MainTankCleanWater
+        {
+            get
+            {
                 return ResourceManager.GetString("MainTankCleanWater", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Ana Tank Mak. Su Al benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string MainTankWater {
-            get {
+        public static string MainTankWater
+        {
+            get
+            {
                 return ResourceManager.GetString("MainTankWater", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Makine bağlantısı bulunamadı. benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string makinebaglantısıbulunamadı {
-            get {
+        public static string makinebaglantısıbulunamadı
+        {
+            get
+            {
                 return ResourceManager.GetString("makinebaglantısıbulunamadı", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Makine Bilgileri benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string makinebilgileri {
-            get {
+        public static string makinebilgileri
+        {
+            get
+            {
                 return ResourceManager.GetString("makinebilgileri", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Makine bilgileri başarıyla güncellendi. benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string makinebilgilerigüncellendi {
-            get {
+        public static string makinebilgilerigüncellendi
+        {
+            get
+            {
                 return ResourceManager.GetString("makinebilgilerigüncellendi", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Makine Grubu : benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string makinegrup {
-            get {
+        public static string makinegrup
+        {
+            get
+            {
                 return ResourceManager.GetString("makinegrup", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Makine ID ve IP Adresi alanları zorunludur. benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string makineidveipzorunlu {
-            get {
+        public static string makineidveipzorunlu
+        {
+            get
+            {
                 return ResourceManager.GetString("makineidveipzorunlu", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Makineler benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string makineler {
-            get {
+        public static string makineler
+        {
+            get
+            {
                 return ResourceManager.GetString("makineler", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   makinesini silmek istediğinizden emin misiniz? benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string makinesilmeeminmisin {
-            get {
+        public static string makinesilmeeminmisin
+        {
+            get
+            {
                 return ResourceManager.GetString("makinesilmeeminmisin", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Makine Tipi : benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string makinetip {
-            get {
+        public static string makinetip
+        {
+            get
+            {
                 return ResourceManager.GetString("makinetip", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Makineler yüklenirken hata oluştu : benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string makineyüklemehatası {
-            get {
+        public static string makineyüklemehatası
+        {
+            get
+            {
                 return ResourceManager.GetString("makineyüklemehatası", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Manuel Tüketimler benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string manuelrapor {
-            get {
+        public static string manuelrapor
+        {
+            get
+            {
                 return ResourceManager.GetString("manuelrapor", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Kimyasal Çözme Süresi: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string MixingTime {
-            get {
+        public static string MixingTime
+        {
+            get
+            {
                 return ResourceManager.GetString("MixingTime", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Ad Soyad benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string namesurname {
-            get {
+        public static string namesurname
+        {
+            get
+            {
                 return ResourceManager.GetString("namesurname", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Yeni benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string New {
-            get {
+        public static string New
+        {
+            get
+            {
                 return ResourceManager.GetString("New", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   YENİ REÇETE benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string NewRecipe {
-            get {
+        public static string NewRecipe
+        {
+            get
+            {
                 return ResourceManager.GetString("NewRecipe", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Bu alana erişim yetkiniz bulunmamaktadır. benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string NoAccess {
-            get {
+        public static string NoAccess
+        {
+            get
+            {
                 return ResourceManager.GetString("NoAccess", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   OEE Raporu benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string OeeReport {
-            get {
+        public static string OeeReport
+        {
+            get
+            {
                 return ResourceManager.GetString("OeeReport", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Tamam benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Ok {
-            get {
+        public static string Ok
+        {
+            get
+            {
                 return ResourceManager.GetString("Ok", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   OPERATOR: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Operator {
-            get {
+        public static string Operator
+        {
+            get
+            {
                 return ResourceManager.GetString("Operator", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Sipariş No: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string OrderNo {
-            get {
+        public static string OrderNo
+        {
+            get
+            {
                 return ResourceManager.GetString("OrderNo", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Ortalama Buhar Tüketimi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ortalamabuhartuketimi {
-            get {
+        public static string ortalamabuhartuketimi
+        {
+            get
+            {
                 return ResourceManager.GetString("ortalamabuhartuketimi", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Ortalama Çevrim Süresi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ortalamacevrimsuresi {
-            get {
+        public static string ortalamacevrimsuresi
+        {
+            get
+            {
                 return ResourceManager.GetString("ortalamacevrimsuresi", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Ortalama Elektrik Tüketimi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ortalamaelektriktuketimi {
-            get {
+        public static string ortalamaelektriktuketimi
+        {
+            get
+            {
                 return ResourceManager.GetString("ortalamaelektriktuketimi", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Ortalama Su Tüketimi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ortalamasutuketimi {
-            get {
+        public static string ortalamasutuketimi
+        {
+            get
+            {
                 return ResourceManager.GetString("ortalamasutuketimi", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Parti başlangıç zamanı bulunamadı. benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string partibaslangıczamanıkayip {
-            get {
+        public static string partibaslangıczamanıkayip
+        {
+            get
+            {
                 return ResourceManager.GetString("partibaslangıczamanıkayip", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Şifre: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Password {
-            get {
+        public static string Password
+        {
+            get
+            {
                 return ResourceManager.GetString("Password", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   PLC&apos;den reçete okunamadı: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string plcdenreceteokunmadı {
-            get {
+        public static string plcdenreceteokunmadı
+        {
+            get
+            {
                 return ResourceManager.GetString("plcdenreceteokunmadı", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   PLC Operatör Yönetimi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string PlcOperatorManagement {
-            get {
+        public static string PlcOperatorManagement
+        {
+            get
+            {
                 return ResourceManager.GetString("PlcOperatorManagement", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Lütfen işlem yapılacak makineyi seçin: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string PleaseSelectMachine {
-            get {
+        public static string PleaseSelectMachine
+        {
+            get
+            {
                 return ResourceManager.GetString("PleaseSelectMachine", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Proses Alarmları benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ProcessAlarms {
-            get {
+        public static string ProcessAlarms
+        {
+            get
+            {
                 return ResourceManager.GetString("ProcessAlarms", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Proses Kontrol benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ProcessControl {
-            get {
+        public static string ProcessControl
+        {
+            get
+            {
                 return ResourceManager.GetString("ProcessControl", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Proses Grafiği benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ProcessGraph {
-            get {
+        public static string ProcessGraph
+        {
+            get
+            {
                 return ResourceManager.GetString("ProcessGraph", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   PROSESSING benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Processing {
-            get {
+        public static string Processing
+        {
+            get
+            {
                 return ResourceManager.GetString("Processing", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Üretim Raporu benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ProductionReport {
-            get {
+        public static string ProductionReport
+        {
+            get
+            {
                 return ResourceManager.GetString("ProductionReport", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Üretim Özeti benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ProductionSummary {
-            get {
+        public static string ProductionSummary
+        {
+            get
+            {
                 return ResourceManager.GetString("ProductionSummary", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Proses İzleme benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Proseswatching {
-            get {
+        public static string Proseswatching
+        {
+            get
+            {
                 return ResourceManager.GetString("Proseswatching", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Proses Zaman Çizgisi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string proseszamancizgisi {
-            get {
+        public static string proseszamancizgisi
+        {
+            get
+            {
                 return ResourceManager.GetString("proseszamancizgisi", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Miktar (Litre): benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string QuantityLiters {
-            get {
+        public static string QuantityLiters
+        {
+            get
+            {
                 return ResourceManager.GetString("QuantityLiters", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Rapor oluşturulurken bir hata oluştu: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string raporolusturukenhata {
-            get {
+        public static string raporolusturukenhata
+        {
+            get
+            {
                 return ResourceManager.GetString("raporolusturukenhata", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Reçete PLC&apos;den okunuyor... benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string receteplcdenokunuyor {
-            get {
+        public static string receteplcdenokunuyor
+        {
+            get
+            {
                 return ResourceManager.GetString("receteplcdenokunuyor", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Reçete Adım Tasaramı benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string recipedesigner {
-            get {
+        public static string recipedesigner
+        {
+            get
+            {
                 return ResourceManager.GetString("recipedesigner", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   RECETE ADI: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string RecipeName {
-            get {
+        public static string RecipeName
+        {
+            get
+            {
                 return ResourceManager.GetString("RecipeName", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Reçete Optimizasyon benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string RecipeOptimization {
-            get {
+        public static string RecipeOptimization
+        {
+            get
+            {
                 return ResourceManager.GetString("RecipeOptimization", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Raporlar benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Reports {
-            get {
+        public static string Reports
+        {
+            get
+            {
                 return ResourceManager.GetString("Reports", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Sağ-Sol Yön Süre (SN): benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string RightLeftTime {
-            get {
+        public static string RightLeftTime
+        {
+            get
+            {
                 return ResourceManager.GetString("RightLeftTime", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Roller benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string roller {
-            get {
+        public static string roller
+        {
+            get
+            {
                 return ResourceManager.GetString("roller", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   ÇALIŞMA benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Running {
-            get {
+        public static string Running
+        {
+            get
+            {
                 return ResourceManager.GetString("Running", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Çalışma Devri: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string RunningSpeed {
-            get {
+        public static string RunningSpeed
+        {
+            get
+            {
                 return ResourceManager.GetString("RunningSpeed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Çalışma Süresi (DK): benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string RunningTime {
-            get {
+        public static string RunningTime
+        {
+            get
+            {
                 return ResourceManager.GetString("RunningTime", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Saatlik Elektirk Tüketimi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string saatlik {
-            get {
+        public static string saatlik
+        {
+            get
+            {
                 return ResourceManager.GetString("saatlik", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Ortalama Elektrik Tüketimi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Saatlikelektrik {
-            get {
+        public static string Saatlikelektrik
+        {
+            get
+            {
                 return ResourceManager.GetString("Saatlikelektrik", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Kaydet benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Save {
-            get {
+        public static string Save
+        {
+            get
+            {
                 return ResourceManager.GetString("Save", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Tekstil SCADA Sistemi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string ScadaSystem {
-            get {
+        public static string ScadaSystem
+        {
+            get
+            {
                 return ResourceManager.GetString("ScadaSystem", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Oturum benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Session {
-            get {
+        public static string Session
+        {
+            get
+            {
                 return ResourceManager.GetString("Session", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Ayarlar benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Settings {
-            get {
+        public static string Settings
+        {
+            get
+            {
                 return ResourceManager.GetString("Settings", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Önem Derecesi: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Severity {
-            get {
+        public static string Severity
+        {
+            get
+            {
                 return ResourceManager.GetString("Severity", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Sıkma benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string sikma {
-            get {
+        public static string sikma
+        {
+            get
+            {
                 return ResourceManager.GetString("sikma", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Silme Onayı benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string silmeonayı {
-            get {
+        public static string silmeonayı
+        {
+            get
+            {
                 return ResourceManager.GetString("silmeonayı", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Silme sırasında hata: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Silmesırasındahata {
-            get {
+        public static string Silmesırasındahata
+        {
+            get
+            {
                 return ResourceManager.GetString("Silmesırasındahata", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Yumuşak Su benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string SoftWater {
-            get {
+        public static string SoftWater
+        {
+            get
+            {
                 return ResourceManager.GetString("SoftWater", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Son 24 Saatin Popüler Alarmları benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string son24topalarm {
-            get {
+        public static string son24topalarm
+        {
+            get
+            {
                 return ResourceManager.GetString("son24topalarm", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   SIKMA benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Squeezing {
-            get {
+        public static string Squeezing
+        {
+            get
+            {
                 return ResourceManager.GetString("Squeezing", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Sıkma Devri: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string SqueezingSpeed {
-            get {
+        public static string SqueezingSpeed
+        {
+            get
+            {
                 return ResourceManager.GetString("SqueezingSpeed", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Sıkma Süre (DK): benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string SqueezingTime {
-            get {
+        public static string SqueezingTime
+        {
+            get
+            {
                 return ResourceManager.GetString("SqueezingTime", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Başlangıç Tarihi: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string StartTime {
-            get {
+        public static string StartTime
+        {
+            get
+            {
                 return ResourceManager.GetString("StartTime", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   ADIM: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Step {
-            get {
+        public static string Step
+        {
+            get
+            {
                 return ResourceManager.GetString("Step", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Adım Detayları benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string StepDetails {
-            get {
+        public static string StepDetails
+        {
+            get
+            {
                 return ResourceManager.GetString("StepDetails", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Su benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string su {
-            get {
+        public static string su
+        {
+            get
+            {
                 return ResourceManager.GetString("su", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Su Alma benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string sualma {
-            get {
+        public static string sualma
+        {
+            get
+            {
                 return ResourceManager.GetString("sualma", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Su seviyesi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string suseviyesi {
-            get {
+        public static string suseviyesi
+        {
+            get
+            {
                 return ResourceManager.GetString("suseviyesi", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   1. Tank Dozaj benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Tank1Dosage {
-            get {
+        public static string Tank1Dosage
+        {
+            get
+            {
                 return ResourceManager.GetString("Tank1Dosage", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   1. Tank Su Al benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Tank1Water {
-            get {
+        public static string Tank1Water
+        {
+            get
+            {
                 return ResourceManager.GetString("Tank1Water", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Tank Alınan Su: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string TankWaterAmount {
-            get {
+        public static string TankWaterAmount
+        {
+            get
+            {
                 return ResourceManager.GetString("TankWaterAmount", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Isı (°C): benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Temperature {
-            get {
+        public static string Temperature
+        {
+            get
+            {
                 return ResourceManager.GetString("Temperature", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Isı Kontrol benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string TemperatureControl {
-            get {
+        public static string TemperatureControl
+        {
+            get
+            {
                 return ResourceManager.GetString("TemperatureControl", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Toplam Süre: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string TotalTime {
-            get {
+        public static string TotalTime
+        {
+            get
+            {
                 return ResourceManager.GetString("TotalTime", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Trend Analizi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string TrendAnalysis {
-            get {
+        public static string TrendAnalysis
+        {
+            get
+            {
                 return ResourceManager.GetString("TrendAnalysis", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Trend Analiz Raporu (Geliştirilecek) benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string TrendAnalysisReport {
-            get {
+        public static string TrendAnalysisReport
+        {
+            get
+            {
                 return ResourceManager.GetString("TrendAnalysisReport", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Tüketim Tipi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string tüketimtipi {
-            get {
+        public static string tüketimtipi
+        {
+            get
+            {
                 return ResourceManager.GetString("tüketimtipi", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Türkçe benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Turkish {
-            get {
+        public static string Turkish
+        {
+            get
+            {
                 return ResourceManager.GetString("Turkish", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Üretim Raporu benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string üretimraporu {
-            get {
+        public static string üretimraporu
+        {
+            get
+            {
                 return ResourceManager.GetString("üretimraporu", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Kullanıcı Aktif benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Useractive {
-            get {
+        public static string Useractive
+        {
+            get
+            {
                 return ResourceManager.GetString("Useractive", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Kullanıcı Detayları benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Userdetail {
-            get {
+        public static string Userdetail
+        {
+            get
+            {
                 return ResourceManager.GetString("Userdetail", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Kullanıcı Yönetimi benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string UserManagement {
-            get {
+        public static string UserManagement
+        {
+            get
+            {
                 return ResourceManager.GetString("UserManagement", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Kullanıcı Adı: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Username {
-            get {
+        public static string Username
+        {
+            get
+            {
                 return ResourceManager.GetString("Username", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Kullanıcı adı zorunludur. benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string usernamehard {
-            get {
+        public static string usernamehard
+        {
+            get
+            {
                 return ResourceManager.GetString("usernamehard", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   VNC Adresi : benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string vncadres {
-            get {
+        public static string vncadres
+        {
+            get
+            {
                 return ResourceManager.GetString("vncadres", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   VNC penceresi açılırken bir hata oluştu: benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Vncconnecterror {
-            get {
+        public static string Vncconnecterror
+        {
+            get
+            {
                 return ResourceManager.GetString("Vncconnecterror", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   VNC Bağlantısı benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string VncConnectionTo {
-            get {
+        public static string VncConnectionTo
+        {
+            get
+            {
                 return ResourceManager.GetString("VncConnectionTo", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Zaten bir VNC bağlantısı aktif. Lütfen mevcut pencereyi kapatın. benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Vnccurrentclose {
-            get {
+        public static string Vnccurrentclose
+        {
+            get
+            {
                 return ResourceManager.GetString("Vnccurrentclose", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Bu makine için bir VNC adresi tanımlanmamış. benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Vncnomachine {
-            get {
+        public static string Vncnomachine
+        {
+            get
+            {
                 return ResourceManager.GetString("Vncnomachine", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Bekleme Süresi (SN): benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string WaitTime {
-            get {
+        public static string WaitTime
+        {
+            get
+            {
                 return ResourceManager.GetString("WaitTime", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Uyarı benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Warning {
-            get {
+        public static string Warning
+        {
+            get
+            {
                 return ResourceManager.GetString("Warning", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   SU ALMA benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string WaterIntake {
-            get {
+        public static string WaterIntake
+        {
+            get
+            {
                 return ResourceManager.GetString("WaterIntake", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Yeni kullanıcı için şifre zorunludur. benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string Yenikullanıcıiçinsifrezorunludur {
-            get {
+        public static string Yenikullanıcıiçinsifrezorunludur
+        {
+            get
+            {
                 return ResourceManager.GetString("Yenikullanıcıiçinsifrezorunludur", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Yeni makine başarıyla eklendi. benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
-        public static string yenimakinebasarili {
-            get {
+        public static string yenimakinebasarili
+        {
+            get
+            {
                 return ResourceManager.GetString("yenimakinebasarili", resourceCulture);
             }
         }
