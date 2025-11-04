@@ -289,5 +289,63 @@ namespace TekstilScada.Repositories
                 cmd.ExecuteNonQuery();
             }
         }
+        public User GetUserByRefreshToken(string refreshToken)
+        {
+            User user = null;
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                // NOT: RefreshTokenExpiry, UTC olarak saklanmalıdır. NOW() yerine UTC_TIMESTAMP() kullanılabilir.
+                string query = "SELECT Id, Username, FullName, IsActive FROM users WHERE RefreshToken = @RefreshToken AND RefreshTokenExpiry > UTC_TIMESTAMP();";
+                var cmd = new MySqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("@RefreshToken", refreshToken);
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        user = new User
+                        {
+                            Id = reader.GetInt32("Id"),
+                            Username = reader.GetString("Username"),
+                            FullName = reader.GetString("FullName"),
+                            IsActive = reader.GetBoolean("IsActive")
+                        };
+                    }
+                }
+
+                if (user != null)
+                {
+                    user.Roles = GetUserRoles(user.Id);
+                }
+            }
+            return user;
+        }
+
+        /// <summary>
+        /// Kullanıcının Refresh Token'ını ve son kullanma tarihini günceller.
+        /// </summary>
+        /// <summary>
+        /// Kullanıcının Refresh Token'ını ve son kullanma tarihini günceller.
+        /// </summary>
+        public void UpdateRefreshToken(int userId, string refreshToken)
+        {
+            // HATA DÜZELTİLDİ: Süre hesaplaması baştan UTC olarak yapılıyor.
+            var expiryDate = DateTime.UtcNow.AddDays(30);
+
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                string query = "UPDATE users SET RefreshToken = @RefreshToken, RefreshTokenExpiry = @ExpiryDate WHERE Id = @UserId;";
+                var cmd = new MySqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("@RefreshToken", refreshToken);
+
+                // MySql'e zaten UTC olan değer gönderiliyor.
+                cmd.Parameters.AddWithValue("@ExpiryDate", expiryDate);
+
+                cmd.Parameters.AddWithValue("@UserId", userId);
+                cmd.ExecuteNonQuery();
+            }
+        }
     }
 }

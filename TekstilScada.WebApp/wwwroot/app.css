@@ -623,3 +623,158 @@ html, body {
     height: 100px; /* Grafik yüksekliði */
     width: 100px;
 }
+@media (max-width: 768px) {
+
+    /* Genel dashboard dolgusunu mobil cihazlarda azaltabiliriz */
+    .dashboard-container {
+        padding: 10px;
+    }
+
+    /* KPI Kartlarý: Tek sýra yerine sararak (wrap) dikeyde daha iyi yayýlým saðlar. */
+    .kpi-cards-row {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    /* KPI Kartý (tekil): Küçük ekranlarda yan yana ikiþerli sýðmasý için geniþlik ayarý. */
+    .kpi-card {
+        flex: 1 1 45%; /* Ýki kart yan yana sýðmasý için yaklaþýk %45 geniþlik */
+        min-width: 150px;
+        padding: 10px; /* Daha az yer kaplamasý için dolguyu azalt */
+    }
+
+    /* Ana Ýçerik Alaný: Yatay (flex-row) düzeni dikey (column) düzene çevirir. */
+    .main-content-area {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    /* Makine Gruplarý Sütunu: Tam geniþlik kullanýr. */
+    .machine-groups-column {
+        flex-grow: unset;
+        width: 100%;
+        overflow-x: auto; /* Makine kartlarý yatay kaymaya devam edebilir */
+        order: 2; /* (Opsiyonel) Makine listesini grafiklerin altýna taþýr */
+    }
+
+    /* Yan Çubuk (Grafik) Sütunu: Sabit geniþliði kaldýrýr ve tam geniþlik kullanýr. */
+    .sidebar-charts-column {
+        width: 100%; /* Sabit 500px kaldýrýldý */
+        flex-shrink: unset;
+        order: 1; /* (Opsiyonel) Grafiklerin makine listesinin üstüne gelmesini saðlar */
+    }
+
+    /* Grafik Kutularý: Mobil cihazlarda yüksekliði biraz azaltarak daha fazla içeriðin görünmesini saðlar. */
+    .chart-box {
+        height: 200px;
+        padding: 5px;
+    }
+
+    .chart-title {
+        font-size: 0.8rem;
+    }
+
+    /* Çok küçük telefonlarda (örneðin 480px altý) KPI kartlarýný tek sütuna düþür */
+    @media (max-width: 480px) {
+        .kpi-card {
+            flex: 1 1 100%; /* Tek kart tam geniþlik */
+        }
+    }
+    /* Ana düzeni (Reçete Listesi ve Reçete Detaylarý) alt alta yýð */
+    .recipe-editor-layout {
+        /* Hem flex hem de grid tanýmlandýðý için her ikisini de column yapýsýný zorlayalým */
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px;
+    }
+
+    /* Reçete Listesi Paneli (Sol Panel): Sabit geniþliði kaldýr ve tam geniþlik yap */
+    .recipe-list-panel {
+        flex: 1 1 100%;
+        width: 100%;
+        margin-bottom: 10px; /* Alttaki detay panelinden ayýrmak için */
+    }
+
+    /* Reçete Detay Paneli (Sað Panel): Tam geniþlik yap */
+    .recipe-details-panel {
+        width: 100%;
+    }
+
+    /* Adým Düzenleyici (Step Editor) Ýç Düzenlemesi (Örn: Isýtma, Dozaj) */
+    .step-editor-container {
+        /* Adým türleri ve düzenleyicinin yan yana durmasýný engelle, alt alta yýð */
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    /* Adým Türü Seçim Alaný: Sýnýrý kaldýr ve yatay bir ayýrýcý ekle */
+    .step-types {
+        padding-right: 0;
+        border-right: none;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+    .card-header-tabs {
+        flex-wrap: nowrap; /* Sekmelerin alt satýra geçmesini engelle */
+        overflow-x: auto; /* Yatay kaydýrmayý etkinleþtir */
+        -webkit-overflow-scrolling: touch; /* iOS için kaydýrma iyileþtirmesi */
+        border-bottom: none; /* Alt kenarlýðý kaldýr */
+    }
+
+    /* Sekmelerin içine sýðmasý için metin boyutunu küçült ve dolguyu azalt */
+    .nav-tabs .nav-link {
+        white-space: nowrap;
+        padding: 8px 10px;
+        font-size: 0.85rem; /* Yazý boyutunu küçült */
+    }
+
+    /* Tarih Aralýðý Input Group'unu alt alta yýð (2 tane InputDate yan yana duruyor) */
+    .input-group {
+        flex-wrap: wrap;
+    }
+
+        /* Tarih alanlarýnýn her birinin tam satýrý kaplamasýný saðla */
+        .input-group .form-control {
+            flex: 1 1 100%;
+        }
+
+            /* Tarih alanlarý arasýna boþluk koyar */
+            .input-group .form-control:first-child {
+                margin-bottom: 5px;
+            }
+
+    /* Rapor Filtreleri: Tüm col-md-* sütunlarýnýn dikey olarak yýðýlmasý beklenir. */
+    /* Raporlama Butonlarý: Yan yana duran 'RAPORLA' ve 'Excel'e Aktar' butonlarýný alt alta yýð */
+    .col-md-4.align-self-end .d-grid {
+        display: grid !important; /* d-md-flex'i ezer, grid yapýsý ile alt alta dizilir */
+        grid-template-columns: 1fr;
+        gap: 5px;
+        margin-top: 10px; /* Üstteki filtre alanýndan ayýrýr */
+    }
+
+    /* --- Reçete Tüketim Analizi Düzenlemesi --- */
+    /* Ana row yapýsýný dikey olarak yýð (col-md-4 ve col-md-8'in alt alta gelmesini saðlar) */
+    .card-body > .row {
+        flex-direction: column;
+    }
+
+    /* Reçete listesini içeren panelin yüksekliðini mobil için ayarla */
+    .list-group[style*="max-height: 70vh"] {
+        max-height: 35vh !important; /* Mobil için daha düþük bir maksimum yükseklik */
+        margin-bottom: 15px; /* Detay panelinden ayýr */
+    }
+    .card-header-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-bottom: none;
+    }
+
+    .nav-tabs .nav-link {
+        white-space: nowrap;
+        padding: 8px 10px;
+        font-size: 0.85rem;
+    }
+}
