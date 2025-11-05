@@ -11,7 +11,9 @@
 @using TekstilScada.WebApp.Services
 @using Microsoft.AspNetCore.Components.Forms
 @using TekstilScada.WebApp.Components.Layout
-
+@using TekstilScada.WebApp.Services
+@inject CustomAuthStateProvider AuthProvider
+@inject NavigationManager NavManager
 <div class="login-container">
     <div class="card p-4 shadow-lg">
         <h3 class="card-title text-center mb-4">Giriş Yap</h3>
@@ -71,14 +73,26 @@
     private LoginModel loginModel = new LoginModel();
     private string errorMessage = string.Empty;
     private bool isProcessing = false;
-
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
     private class LoginModel
     {
         // DataAnnotations eklemedim, ancak production ortamı için eklemenizi öneririm (örneğin [Required])
         public string Username { get; set; }
         public string Password { get; set; }
     }
+    protected override async Task OnInitializedAsync()
+    {
+        // Auth provider'dan mevcut oturum durumunu al
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
 
+        // Eğer kullanıcı zaten giriş yapmışsa (token'ı geçerliyse)
+        if (authState.User.Identity != null && authState.User.Identity.IsAuthenticated)
+        {
+            // Onu login sayfasında tutma, anasayfaya yönlendir
+            NavManager.NavigateTo(ReturnUrl ?? "/");
+        }
+    }
     private async Task HandleLogin()
     {
         isProcessing = true;

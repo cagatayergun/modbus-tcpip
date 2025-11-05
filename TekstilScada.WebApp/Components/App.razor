@@ -171,104 +171,102 @@
 
         Plotly.newPlot(chartId, [traceTemp, traceRpm, traceWater], layout, { responsive: true });
     }
-        // Bu fonksiyonu App.razor veya sitenizdeki bir JS dosyasına ekleyin
-
+        
     function plotDashboardCharts(hourlyOeeData, hourlyConsumptionData, topAlarmsData) {
         if (!Plotly) {
             console.error("Plotly kütüphanesi yüklenmedi.");
-            return;
+return;
         }
 
-        // 1. OEE Grafiği (Bar Chart)
+        const isMobile = window.innerWidth <= 768;
+
+        // 1. OEE Grafiği - AYARLI
         const plotOee = () => {
-            const containerId = 'oeeChartContainer';
+const containerId = 'oeeChartContainer';
             const data = hourlyOeeData.map(d => ({ hour: d.saat, oee: d.averageOEE }));
-
             if (data.length === 0) return Plotly.purge(containerId);
-
-            const trace = {
+const trace = {
                 x: data.map(d => `${d.hour}:00`),
                 y: data.map(d => d.oee),
                 type: 'bar',
-                marker: { color: 'rgba(46, 204, 113, 0.8)' }, // kpi-success rengi
+marker: { color: 'rgba(46, 204, 113, 0.8)' },
                 name: 'Ortalama OEE (%)'
             };
-
+            
+            // YENİ: Mobil ve Masaüstü için ayrı ayarlar
             const layout = {
-              
-                xaxis: { title: 'Saat', tickangle: 45 },
-                yaxis: { title: 'OEE (%)', range: [0, 100] },
-                margin: { t: 30, b: 0, l: 0, r: 0 },
-                height: 250 // Dashboard görünümüne uygun yükseklik
-                
+                // Mobilde etiket açısını (tickangle) kaldır, masaüstünde kullan (45)
+xaxis: { title: 'Saat', tickangle: isMobile ? 0 : 45, automargin: true },
+                yaxis: { title: 'OEE (%)', range: [0, 100], automargin: true },
+                // Mobilde (175px) alt boşluk 40, Masaüstünde (300px) eğik etiket için 70
+                margin: { t: 30, b: isMobile ? 40 : 70, l: 40, r: 10 },
+                // YENİ: CSS ile senkronize yükseklik
+height: isMobile ? 160 : 250 
             };
-
-            Plotly.newPlot(containerId, [trace], layout, { displayModeBar: false, responsive: true });
+            
+            // YENİ: Mobilde 'responsive: false' (titremeyi durdurur), 
+            // Masaüstünde 'responsive: true' (yeniden boyutlandırmaya izin verir).
+Plotly.newPlot(containerId, [trace], layout, { displayModeBar: false, responsive: !isMobile });
         };
 
-        // 2. Tüketim Grafikleri (Bar Chart - Gruplandırılmış)
-        const plotConsumption = (containerId, consumptionKey, title, unit, color) => {
-            const data = hourlyConsumptionData;
-
+        // 2. Tüketim Grafikleri - AYARLI
+const plotConsumption = (containerId, consumptionKey, title, unit, color) => {
+const data = hourlyConsumptionData;
             if (data.length === 0) return Plotly.purge(containerId);
-
-            // consumptionKey'i kullanarak ilgili tüketim değerini al
-            const values = data.map(d => d[consumptionKey]);
-
+const values = data.map(d => d[consumptionKey]);
             const trace = {
-                x: data.map(d => `${d.saat}:00`),
+                x: data.map(d => `${d.hour}:00`),
                 y: values,
                 type: 'bar',
-                marker: { color: color },
+marker: { color: color },
                 name: title
             };
-
             const layout = {
                 title: title,
-                xaxis: { title: 'Saat', tickangle: 45 },
+                // Mobilde etiket açısını kaldır, masaüstünde kullan
+                xaxis: { title: 'Saat', tickangle: isMobile ? 0 : 45, automargin: true },
                 yaxis: { title: unit, automargin: true },
-                 margin: { t: 30, b: 0, l: 0, r: 0 },
-                height: 250
+                margin: { t: 30, b: isMobile ? 40 : 70, l: 40, r: 10 },
+                // YENİ: CSS ile senkronize yükseklik
+height: isMobile ? 160 : 250 
             };
-
-            Plotly.newPlot(containerId, [trace], layout, { displayModeBar: false, responsive: true });
+            // YENİ: Mobilde 'responsive: false'
+Plotly.newPlot(containerId, [trace], layout, { displayModeBar: false, responsive: !isMobile });
         };
 
-        // 3. En Sık Alarmlar Grafiği (Yatay Bar Chart)
-        const plotTopAlarms = () => {
-            const containerId = 'topAlarmsChartContainer';
-            const data = topAlarmsData.sort((a, b) => a.count - b.count).slice(-5); // En çok tekrar eden 5 alarm
-
+        // 3. En Sık Alarmlar Grafiği - AYARLI
+const plotTopAlarms = () => {
+const containerId = 'topAlarmsChartContainer';
+            const data = topAlarmsData.sort((a, b) => a.count - b.count).slice(-5);
             if (data.length === 0) return Plotly.purge(containerId);
-
-            const trace = {
+const trace = {
                 x: data.map(d => d.count),
-                y: data.map(d => d.alarmText.length > 20 ? d.alarmText.substring(0, 17) + '...' : d.alarmText), // Uzun isimleri kısalt
+                y: data.map(d => d.alarmText.length > 20 ? d.alarmText.substring(0, 17) + '...' : d.alarmText),
                 type: 'bar',
-                orientation: 'h', // Yatay bar
-                marker: { color: 'rgba(231, 76, 60, 0.8)' }, // kpi-danger rengi
+orientation: 'h',
+                marker: { color: 'rgba(231, 76, 60, 0.8)' },
                 name: 'Tekrar Sayısı'
             };
-
-            const layout = {
-               
+const layout = {
                 xaxis: { title: 'Tekrar Sayısı', automargin: true },
                 yaxis: { automargin: true },
-                margin: { t: 30, b: 40, l: 150, r: 0 }, // Solda alarm isimleri için geniş boşluk
-                height: 250
+                // Mobilde (175px) 'automargin' sol boşluğu kendi ayarlar,
+                // Masaüstünde (300px) alarm metni için 'l: 150' kullanırız.
+                margin: { t: 30, b: 40, l: isMobile ? 10 : 150, r: 10 },
+                // YENİ: CSS ile senkronize yükseklik
+height: isMobile ? 160 : 250 
             };
-
-            Plotly.newPlot(containerId, [trace], layout, { displayModeBar: false, responsive: true });
+            // YENİ: Mobilde 'responsive: false'
+Plotly.newPlot(containerId, [trace], layout, { displayModeBar: false, responsive: !isMobile });
         };
 
-
         // Tüm grafikleri çağır
-        plotOee();
+plotOee();
         plotConsumption('electricChartContainer', 'toplamElektrik', '', 'kWh', '#3498db');
-        plotConsumption('waterChartContainer', 'toplamSu', '', 'Litre', '#2c3e50');
+plotConsumption('waterChartContainer', 'toplamSu', '', 'Litre', '#2c3e50');
         plotConsumption('steamChartContainer', 'toplamBuhar', '', 'kg', '#9b59b6');
         plotTopAlarms();
-    }
+}
        function drawPieChart(elementId, chartData) {
         if (!chartData || chartData.length === 0) {
             Plotly.purge(elementId);

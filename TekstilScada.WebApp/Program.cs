@@ -18,6 +18,27 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options =>
     {
         options.LoginPath = "/login";
+
+        // --- YÖNLENDÝRME DÖNGÜSÜ ÝÇÝN DÜZELTME ---
+        options.Events.OnRedirectToLogin = context =>
+        {
+            // KRÝTÝK KONTROL: Eðer istek ZATEN /login sayfasýna
+            // gidiyorsa, ASLA tekrar yönlendirme yapma.
+            // Bu, "boþ sayfa" ve "manuel giriþ" sorunlarýný
+            // (sonsuz döngüyü) çözecektir.
+            if (context.Request.Path == options.LoginPath)
+            {
+                // Sadece olayýn tamamlanmasýna izin ver,
+                // sayfanýn (Login.razor) yüklenmesini engelleme.
+                return Task.CompletedTask;
+            }
+
+            // Eðer istek /login dýþýnda bir sayfaya (örn: '/')
+            // yapýlýyorsa, normal þekilde /login'e yönlendir.
+            context.Response.Redirect(context.RedirectUri);
+            return Task.CompletedTask;
+        };
+        // --- DÜZELTMENÝN SONU ---
     });
 
 
@@ -51,7 +72,7 @@ builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
 
 
 // HttpClient yapýlandýrmasý (Bu doðru)
-var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:7039";
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5000";
 
 // HttpClient yapýlandýrmasý (Bu doðru)
 builder.Services.AddHttpClient("WebApiClient", client =>
